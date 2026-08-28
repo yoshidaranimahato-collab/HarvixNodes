@@ -1,1017 +1,1017 @@
-<!doctype html>
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HarvixPanel</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-*{box-sizing:border-box}
+  <title>HarvixPanel</title>
 
-:root{
-  --bg:#090c12;
-  --card:#111722;
-  --border:#252d3a;
-  --text:#edf2f7;
-  --muted:#9ba7b7;
-  --primary:#7c5cff;
-  --danger:#ff6b6b;
-  --success:#50d890;
-}
+  <style>
+    :root {
+      --bg: #090c12;
+      --card: #111722;
+      --card2: #0d131d;
+      --border: #252d3a;
+      --text: #edf2f7;
+      --muted: #9ba7b7;
+      --primary: #7c5cff;
+      --primary2: #6847f5;
+      --danger: #ff6262;
+      --success: #48d597;
+      --warning: #f4c95d;
+    }
 
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,sans-serif;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-header{
-  padding:16px 20px;
-  background:var(--card);
-  border-bottom:1px solid var(--border);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  position:sticky;
-  top:0;
-  z-index:10;
-}
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-size:20px;
-  font-weight:bold;
-}
+    button,
+    input,
+    select {
+      font: inherit;
+    }
 
-.container{
-  max-width:1150px;
-  margin:auto;
-  padding:20px;
-}
+    button {
+      cursor: pointer;
+    }
 
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:18px;
-  margin:14px 0;
-}
+    .hidden {
+      display: none !important;
+    }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:10px;
-}
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(17, 23, 34, .95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
 
-input,select,button{
-  width:100%;
-  padding:11px;
-  border-radius:8px;
-  border:1px solid #303a49;
-  background:#0b1018;
-  color:#fff;
-  margin:4px 0;
-}
+    .header-inner {
+      max-width: 1200px;
+      margin: auto;
+      min-height: 64px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
 
-button{
-  cursor:pointer;
-  font-weight:bold;
-}
+    .brand {
+      font-size: 19px;
+      font-weight: 800;
+    }
 
-button:hover{
-  border-color:var(--primary);
-}
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-.primary{
-  background:var(--primary);
-  border-color:var(--primary);
-}
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+    }
 
-.danger{
-  color:#ff8c8c;
-}
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
 
-.success{
-  color:#78e6a0;
-}
+    .small-card {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
 
-.muted{
-  color:var(--muted);
-}
+    h1,
+    h2,
+    h3 {
+      margin-top: 0;
+    }
 
-.hidden{
-  display:none!important;
-}
+    .muted {
+      color: var(--muted);
+    }
 
-.tabs{
-  display:flex;
-  flex-wrap:wrap;
-  gap:7px;
-  margin-top:12px;
-}
+    .success {
+      color: var(--success);
+    }
 
-.tabs button{
-  width:auto;
-}
+    .danger {
+      color: var(--danger);
+    }
 
-.server{
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:15px;
-  margin:12px 0;
-}
+    .warning {
+      color: var(--warning);
+    }
 
-.nav{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-bottom:15px;
-}
+    input,
+    select {
+      width: 100%;
+      padding: 11px 12px;
+      margin: 5px 0;
+      color: var(--text);
+      background: #090e16;
+      border: 1px solid #303a49;
+      border-radius: 9px;
+      outline: none;
+    }
 
-.nav button{
-  width:auto;
-}
+    input:focus,
+    select:focus {
+      border-color: var(--primary);
+    }
 
-.badge{
-  padding:5px 9px;
-  border-radius:20px;
-  font-size:12px;
-  background:#182131;
-}
+    button {
+      border: 1px solid #303a49;
+      background: #0c121c;
+      color: white;
+      padding: 10px 13px;
+      border-radius: 9px;
+      margin: 4px;
+    }
 
-.online{
-  color:var(--success);
-}
+    button:hover {
+      border-color: var(--primary);
+    }
 
-.offline{
-  color:var(--muted);
-}
+    .primary {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
 
-.auth-box{
-  max-width:420px;
-  margin:60px auto;
-}
+    .primary:hover {
+      background: var(--primary2);
+    }
 
-.logo{
-  font-size:38px;
-  text-align:center;
-  margin-bottom:8px;
-}
+    .danger-btn {
+      background: #35151a;
+      border-color: #70313a;
+    }
 
-hr{
-  border:0;
-  border-top:1px solid var(--border);
-  margin:20px 0;
-}
-</style>
+    .success-btn {
+      background: #10291f;
+      border-color: #286c4e;
+    }
 
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .server-card {
+      margin-bottom: 16px;
+    }
+
+    .server-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .server-name {
+      font-size: 19px;
+      font-weight: bold;
+    }
+
+    .status {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #202936;
+      font-size: 12px;
+    }
+
+    .status.running {
+      color: var(--success);
+      background: #10291f;
+    }
+
+    .status.stopped {
+      color: var(--muted);
+    }
+
+    .status.restarting,
+    .status.reinstalling {
+      color: var(--warning);
+      background: #302914;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 13px;
+    }
+
+    .tabs button {
+      font-size: 13px;
+    }
+
+    .module {
+      margin-top: 14px;
+      padding: 15px;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .module pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #070a0f;
+      padding: 12px;
+      border-radius: 8px;
+      min-height: 130px;
+      color: #cdd6e4;
+      overflow: auto;
+    }
+
+    .auth {
+      max-width: 430px;
+      margin: 50px auto;
+    }
+
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 12px;
+    }
+
+    .auth-tabs button {
+      flex: 1;
+    }
+
+    .user-info {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+    }
+
+    .admin-badge {
+      color: #d7caff;
+    }
+
+    .message {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.error {
+      background: #32161a;
+      color: #ff9ca4;
+    }
+
+    .message.ok {
+      background: #10291f;
+      color: #83e2b3;
+    }
+
+    .stat {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 25px;
+      color: var(--muted);
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 18px 0;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 25px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 12px;
+      }
+
+      .header-inner {
+        padding: 0 12px;
+      }
+
+      .header-right {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .user-info {
+        display: none;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
-  <div class="brand">
-    <span id="panelIcon">⚡</span>
-    <span id="panelName">HarvixPanel</span>
-  </div>
+  <div class="header-inner">
+    <div class="brand">⚡ HarvixPanel</div>
 
-  <div>
-    <span id="userInfo" class="muted"></span>
-    <button id="logoutBtn" class="hidden" onclick="logout()" style="width:auto">
-      Logout
-    </button>
+    <div class="header-right">
+      <span id="userInfo" class="user-info hidden"></span>
+      <button id="adminButton" class="primary hidden" onclick="showAdmin()">Admin Panel</button>
+      <button id="logoutButton" class="hidden" onclick="logout()">Logout</button>
+    </div>
   </div>
 </header>
 
-<!-- ================================================= -->
+<main>
 
-<!-- AUTH -->
+  <!-- =====================================================
+       AUTH
+       ===================================================== -->
 
-<!-- ================================================= -->
-
-<div id="authPage" class="container">
-
-  <div class="card auth-box">
-
-```
-<div class="logo">⚡</div>
-
-<h2 id="authTitle">Login</h2>
-
-<input id="authUsername" placeholder="Username">
-<input id="authPassword" type="password" placeholder="Password">
-
-<button class="primary" onclick="login()" id="loginButton">
-  Login
-</button>
-
-<button onclick="showRegister()" id="registerButton">
-  Create Account
-</button>
-
-<p id="authMessage" class="muted"></p>
-```
-
-  </div>
-
-</div>
-
-<!-- ================================================= -->
-
-<!-- MAIN PANEL -->
-
-<!-- ================================================= -->
-
-<div id="panelPage" class="container hidden">
-
-  <div class="nav">
-
-```
-<button onclick="showSection('dashboard')">
-  🏠 Dashboard
-</button>
-
-<button onclick="showSection('servers')">
-  🖥️ My Servers
-</button>
-
-<button onclick="showSection('create')">
-  ➕ Create Server
-</button>
-
-<button id="adminButton" class="hidden" onclick="showSection('admin')">
-  👑 Admin Panel
-</button>
-```
-
-  </div>
-
-  <!-- DASHBOARD -->
-
-  <section id="dashboardSection">
-
-```
-<div class="card">
-
-  <h2>Welcome to <span id="welcomeName">HarvixPanel</span></h2>
-
-  <p class="muted">
-    Minecraft hosting management panel.
-  </p>
-
-  <div class="grid">
+  <section id="authSection" class="auth">
 
     <div class="card">
-      <h3>🖥️ Servers</h3>
-      <h2 id="serverCount">0</h2>
+
+      <h2 id="authTitle">Login</h2>
+
+      <div class="auth-tabs">
+        <button onclick="showLogin()">Login</button>
+        <button onclick="showRegister()">Register</button>
+      </div>
+
+      <div id="loginBox">
+
+        <input
+          id="loginUsername"
+          placeholder="Username"
+          autocomplete="username"
+        >
+
+        <input
+          id="loginPassword"
+          type="password"
+          placeholder="Password"
+          autocomplete="current-password"
+        >
+
+        <button class="primary" onclick="login()">
+          Login
+        </button>
+
+      </div>
+
+      <div id="registerBox" class="hidden">
+
+        <input
+          id="registerUsername"
+          placeholder="Username"
+          autocomplete="username"
+        >
+
+        <input
+          id="registerPassword"
+          type="password"
+          placeholder="Password (minimum 6 characters)"
+          autocomplete="new-password"
+        >
+
+        <button class="primary" onclick="registerUser()">
+          Create Account
+        </button>
+
+      </div>
+
+      <div id="authMessage" class="message"></div>
+
     </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       DASHBOARD
+       ===================================================== -->
+
+  <section id="dashboardSection" class="hidden">
+
+    <div class="top-actions">
+
+      <button class="primary" onclick="showDashboard()">
+        🏠 Dashboard
+      </button>
+
+      <button id="adminTopButton" class="hidden" onclick="showAdmin()">
+        👑 Admin
+      </button>
+
+      <button onclick="loadServers()">
+        🔄 Refresh
+      </button>
+
+    </div>
+
+
+    <!-- Create Server -->
 
     <div class="card">
-      <h3>🟢 Status</h3>
-      <h2 class="success">Online</h2>
-    </div>
 
-    <div class="card">
-      <h3>👤 Account</h3>
-      <h2 id="roleDisplay">User</h2>
-    </div>
+      <h2>➕ Create Server</h2>
 
-  </div>
+      <p class="muted">
+        Normal users: maximum 4096 MB RAM, 5120 MB disk and 1 vCore.
+      </p>
 
-</div>
-```
+      <div class="grid">
 
-  </section>
-
-  <!-- SERVERS -->
-
-  <section id="serversSection" class="hidden">
-
-```
-<div class="card">
-
-  <h2>🖥️ My Servers</h2>
-
-  <div id="servers">
-    Loading...
-  </div>
-
-</div>
-```
-
-  </section>
-
-  <!-- CREATE SERVER -->
-
-  <section id="createSection" class="hidden">
-
-```
-<div class="card">
-
-  <h2>➕ Create Server</h2>
-
-  <div class="grid">
-
-    <input id="serverName" placeholder="Server name">
-
-    <input id="serverRam"
-           type="number"
-           value="1024"
-           placeholder="RAM MB">
-
-    <input id="serverDisk"
-           type="number"
-           value="1024"
-           placeholder="Disk MB">
-
-    <input id="serverCpu"
-           type="number"
-           value="1"
-           step="0.1"
-           placeholder="vCPU">
-
-    <select id="serverSoftware">
-      <option>Paper</option>
-      <option>Vanilla</option>
-      <option>Fabric</option>
-      <option>Forge</option>
-    </select>
-
-    <input id="serverVersion"
-           value="1.21.4"
-           placeholder="Version">
-
-  </div>
-
-  <button class="primary" onclick="createServer()">
-    Create Server
-  </button>
-
-  <p class="muted">
-    Normal user limit: 4 GB RAM • 5 GB Disk • 1 vCore
-  </p>
-
-  <p id="createMessage"></p>
-
-</div>
-```
-
-  </section>
-
-  <!-- ADMIN PANEL -->
-
-  <section id="adminSection" class="hidden">
-
-```
-<div class="card">
-
-  <h2>👑 Admin Panel</h2>
-
-  <div class="nav">
-
-    <button onclick="adminSection('settings')">
-      ⚙️ Settings
-    </button>
-
-    <button onclick="adminSection('nodes')">
-      🖥️ Nodes
-    </button>
-
-    <button onclick="adminSection('create')">
-      ➕ Create Server
-    </button>
-
-    <button onclick="adminSection('users')">
-      👥 Users
-    </button>
-
-    <button onclick="adminSection('theme')">
-      🎨 Theme
-    </button>
-
-  </div>
-
-  <!-- ADMIN SETTINGS -->
-
-  <div id="adminSettings">
-
-    <h3>⚙️ Panel Settings</h3>
-
-    <input id="settingServerName"
-           placeholder="Server name">
-
-    <input id="settingServerIcon"
-           placeholder="Server icon">
-
-    <button class="primary" onclick="saveSettings()">
-      Save Changes
-    </button>
-
-    <p id="settingsMessage"></p>
-
-  </div>
-
-  <!-- NODES -->
-
-  <div id="adminNodes" class="hidden">
-
-    <h3>🖥️ Nodes</h3>
-
-    <div id="nodeList">
-      Loading...
-    </div>
-
-    <hr>
-
-    <h3>Add Node</h3>
-
-    <input id="nodeName" placeholder="Node name">
-
-    <input id="nodeAddress" placeholder="Node address">
-
-    <input id="nodeRam"
-           type="number"
-           placeholder="RAM MB">
-
-    <input id="nodeDisk"
-           type="number"
-           placeholder="Disk MB">
-
-    <input id="nodeCpu"
-           type="number"
-           step="0.1"
-           placeholder="CPU">
-
-    <button class="primary" onclick="createNode()">
-      Add Node
-    </button>
-
-  </div>
-
-  <!-- USERS -->
-
-  <div id="adminUsers" class="hidden">
-
-    <h3>👥 Users</h3>
-
-    <div id="userList">
-      Loading...
-    </div>
-
-  </div>
-
-  <!-- THEME -->
-
-  <div id="adminTheme" class="hidden">
-
-    <h3>🎨 Theme</h3>
-
-    <button onclick="setTheme('dark')">
-      🌙 Dark
-    </button>
-
-    <button onclick="setTheme('light')">
-      ☀️ Light
-    </button>
-
-  </div>
-
-</div>
-```
-
-  </section>
-
-</div>
-
-<script>
-
-// =====================================================
-// STATE
-// =====================================================
-
-let currentUser = null;
-
-// =====================================================
-// INIT
-// =====================================================
-
-async function init(){
-
-  try{
-
-    const r = await fetch("/api/settings");
-    const data = await r.json();
-
-    if(data.success){
-
-      document.getElementById("panelName").textContent =
-        data.settings.serverName;
-
-      document.getElementById("panelIcon").textContent =
-        data.settings.serverIcon;
-
-      document.title = data.settings.serverName;
-
-    }
-
-  }catch(e){
-
-    console.log("Settings unavailable");
-
-  }
-
-  const saved =
-    localStorage.getItem("harvix_user");
-
-  if(saved){
-
-    try{
-
-      currentUser = JSON.parse(saved);
-      showPanel();
-
-    }catch(e){
-
-      localStorage.removeItem("harvix_user");
-
-    }
-
-  }
-
-}
-
-// =====================================================
-// REGISTER
-// =====================================================
-
-function showRegister(){
-
-  document.getElementById("authTitle").textContent =
-    "Create Account";
-
-  document.getElementById("loginButton").textContent =
-    "Register";
-
-  document.getElementById("loginButton").onclick =
-    register;
-
-  document.getElementById("registerButton").textContent =
-    "Back to Login";
-
-  document.getElementById("registerButton").onclick =
-    showLogin;
-
-}
-
-function showLogin(){
-
-  document.getElementById("authTitle").textContent =
-    "Login";
-
-  document.getElementById("loginButton").textContent =
-    "Login";
-
-  document.getElementById("loginButton").onclick =
-    login;
-
-  document.getElementById("registerButton").textContent =
-    "Create Account";
-
-  document.getElementById("registerButton").onclick =
-    showRegister;
-
-}
-
-// =====================================================
-// REGISTER API
-// =====================================================
-
-async function register(){
-
-  const username =
-    document.getElementById("authUsername").value.trim();
-
-  const password =
-    document.getElementById("authPassword").value;
-
-  const message =
-    document.getElementById("authMessage");
-
-  const r = await fetch("/api/auth/register",{
-
-    method:"POST",
-
-    headers:{
-      "Content-Type":"application/json"
-    },
-
-    body:JSON.stringify({
-      username,
-      password
-    })
-
-  });
-
-  const data = await r.json();
-
-  if(!r.ok){
-
-    message.textContent =
-      data.error || "Registration failed.";
-
-    message.className = "danger";
-
-    return;
-
-  }
-
-  message.textContent =
-    "Account created. Please login.";
-
-  message.className = "success";
-
-  showLogin();
-
-}
-
-// =====================================================
-// LOGIN API
-// =====================================================
-
-async function login(){
-
-  const username =
-    document.getElementById("authUsername").value.trim();
-
-  const password =
-    document.getElementById("authPassword").value;
-
-  const message =
-    document.getElementById("authMessage");
-
-  const r = await fetch("/api/auth/login",{
-
-    method:"POST",
-
-    headers:{
-      "Content-Type":"application/json"
-    },
-
-    body:JSON.stringify({
-      username,
-      password
-    })
-
-  });
-
-  const data = await r.json();
-
-  if(!r.ok){
-
-    message.textContent =
-      data.error || "Login failed.";
-
-    message.className = "danger";
-
-    return;
-
-  }
-
-  currentUser = data.user;
-
-  localStorage.setItem(
-    "harvix_user",
-    JSON.stringify(currentUser)
-  );
-
-  showPanel();
-
-}
-
-// =====================================================
-// SHOW PANEL
-// =====================================================
-
-function showPanel(){
-
-  document.getElementById("authPage")
-    .classList.add("hidden");
-
-  document.getElementById("panelPage")
-    .classList.remove("hidden");
-
-  document.getElementById("logoutBtn")
-    .classList.remove("hidden");
-
-  document.getElementById("userInfo")
-    .textContent =
-      currentUser.username +
-      " • " +
-      currentUser.role;
-
-  document.getElementById("roleDisplay")
-    .textContent =
-      currentUser.role;
-
-  document.getElementById("welcomeName")
-    .textContent =
-      currentUser.username;
-
-  if(currentUser.role === "admin"){
-
-    document.getElementById("adminButton")
-      .classList.remove("hidden");
-
-  }
-
-  loadServers();
-
-}
-
-// =====================================================
-// LOGOUT
-// =====================================================
-
-function logout(){
-
-  localStorage.removeItem("harvix_user");
-
-  currentUser = null;
-
-  location.reload();
-
-}
-
-// =====================================================
-// SECTIONS
-// =====================================================
-
-function showSection(section){
-
-  const sections = [
-    "dashboard",
-    "servers",
-    "create",
-    "admin"
-  ];
-
-  sections.forEach(name => {
-
-    const element =
-      document.getElementById(
-        name + "Section"
-      );
-
-    if(element)
-      element.classList.add("hidden");
-
-  });
-
-  const selected =
-    document.getElementById(
-      section + "Section"
-    );
-
-  if(selected)
-    selected.classList.remove("hidden");
-
-  if(section === "servers")
-    loadServers();
-
-}
-
-// =====================================================
-// ADMIN SECTIONS
-// =====================================================
-
-function adminSection(section){
-
-  document.getElementById("adminSettings")
-    .classList.add("hidden");
-
-  document.getElementById("adminNodes")
-    .classList.add("hidden");
-
-  document.getElementById("adminUsers")
-    .classList.add("hidden");
-
-  document.getElementById("adminTheme")
-    .classList.add("hidden");
-
-  if(section === "settings"){
-
-    document.getElementById("adminSettings")
-      .classList.remove("hidden");
-
-    loadSettings();
-
-  }
-
-  if(section === "nodes"){
-
-    document.getElementById("adminNodes")
-      .classList.remove("hidden");
-
-    loadNodes();
-
-  }
-
-  if(section === "users"){
-
-    document.getElementById("adminUsers")
-      .classList.remove("hidden");
-
-    loadUsers();
-
-  }
-
-  if(section === "theme"){
-
-    document.getElementById("adminTheme")
-      .classList.remove("hidden");
-
-  }
-
-  if(section === "create"){
-
-    showSection("create");
-
-  }
-
-}
-
-// =====================================================
-// LOAD SERVERS
-// =====================================================
-
-async function loadServers(){
-
-  if(!currentUser) return;
-
-  const r = await fetch(
-    "/api/servers?username=" +
-    encodeURIComponent(currentUser.username)
-  );
-
-  const data = await r.json();
-
-  const container =
-    document.getElementById("servers");
-
-  if(!data.success){
-
-    container.innerHTML =
-      `<p class="danger">${data.error}</p>`;
-
-    return;
-
-  }
-
-  document.getElementById("serverCount")
-    .textContent =
-      data.servers.length;
-
-  if(!data.servers.length){
-
-    container.innerHTML =
-      `<p class="muted">No servers yet.</p>`;
-
-    return;
-
-  }
-
-  container.innerHTML =
-    data.servers.map(server => {
-
-      const r = server.resources;
-
-      return `
-
-      <div class="server">
-
-        <h3>🖥️ ${escapeHtml(server.name)}</h3>
-
-        <p class="muted">
-
-          ${escapeHtml(server.software)}
-          ${escapeHtml(server.version)}
-          • ${r.ramMB} MB RAM
-          • ${r.diskMB} MB Disk
-          • ${r.cpuVcpu} vCPU
-
-        </p>
-
-        <p>
-
-          Status:
-          <span class="${
-            server.status === "running"
-              ? "online"
-              : "offline"
-          }">
-
-            ${server.status}
-
-          </span>
-
-        </p>
-
-        <div class="tabs">
-
-          <button onclick="openServerModule('${server.id}','Console')">
-            🖥️ Console
-          </button>
-
-          <button onclick="openServerModule('${server.id}','File Manager')">
-            📁 File Manager
-          </button>
-
-          <button onclick="openServerModule('${server.id}','SFTP')">
-            🔐 SFTP
-          </button>
-
-          <button onclick="openServerModule('${server.id}','Plugin Installer')">
-            🧩 Plugin Installer
-          </button>
-
-          <button onclick="openServerModule('${server.id}','Mod Manager')">
-            🧱 Mod Manager
-          </button>
-
-          <button onclick="openServerModule('${server.id}','Votifier Test')">
-            🗳️ Votifier Test
-          </button>
-
-          <button onclick="openServerModule('${server.id}','Server Splitter')">
-            ✂️ Server Splitter
-          </button>
-
-          <button onclick="openServerSettings('${server.id}')">
-            ⚙️ Settings
-          </button>
-
+        <div>
+          <label>Server Name</label>
+          <input id="serverName" placeholder="My Survival Server">
         </div>
 
-        <div id="module-${server.id}"
-             class="card hidden">
+        <div>
+          <label>RAM (MB)</label>
+          <input id="serverRam" type="number" value="1024" min="1">
         </div>
 
-        <div class="tabs">
+        <div>
+          <label>Disk (MB)</label>
+          <input id="serverDisk" type="number" value="2048" min="1">
+        </div>
 
-          <button
-            onclick="serverAction('${server.id}','start')">
-            ▶ Start
-          </button>
+        <div>
+          <label>CPU (vCore)</label>
+          <input id="serverCpu" type="number" value="1" min="0.1" step="0.1">
+        </div>
 
-          <button
-            onclick="serverAction('${server.id}','stop')">
-            ⏹ Stop
-          </button>
+        <div>
+          <label>Software</label>
+          <select id="serverSoftware">
+            <option>Paper</option>
+            <option>Vanilla</option>
+            <option>Fabric</option>
+            <option>Forge</option>
+          </select>
+        </div>
 
-          <button
-            onclick="serverAction('${server.id}','restart')">
-            🔄 Restart
-          </button>
-
+        <div>
+          <label>Version</label>
+          <input id="serverVersion" value="1.21.4">
         </div>
 
       </div>
 
-      `;
+      <button class="primary" onclick="createServer()">
+        Create Server
+      </button>
 
-    }).join("");
+      <div id="createMessage" class="message"></div>
 
+    </div>
+
+
+    <!-- Servers -->
+
+    <div class="card">
+
+      <h2>🖥️ My Servers</h2>
+
+      <div id="servers">
+        Loading...
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       ADMIN PANEL
+       ===================================================== -->
+
+  <section id="adminSection" class="hidden">
+
+    <div class="top-actions">
+
+      <button onclick="showDashboard()">
+        🏠 Dashboard
+      </button>
+
+      <button class="primary" onclick="showAdmin()">
+        👑 Admin Panel
+      </button>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>👑 Admin Panel</h2>
+
+      <div class="tabs">
+
+        <button onclick="adminSettings()">
+          ⚙️ Settings
+        </button>
+
+        <button onclick="adminNodes()">
+          🖥️ Nodes
+        </button>
+
+        <button onclick="adminCreateServer()">
+          ➕ Create Server
+        </button>
+
+        <button onclick="adminUsers()">
+          👥 Users
+        </button>
+
+        <button onclick="adminTheme()">
+          🎨 Theme
+        </button>
+
+      </div>
+
+    </div>
+
+    <div id="adminContent"></div>
+
+  </section>
+
+</main>
+
+<footer>
+  HarvixPanel • HarvixNodes
+</footer>
+
+
+<script>
+/* =========================================================
+   GLOBAL STATE
+   ========================================================= */
+
+let authToken = localStorage.getItem("harvix_token") || "";
+let currentUser = null;
+
+
+/* =========================================================
+   API HELPER
+   ========================================================= */
+
+async function api(url, options = {}) {
+
+  const headers = {
+    ...(options.headers || {})
+  };
+
+  if (authToken) {
+    headers.Authorization = "Bearer " + authToken;
+  }
+
+  if (
+    options.body &&
+    typeof options.body !== "string"
+  ) {
+    headers["Content-Type"] = "application/json";
+    options.body = JSON.stringify(options.body);
+  }
+
+  const response = await fetch(url, {
+    ...options,
+    headers
+  });
+
+  let data = {};
+
+  try {
+    data = await response.json();
+  } catch {
+    data = {};
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data.error || "Request failed"
+    );
+  }
+
+  return data;
 }
 
-// =====================================================
-// CREATE SERVER
-// =====================================================
 
-async function createServer(){
+/* =========================================================
+   AUTH UI
+   ========================================================= */
+
+function showLogin() {
+
+  document.getElementById("authTitle").textContent = "Login";
+
+  document.getElementById("loginBox")
+    .classList.remove("hidden");
+
+  document.getElementById("registerBox")
+    .classList.add("hidden");
+
+  clearMessage("authMessage");
+}
+
+
+function showRegister() {
+
+  document.getElementById("authTitle").textContent = "Create Account";
+
+  document.getElementById("loginBox")
+    .classList.add("hidden");
+
+  document.getElementById("registerBox")
+    .classList.remove("hidden");
+
+  clearMessage("authMessage");
+}
+
+
+function showMessage(id, text, type = "ok") {
+
+  const element = document.getElementById(id);
+
+  if (!element) return;
+
+  element.textContent = text;
+
+  element.className =
+    "message show " +
+    (type === "error" ? "error" : "ok");
+}
+
+
+function clearMessage(id) {
+
+  const element = document.getElementById(id);
+
+  if (!element) return;
+
+  element.textContent = "";
+  element.className = "message";
+}
+
+
+/* =========================================================
+   REGISTER
+   ========================================================= */
+
+async function registerUser() {
+
+  const username =
+    document.getElementById("registerUsername").value.trim();
+
+  const password =
+    document.getElementById("registerPassword").value;
+
+  if (!username || !password) {
+
+    showMessage(
+      "authMessage",
+      "Username and password are required.",
+      "error"
+    );
+
+    return;
+  }
+
+  try {
+
+    await api("/api/auth/register", {
+      method: "POST",
+      body: {
+        username,
+        password
+      }
+    });
+
+    showMessage(
+      "authMessage",
+      "Account created successfully. You can now login."
+    );
+
+    document.getElementById("registerPassword").value = "";
+
+    showLogin();
+
+  } catch (error) {
+
+    showMessage(
+      "authMessage",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+async function login() {
+
+  const username =
+    document.getElementById("loginUsername").value.trim();
+
+  const password =
+    document.getElementById("loginPassword").value;
+
+  if (!username || !password) {
+
+    showMessage(
+      "authMessage",
+      "Enter username and password.",
+      "error"
+    );
+
+    return;
+  }
+
+  try {
+
+    const result = await api(
+      "/api/auth/login",
+      {
+        method: "POST",
+        body: {
+          username,
+          password
+        }
+      }
+    );
+
+    authToken = result.token;
+
+    localStorage.setItem(
+      "harvix_token",
+      authToken
+    );
+
+    currentUser = result.user;
+
+    updateHeader();
+
+    showDashboard();
+
+  } catch (error) {
+
+    showMessage(
+      "authMessage",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
+async function logout() {
+
+  try {
+
+    await api(
+      "/api/auth/logout",
+      {
+        method: "POST"
+      }
+    );
+
+  } catch {}
+
+  authToken = "";
+
+  currentUser = null;
+
+  localStorage.removeItem(
+    "harvix_token"
+  );
+
+  updateHeader();
+
+  document.getElementById("dashboardSection")
+    .classList.add("hidden");
+
+  document.getElementById("adminSection")
+    .classList.add("hidden");
+
+  document.getElementById("authSection")
+    .classList.remove("hidden");
+
+  showLogin();
+}
+
+
+/* =========================================================
+   CHECK LOGIN
+   ========================================================= */
+
+async function checkLogin() {
+
+  if (!authToken) {
+
+    updateHeader();
+
+    return;
+  }
+
+  try {
+
+    currentUser =
+      await api("/api/auth/me");
+
+    updateHeader();
+
+    showDashboard();
+
+  } catch {
+
+    authToken = "";
+
+    localStorage.removeItem(
+      "harvix_token"
+    );
+
+    updateHeader();
+  }
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+function updateHeader() {
+
+  const userInfo =
+    document.getElementById("userInfo");
+
+  const logoutButton =
+    document.getElementById("logoutButton");
+
+  const adminButton =
+    document.getElementById("adminButton");
+
+  const adminTopButton =
+    document.getElementById("adminTopButton");
+
+  if (!currentUser) {
+
+    userInfo.classList.add("hidden");
+
+    logoutButton.classList.add("hidden");
+
+    adminButton.classList.add("hidden");
+
+    adminTopButton.classList.add("hidden");
+
+    return;
+  }
+
+  userInfo.textContent =
+    currentUser.username +
+    " • " +
+    currentUser.role;
+
+  userInfo.classList.remove("hidden");
+
+  logoutButton.classList.remove("hidden");
+
+  if (currentUser.role === "admin") {
+
+    adminButton.classList.remove("hidden");
+
+    adminTopButton.classList.remove("hidden");
+
+  } else {
+
+    adminButton.classList.add("hidden");
+
+    adminTopButton.classList.add("hidden");
+  }
+}
+
+
+/* =========================================================
+   PAGE SWITCHING
+   ========================================================= */
+
+function hideAllSections() {
+
+  document.getElementById("authSection")
+    .classList.add("hidden");
+
+  document.getElementById("dashboardSection")
+    .classList.add("hidden");
+
+  document.getElementById("adminSection")
+    .classList.add("hidden");
+}
+
+
+function showDashboard() {
+
+  if (!currentUser) {
+
+    hideAllSections();
+
+    document.getElementById("authSection")
+      .classList.remove("hidden");
+
+    return;
+  }
+
+  hideAllSections();
+
+  document.getElementById("dashboardSection")
+    .classList.remove("hidden");
+
+  loadServers();
+}
+
+
+function showAdmin() {
+
+  if (
+    !currentUser ||
+    currentUser.role !== "admin"
+  ) {
+
+    alert("Administrator access required.");
+
+    return;
+  }
+
+  hideAllSections();
+
+  document.getElementById("adminSection")
+    .classList.remove("hidden");
+
+  adminSettings();
+}
+
+
+/* =========================================================
+   CREATE SERVER
+   ========================================================= */
+
+async function createServer() {
 
   const body = {
 
-    username:currentUser.username,
-
     name:
-      document.getElementById("serverName")
-      .value.trim(),
+      document.getElementById("serverName").value.trim(),
 
-    ramMB:
+    ram_mb:
       Number(
         document.getElementById("serverRam").value
       ),
 
-    diskMB:
+    disk_mb:
       Number(
         document.getElementById("serverDisk").value
       ),
 
-    cpuVcpu:
+    cpu_vcpu:
       Number(
         document.getElementById("serverCpu").value
       ),
@@ -1021,172 +1021,111 @@ async function createServer(){
 
     version:
       document.getElementById("serverVersion").value.trim()
-
   };
 
-  const r = await fetch("/api/servers",{
+  if (!body.name) {
 
-    method:"POST",
-
-    headers:{
-      "Content-Type":"application/json"
-    },
-
-    body:JSON.stringify(body)
-
-  });
-
-  const data = await r.json();
-
-  const message =
-    document.getElementById("createMessage");
-
-  if(!r.ok){
-
-    message.textContent =
-      data.error || "Server creation failed.";
-
-    message.className = "danger";
+    showMessage(
+      "createMessage",
+      "Enter a server name.",
+      "error"
+    );
 
     return;
-
   }
 
-  message.textContent =
-    "Server created successfully.";
+  try {
 
-  message.className = "success";
+    await api(
+      "/api/servers",
+      {
+        method: "POST",
+        body
+      }
+    );
 
-  loadServers();
+    showMessage(
+      "createMessage",
+      "Server created successfully."
+    );
 
+    document.getElementById("serverName").value = "";
+
+    await loadServers();
+
+  } catch (error) {
+
+    showMessage(
+      "createMessage",
+      error.message,
+      "error"
+    );
+  }
 }
 
-// =====================================================
-// SERVER ACTION
-// =====================================================
 
-async function serverAction(id, action){
+/* =========================================================
+   LOAD SERVERS
+   ========================================================= */
 
-  const r = await fetch(
-    `/api/servers/${id}/${action}`,
-    {
-      method:"POST",
+async function loadServers() {
 
-      headers:{
-        "Content-Type":"application/json"
-      },
+  const container =
+    document.getElementById("servers");
 
-      body:JSON.stringify({
-        username:currentUser.username
-      })
+  container.innerHTML =
+    '<div class="empty">Loading servers...</div>';
+
+  try {
+
+    const servers =
+      await api("/api/servers");
+
+    if (!servers.length) {
+
+      container.innerHTML =
+        '<div class="empty">No servers yet.</div>';
+
+      return;
     }
-  );
 
-  const data = await r.json();
+    container.innerHTML =
+      servers.map(renderServer).join("");
 
-  if(!r.ok){
+  } catch (error) {
 
-    alert(data.error || "Action failed.");
-
-    return;
-
+    container.innerHTML =
+      `<div class="danger">${escapeHtml(error.message)}</div>`;
   }
-
-  loadServers();
-
 }
 
-// =====================================================
-// SERVER MODULE
-// =====================================================
 
-function openServerModule(id,title){
+/* =========================================================
+   SERVER CARD
+   ========================================================= */
 
-  const element =
-    document.getElementById(
-      "module-" + id
-    );
+function renderServer(server) {
 
-  element.classList.remove("hidden");
+  const status =
+    server.status || "stopped";
 
-  element.innerHTML = `
+  return `
+    <div class="card server-card">
 
-    <h3>${title}</h3>
+      <div class="server-head">
 
-    <p class="muted">
+        <div>
 
-      ${title} UI is connected to HarvixPanel.
-      The real node-agent implementation will provide
-      the actual operations.
+          <div class="server-name">
+            🖥️ ${escapeHtml(server.name)}
+          </div>
 
-    </p>
+          <div class="muted">
+            ${escapeHtml(server.software)}
+            ${escapeHtml(server.version)}
+          </div>
 
-  `;
+        </div>
 
-}
-
-// =====================================================
-// SERVER SETTINGS
-// =====================================================
-
-function openServerSettings(id){
-
-  const element =
-    document.getElementById(
-      "module-" + id
-    );
-
-  element.classList.remove("hidden");
-
-  let html = `
-
-    <h3>⚙️ Server Settings</h3>
-
-    <button onclick="openServerModule('${id}','Reinstall Server')">
-      Reinstall Server
-    </button>
-
-    <button onclick="openServerModule('${id}','Change Version Type')">
-      Change Version Type
-    </button>
-
-    <button onclick="openServerModule('${id}','Change Software')">
-      Change Software
-    </button>
-
-  `;
-
-  if(currentUser.role === "admin"){
-
-    html += `
-
-      <hr>
-
-      <h3>🔗 IP Alias</h3>
-
-      <p class="muted">
-
-        Admin-only field for an address/alias that you
-        already control, such as a Playit or MineKube address.
-
-      </p>
-
-      <input
-        id="alias-${id}"
-        placeholder="example.playit.gg:12345">
-
-      <button
-        onclick="saveAlias('${id}')">
-        Save IP Alias
-      </button>
-
-    `;
-
-  }
-
-  element.innerHTML = html;
-
-}
-
-// =====================================================
-// SAVE IP 
+        <span class="status ${escapeHtml(status)}">
+          ${escapeHtml(sta
