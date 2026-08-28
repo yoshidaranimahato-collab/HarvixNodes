@@ -1,828 +1,573 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>HarvixPanel</title>
 
   <style>
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
     }
 
     body {
       min-height: 100vh;
-      background: #0b0b0f;
-      color: white;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+      overflow-x: hidden;
+      background:
+        linear-gradient(rgba(20, 5, 35, 0.55), rgba(10, 3, 25, 0.75)),
+        url("https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1600&q=80")
+        center/cover fixed no-repeat;
     }
 
-    .navbar {
-      height: 65px;
+    .background {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(174, 70, 255, 0.28), transparent 30%),
+        radial-gradient(circle at 80% 70%, rgba(255, 40, 180, 0.22), transparent 35%);
+      pointer-events: none;
+    }
+
+    .page {
+      width: 100%;
+      min-height: 100vh;
       display: flex;
+      justify-content: center;
       align-items: center;
-      justify-content: space-between;
-      padding: 0 25px;
-      background: #111118;
-      border-bottom: 1px solid #292934;
+      padding: 30px 18px;
     }
 
-    .logo {
-      font-size: 22px;
-      font-weight: bold;
+    .auth-box {
+      width: 100%;
+      max-width: 480px;
+      padding: 35px;
+      border-radius: 22px;
+
+      background: rgba(25, 15, 35, 0.48);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+
+      box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
 
-    .nav-buttons {
-      display: flex;
-      gap: 10px;
+    .brand {
+      text-align: center;
+      margin-bottom: 28px;
     }
 
-    button {
-      border: 0;
-      border-radius: 8px;
-      padding: 11px 17px;
-      cursor: pointer;
+    .brand-logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 15px;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .brand-name {
+      font-size: 27px;
+      font-weight: 800;
+    }
+
+    .brand-subtitle {
+      margin-top: 7px;
+      color: rgba(255,255,255,0.65);
       font-size: 14px;
     }
 
-    .login-btn {
-      background: #272733;
-      color: white;
+    .form-title {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
     }
 
-    .register-btn {
-      background: #6d35ff;
-      color: white;
+    .form-description {
+      color: rgba(255,255,255,0.68);
+      margin-bottom: 28px;
+      line-height: 1.5;
     }
 
-    .logout-btn {
-      background: #d83232;
-      color: white;
+    .field {
+      margin-bottom: 19px;
     }
 
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      padding: 70px 20px;
-      text-align: center;
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+      font-weight: 600;
     }
 
-    h1 {
-      font-size: 45px;
-      margin-bottom: 15px;
+    .input-wrap {
+      position: relative;
     }
 
-    .subtitle {
-      color: #aaa;
-      margin-bottom: 40px;
+    .input-icon {
+      position: absolute;
+      left: 17px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 19px;
+      opacity: 0.65;
+      pointer-events: none;
     }
 
-    .card {
-      background: #15151e;
-      border: 1px solid #292934;
-      border-radius: 14px;
-      padding: 30px;
-      margin: 20px auto;
-      max-width: 450px;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-box {
+    .field input {
       width: 100%;
-      max-width: 400px;
-      background: #15151e;
-      border: 1px solid #30303d;
+      height: 58px;
       border-radius: 14px;
-      padding: 28px;
-    }
-
-    .modal-box h2 {
-      margin-bottom: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 13px;
-      margin-bottom: 13px;
-      border-radius: 8px;
-      border: 1px solid #363642;
-      background: #0d0d13;
-      color: white;
+      border: 1px solid rgba(255,255,255,0.15);
       outline: none;
+
+      background: rgba(5, 5, 10, 0.48);
+      color: #fff;
+
+      padding: 0 18px 0 50px;
+      font-size: 16px;
+
+      transition: 0.2s;
     }
 
-    input:focus {
-      border-color: #6d35ff;
+    .field input::placeholder {
+      color: rgba(255,255,255,0.48);
     }
 
-    .submit-btn {
+    .field input:focus {
+      border-color: #9b35ff;
+      box-shadow: 0 0 0 3px rgba(155, 53, 255, 0.14);
+    }
+
+    .main-button {
       width: 100%;
-      background: #6d35ff;
+      height: 59px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+
       color: white;
-      margin-top: 5px;
+      font-size: 17px;
+      font-weight: 700;
+
+      background: linear-gradient(135deg, #8b20e8, #a52cff);
+
+      box-shadow: 0 10px 25px rgba(143, 35, 235, 0.25);
+      transition: 0.2s;
     }
 
-    .close-btn {
-      width: 100%;
-      background: #292934;
-      color: white;
-      margin-top: 10px;
+    .main-button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+    }
+
+    .main-button:active {
+      transform: translateY(1px);
     }
 
     .message {
-      min-height: 22px;
-      margin-top: 13px;
-      font-size: 14px;
-    }
-
-    .user-info {
       display: none;
-      align-items: center;
-      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      font-size: 14px;
+      line-height: 1.4;
     }
 
-    .welcome {
-      color: #aaa;
+    .message.error {
+      display: block;
+      background: rgba(255, 50, 80, 0.15);
+      border: 1px solid rgba(255, 80, 100, 0.3);
+      color: #ffb5bf;
     }
 
+    .message.success {
+      display: block;
+      background: rgba(50, 255, 150, 0.12);
+      border: 1px solid rgba(50, 255, 150, 0.25);
+      color: #a8ffd1;
+    }
+
+    .switch {
+      text-align: center;
+      margin-top: 24px;
+      color: rgba(255,255,255,0.65);
+      font-size: 15px;
+    }
+
+    .switch button {
+      border: none;
+      background: transparent;
+      color: #c15cff;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .switch button:hover {
+      text-decoration: underline;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 520px) {
+      .page {
+        padding: 18px 14px;
+      }
+
+      .auth-box {
+        padding: 27px 20px;
+        border-radius: 19px;
+      }
+
+      .form-title {
+        font-size: 29px;
+      }
+
+      .brand-name {
+        font-size: 25px;
+      }
+    }
   </style>
 </head>
 
-
 <body>
 
-  <nav class="navbar">
+  <div class="background"></div>
 
-    <div class="logo">
-      HarvixPanel
-    </div>
+  <main class="page">
 
-    <div class="nav-buttons">
+    <!-- REGISTER -->
+    <section class="auth-box" id="registerBox">
 
-      <div
-        id="authButtons"
-        class="nav-buttons"
-      >
-
-        <button
-          class="login-btn"
-          id="loginButton"
-        >
-          Login
-        </button>
-
-        <button
-          class="register-btn"
-          id="registerButton"
-        >
-          Register
-        </button>
-
+      <div class="brand">
+        <!-- Baad me apna HarvixPanel logo yahan laga sakte ho -->
+        <div class="brand-name">HarvixPanel</div>
+        <div class="brand-subtitle">Minecraft Hosting Panel</div>
       </div>
 
+      <h1 class="form-title">Create account</h1>
 
-      <div
-        id="userInfo"
-        class="user-info"
-      >
-
-        <span
-          class="welcome"
-          id="welcomeText"
-        ></span>
-
-        <button
-          class="logout-btn"
-          id="logoutButton"
-        >
-          Logout
-        </button>
-
-      </div>
-
-    </div>
-
-  </nav>
-
-
-  <main class="container">
-
-    <h1>
-      HarvixPanel
-    </h1>
-
-    <p class="subtitle">
-      Minecraft Hosting Control Panel
-    </p>
-
-
-    <div class="card">
-
-      <h2>
-        Panel Online
-      </h2>
-
-      <p style="color:#aaa;margin-top:10px;">
-        Create an account or login to continue.
+      <p class="form-description">
+        Sign up to start managing your servers.
       </p>
 
-    </div>
+      <div id="registerMessage" class="message"></div>
+
+      <form id="registerForm">
+
+        <div class="field">
+          <label>Username</label>
+
+          <div class="input-wrap">
+            <span class="input-icon">♙</span>
+            <input
+              type="text"
+              id="registerUsername"
+              placeholder="Choose a username"
+              minlength="3"
+              maxlength="24"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input
+              type="password"
+              id="registerPassword"
+              placeholder="Create a password"
+              minlength="6"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Confirm Password</label>
+
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input
+              type="password"
+              id="registerConfirm"
+              placeholder="Confirm your password"
+              minlength="6"
+              required
+            >
+          </div>
+        </div>
+
+        <button class="main-button" type="submit">
+          Create account &nbsp; →
+        </button>
+
+      </form>
+
+      <div class="switch">
+        Already have an account?
+        <button type="button" onclick="showLogin()">Sign in</button>
+      </div>
+
+    </section>
+
+
+    <!-- LOGIN -->
+    <section class="auth-box hidden" id="loginBox">
+
+      <div class="brand">
+        <div class="brand-name">HarvixPanel</div>
+        <div class="brand-subtitle">Minecraft Hosting Panel</div>
+      </div>
+
+      <h1 class="form-title">Login</h1>
+
+      <p class="form-description">
+        Welcome to the panel.
+      </p>
+
+      <div id="loginMessage" class="message"></div>
+
+      <form id="loginForm">
+
+        <div class="field">
+          <label>Username</label>
+
+          <div class="input-wrap">
+            <span class="input-icon">♙</span>
+            <input
+              type="text"
+              id="loginUsername"
+              placeholder="Username"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input
+              type="password"
+              id="loginPassword"
+              placeholder="Password"
+              required
+            >
+          </div>
+        </div>
+
+        <button class="main-button" type="submit">
+          Sign In
+        </button>
+
+      </form>
+
+      <div class="switch">
+        Don't have an account?
+        <button type="button" onclick="showRegister()">Register</button>
+      </div>
+
+    </section>
 
   </main>
 
 
-  <!-- LOGIN MODAL -->
-
-  <div
-    class="modal"
-    id="loginModal"
-  >
-
-    <div class="modal-box">
-
-      <h2>
-        Login
-      </h2>
-
-      <form id="loginForm">
-
-        <input
-          type="text"
-          id="loginUsername"
-          placeholder="Username"
-          autocomplete="username"
-          required
-        >
-
-        <input
-          type="password"
-          id="loginPassword"
-          placeholder="Password"
-          autocomplete="current-password"
-          required
-        >
-
-        <button
-          type="submit"
-          class="submit-btn"
-        >
-          Login
-        </button>
-
-      </form>
-
-      <div
-        class="message"
-        id="loginMessage"
-      ></div>
-
-      <button
-        class="close-btn"
-        id="closeLogin"
-      >
-        Close
-      </button>
-
-    </div>
-
-  </div>
-
-
-  <!-- REGISTER MODAL -->
-
-  <div
-    class="modal"
-    id="registerModal"
-  >
-
-    <div class="modal-box">
-
-      <h2>
-        Create Account
-      </h2>
-
-      <form id="registerForm">
-
-        <input
-          type="text"
-          id="registerUsername"
-          placeholder="Username"
-          autocomplete="username"
-          required
-        >
-
-        <input
-          type="password"
-          id="registerPassword"
-          placeholder="Password"
-          autocomplete="new-password"
-          required
-        >
-
-        <button
-          type="submit"
-          class="submit-btn"
-        >
-          Register
-        </button>
-
-      </form>
-
-      <div
-        class="message"
-        id="registerMessage"
-      ></div>
-
-      <button
-        class="close-btn"
-        id="closeRegister"
-      >
-        Close
-      </button>
-
-    </div>
-
-  </div>
-
-
   <script>
+    const registerBox = document.getElementById("registerBox");
+    const loginBox = document.getElementById("loginBox");
 
-    const loginButton =
-      document.getElementById(
-        "loginButton"
-      );
+    function showLogin() {
+      registerBox.classList.add("hidden");
+      loginBox.classList.remove("hidden");
 
-    const registerButton =
-      document.getElementById(
-        "registerButton"
-      );
+      clearMessages();
+    }
 
-    const logoutButton =
-      document.getElementById(
-        "logoutButton"
-      );
+    function showRegister() {
+      loginBox.classList.add("hidden");
+      registerBox.classList.remove("hidden");
 
+      clearMessages();
+    }
 
-    const loginModal =
-      document.getElementById(
-        "loginModal"
-      );
+    function showMessage(id, text, type) {
+      const box = document.getElementById(id);
 
-    const registerModal =
-      document.getElementById(
-        "registerModal"
-      );
+      box.textContent = text;
+      box.className = "message " + type;
+    }
 
-
-    const closeLogin =
-      document.getElementById(
-        "closeLogin"
-      );
-
-    const closeRegister =
-      document.getElementById(
-        "closeRegister"
-      );
-
-
-    const loginForm =
-      document.getElementById(
-        "loginForm"
-      );
-
-    const registerForm =
-      document.getElementById(
-        "registerForm"
-      );
-
-
-    const loginMessage =
-      document.getElementById(
-        "loginMessage"
-      );
-
-    const registerMessage =
-      document.getElementById(
-        "registerMessage"
-      );
-
-
-    const authButtons =
-      document.getElementById(
-        "authButtons"
-      );
-
-    const userInfo =
-      document.getElementById(
-        "userInfo"
-      );
-
-    const welcomeText =
-      document.getElementById(
-        "welcomeText"
-      );
-
-
-    function openModal(modal) {
-
-      modal.classList.add(
-        "active"
-      );
-
+    function clearMessages() {
+      document.getElementById("registerMessage").className = "message";
+      document.getElementById("loginMessage").className = "message";
     }
 
 
-    function closeModal(modal) {
-
-      modal.classList.remove(
-        "active"
-      );
-
-    }
-
-
-    loginButton.addEventListener(
-      "click",
-      () => {
-
-        loginMessage.textContent = "";
-
-        openModal(loginModal);
-
-      }
-    );
-
-
-    registerButton.addEventListener(
-      "click",
-      () => {
-
-        registerMessage.textContent = "";
-
-        openModal(registerModal);
-
-      }
-    );
-
-
-    closeLogin.addEventListener(
-      "click",
-      () => {
-
-        closeModal(loginModal);
-
-      }
-    );
-
-
-    closeRegister.addEventListener(
-      "click",
-      () => {
-
-        closeModal(registerModal);
-
-      }
-    );
-
-
-    window.addEventListener(
-      "click",
-      event => {
-
-        if (
-          event.target === loginModal
-        ) {
-          closeModal(loginModal);
-        }
-
-        if (
-          event.target === registerModal
-        ) {
-          closeModal(registerModal);
-        }
-
-      }
-    );
-
-
-    registerForm.addEventListener(
-      "submit",
-      async event => {
+    // REGISTER
+    document
+      .getElementById("registerForm")
+      .addEventListener("submit", async function(event) {
 
         event.preventDefault();
 
-        registerMessage.textContent =
-          "Creating account...";
-
         const username =
-          document.getElementById(
-            "registerUsername"
-          ).value.trim();
+          document.getElementById("registerUsername").value.trim();
 
         const password =
-          document.getElementById(
-            "registerPassword"
-          ).value;
+          document.getElementById("registerPassword").value;
 
+        const confirm =
+          document.getElementById("registerConfirm").value;
 
-        try {
-
-          const response =
-            await fetch(
-              "/api/auth/register",
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
-
-                body: JSON.stringify({
-                  username,
-                  password
-                })
-              }
-            );
-
-
-          const data =
-            await response.json();
-
-
-          if (!response.ok) {
-
-            registerMessage.textContent =
-              data.message ||
-              "Registration failed.";
-
-            return;
-          }
-
-
-          localStorage.setItem(
-            "harvix_token",
-            data.token
+        if (password !== confirm) {
+          showMessage(
+            "registerMessage",
+            "Passwords do not match.",
+            "error"
           );
-
-
-          registerMessage.textContent =
-            "Account created!";
-
-
-          registerForm.reset();
-
-          setTimeout(
-            () => {
-
-              closeModal(
-                registerModal
-              );
-
-              updateUI(
-                data.user
-              );
-
-            },
-            500
-          );
-
-
-        } catch (error) {
-
-          registerMessage.textContent =
-            "Could not connect to panel.";
-
-        }
-
-      }
-    );
-
-
-    loginForm.addEventListener(
-      "submit",
-      async event => {
-
-        event.preventDefault();
-
-        loginMessage.textContent =
-          "Logging in...";
-
-
-        const username =
-          document.getElementById(
-            "loginUsername"
-          ).value.trim();
-
-        const password =
-          document.getElementById(
-            "loginPassword"
-          ).value;
-
-
-        try {
-
-          const response =
-            await fetch(
-              "/api/auth/login",
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
-
-                body: JSON.stringify({
-                  username,
-                  password
-                })
-              }
-            );
-
-
-          const data =
-            await response.json();
-
-
-          if (!response.ok) {
-
-            loginMessage.textContent =
-              data.message ||
-              "Login failed.";
-
-            return;
-          }
-
-
-          localStorage.setItem(
-            "harvix_token",
-            data.token
-          );
-
-
-          loginMessage.textContent =
-            "Login successful!";
-
-
-          loginForm.reset();
-
-
-          setTimeout(
-            () => {
-
-              closeModal(
-                loginModal
-              );
-
-              updateUI(
-                data.user
-              );
-
-            },
-            400
-          );
-
-
-        } catch (error) {
-
-          loginMessage.textContent =
-            "Could not connect to panel.";
-
-        }
-
-      }
-    );
-
-
-    logoutButton.addEventListener(
-      "click",
-      async () => {
-
-        localStorage.removeItem(
-          "harvix_token"
-        );
-
-        showLoggedOut();
-
-      }
-    );
-
-
-    function updateUI(user) {
-
-      authButtons.style.display =
-        "none";
-
-      userInfo.style.display =
-        "flex";
-
-      welcomeText.textContent =
-        `Hi, ${user.username}`;
-
-    }
-
-
-    function showLoggedOut() {
-
-      authButtons.style.display =
-        "flex";
-
-      userInfo.style.display =
-        "none";
-
-      welcomeText.textContent =
-        "";
-
-    }
-
-
-    async function checkLogin() {
-
-      const token =
-        localStorage.getItem(
-          "harvix_token"
-        );
-
-      if (!token) {
-
-        showLoggedOut();
-
-        return;
-
-      }
-
-
-      try {
-
-        const response =
-          await fetch(
-            "/api/auth/me",
-            {
-              headers: {
-                Authorization:
-                  `Bearer ${token}`
-              }
-            }
-          );
-
-
-        if (!response.ok) {
-
-          localStorage.removeItem(
-            "harvix_token"
-          );
-
-          showLoggedOut();
-
           return;
         }
 
+        try {
 
-        const data =
-          await response.json();
+          const response = await fetch("/api/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              username,
+              password
+            })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(
+              data.message || data.error || "Registration failed."
+            );
+          }
+
+          showMessage(
+            "registerMessage",
+            "Account created successfully! You can now sign in.",
+            "success"
+          );
+
+          document.getElementById("registerForm").reset();
+
+          setTimeout(() => {
+            showLogin();
+          }, 1200);
+
+        } catch (error) {
+
+          showMessage(
+            "registerMessage",
+            error.message || "Something went wrong.",
+            "error"
+          );
+
+        }
+
+      });
 
 
-        updateUI(
-          data.user
-        );
+    // LOGIN
+    document
+      .getElementById("loginForm")
+      .addEventListener("submit", async function(event) {
 
+        event.preventDefault();
 
-      } catch (error) {
+        const username =
+          document.getElementById("loginUsername").value.trim();
 
-        showLoggedOut();
+        const password =
+          document.getElementById("loginPassword").value;
 
-      }
+        try {
 
-    }
+          const response = await fetch("/api/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              username,
+              password
+            })
+          });
 
+          const data = await response.json();
 
-    checkLogin();
+          if (!response.ok) {
+            throw new Error(
+              data.message || data.error || "Invalid username or password."
+            );
+          }
 
+          if (data.token) {
+            localStorage.setItem("harvix_token", data.token);
+          }
+
+          if (data.user) {
+            localStorage.setItem(
+              "harvix_user",
+              JSON.stringify(data.user)
+            );
+          }
+
+          showMessage(
+            "loginMessage",
+            "Login successful! Redirecting...",
+            "success"
+          );
+
+          setTimeout(() => {
+
+            if (
+              data.user &&
+              data.user.role === "admin"
+            ) {
+              window.location.href = "/admin.html";
+            } else {
+              window.location.href = "/dashboard.html";
+            }
+
+          }, 700);
+
+        } catch (error) {
+
+          showMessage(
+            "loginMessage",
+            error.message || "Login failed.",
+            "error"
+          );
+
+        }
+
+      });
   </script>
 
 </body>
-
 </html>
