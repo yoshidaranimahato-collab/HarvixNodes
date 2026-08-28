@@ -20,3 +20,19 @@ IP Alias is deliberately only a stored/displayed alias. It does not pretend to m
 The real Console/File Manager/SFTP/plugin/mod operations require the node agent and Docker integration, which is the next implementation phase.
 
 # 🛠️ Manual Installation
+
+This section contains the complete manual installation process.
+
+You do NOT need the one-click installer if you follow these steps.
+
+# 1️⃣ Install Required Packages
+sudo apt install -y curl git ca-certificates
+
+# 3️⃣ Install Node.js
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+Check the installation:
+node -v
+npm -v
+
