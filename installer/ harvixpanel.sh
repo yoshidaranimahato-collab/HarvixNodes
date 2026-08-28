@@ -5,7 +5,7 @@ set -e
 APP_NAME="HarvixPanel"
 APP_DIR="/opt/harvixpanel"
 REPO="https://github.com/yoshidaranimahato-collab/HarvixNodes.git"
-PORT="3000"
+PORT="6969"
 
 clear
 
