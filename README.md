@@ -50,5 +50,7 @@ export HARVIX_ADMIN_PASSWORD='YOUR-STRONG-PASSWORD'
 example
 export HARVIX_ADMIN_PASSWORD='RevengOp123'
 
+# Manual Install has some problems so use one click command installer
+
 # one click command installer 
 bash <(curl -fsSL https://raw.githubusercontent.com/yoshidaranimahato-collab/HarvixNodes/main/installer/harvixpanel.sh)
