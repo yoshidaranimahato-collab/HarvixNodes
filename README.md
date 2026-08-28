@@ -36,3 +36,19 @@ Check the installation:
 node -v
 npm -v
 
+# 4️⃣ gitclone HarvixPanel
+git clone https://github.com/yoshidaranimahato-collab/HarvixNodes.git
+ enter the project:
+ cd HarvixNodes
+
+# install dependencies
+npm install
+
+# configure admin panel
+export HARVIX_ADMIN_PASSWORD='YOUR-STRONG-PASSWORD'
+
+example
+export HARVIX_ADMIN_PASSWORD='RevengOp123'
+
+# one click command installer 
+bash <(curl -fsSL https://raw.githubusercontent.com/yoshidaranimahato-collab/HarvixNodes/main/installer/harvixpanel.sh)
