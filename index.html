@@ -1,49 +1,1192 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HarvixPanel</title>
+
 <style>
-*{box-sizing:border-box}body{margin:0;background:#090c12;color:#edf2f7;font-family:Arial,sans-serif}
-header{padding:18px 22px;background:#111722;border-bottom:1px solid #252d3a;display:flex;justify-content:space-between}
-main{max-width:1100px;margin:auto;padding:18px}.card{background:#111722;border:1px solid #252d3a;border-radius:14px;padding:18px;margin:14px 0}
-input,select,button{padding:11px;border-radius:8px;border:1px solid #303a49;background:#0b1018;color:#fff;margin:4px}
-button{cursor:pointer}.tabs{display:flex;gap:7px;flex-wrap:wrap}.tab{padding:10px 13px}.hidden{display:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
-.muted{color:#9ba7b7}.danger{color:#ff8c8c}.ok{color:#78e6a0}
-</style></head>
-<body><header><b>⚡ HarvixPanel</b><span class="muted">v0.2.0</span></header><main>
-<div class="card"><h2>Create Server</h2><div class="grid">
-<input id="name" placeholder="Server name"><input id="ram" type="number" value="1024" placeholder="RAM MB">
-<input id="disk" type="number" value="1024" placeholder="Disk MB"><input id="cpu" type="number" value="1" step=".1" placeholder="vCPU">
-<select id="software"><option>Paper</option><option>Vanilla</option><option>Fabric</option><option>Forge</option></select>
-<input id="version" value="1.21.x" placeholder="Version">
-</div><button onclick="createServer()">Create Server</button>
-<p class="muted">Normal user: max 4096 MB RAM • 5120 MB disk • 1 vCPU</p></div>
-<div class="card"><h2>My Servers</h2><div id="servers">Loading...</div></div>
-</main>
-<script>
-async function load(){
- let r=await fetch("/api/servers?user_id=2"),s=await r.json();
- document.getElementById("servers").innerHTML=s.length?s.map(x=>`
- <div class="card"><h3>${x.name}</h3><p class="muted">${x.software} ${x.version} • ${x.ram_mb} MB • ${x.disk_mb} MB • ${x.cpu_vcpu} vCPU • ${x.status}</p>
- <div class="tabs">
- <button onclick="openPanel(${x.id},'Console')">Console</button><button onclick="openPanel(${x.id},'File Manager')">File Manager</button>
- <button onclick="openPanel(${x.id},'SFTP')">SFTP</button><button onclick="openPanel(${x.id},'Plugin Installer')">Plugin Installer</button>
- <button onclick="openPanel(${x.id},'Mod Manager')">Mod Manager</button><button onclick="openPanel(${x.id},'Votifier Test')">Votifier Test</button>
- <button onclick="openPanel(${x.id},'Server Splitter')">Server Splitter</button><button onclick="openSettings(${x.id})">Settings</button>
- </div><div id="p${x.id}" class="card hidden"></div>
- <button onclick="act(${x.id},'start')">Start</button><button onclick="act(${x.id},'stop')">Stop</button><button onclick="act(${x.id},'restart')">Restart</button></div>`).join(""):"No servers yet.";
+*{box-sizing:border-box}
+
+:root{
+  --bg:#090c12;
+  --card:#111722;
+  --border:#252d3a;
+  --text:#edf2f7;
+  --muted:#9ba7b7;
+  --primary:#7c5cff;
+  --danger:#ff6b6b;
+  --success:#50d890;
 }
-function openPanel(id,title){let e=document.getElementById("p"+id);e.classList.remove("hidden");
-e.innerHTML=`<b>${title}</b><p class="muted">UI module is connected. The real node-agent implementation will provide ${title.toLowerCase()} operations.</p>`;}
-function openSettings(id){let e=document.getElementById("p"+id);e.classList.remove("hidden");e.innerHTML=`
-<b>Settings</b><p><button onclick="openPanel(${id},'Reinstall Server')">Reinstall Server</button>
-<button onclick="openPanel(${id},'Change Version Type')">Change Version Type</button>
-<button onclick="openPanel(${id},'Change Software')">Change Software</button></p>
-<hr><b>IP Alias (Admin only)</b><p class="muted">Example: a Playit/MineKube address that you already own/control. This is only stored/displayed as an alias; it does not create DNS or bypass networking.</p>
-<input id="alias${id}" placeholder="example.playit.gg:12345"><button onclick="saveAlias(${id})">Save</button>`;}
-async function saveAlias(id){let alias=document.getElementById("alias"+id).value;
-let r=await fetch("/api/servers/"+id+"/alias",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({user_id:1,alias_ip:alias})});
-let j=await r.json();alert(j.error||"Alias saved for admin.");}
-async function createServer(){let body={name:name.value,ram_mb:+ram.value,disk_mb:+disk.value,cpu_vcpu:+cpu.value,owner_id:2,software:software.value,version:version.value};
-let r=await fetch("/api/servers",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();if(!r.ok)return alert(j.error);load();}
-async function act(id,a){await fetch(`/api/servers/${id}/${a}`,{method:"POST"});load()} load();
-</script></body></html>
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
+
+header{
+  padding:16px 20px;
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:20px;
+  font-weight:bold;
+}
+
+.container{
+  max-width:1150px;
+  margin:auto;
+  padding:20px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px;
+  margin:14px 0;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:10px;
+}
+
+input,select,button{
+  width:100%;
+  padding:11px;
+  border-radius:8px;
+  border:1px solid #303a49;
+  background:#0b1018;
+  color:#fff;
+  margin:4px 0;
+}
+
+button{
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button:hover{
+  border-color:var(--primary);
+}
+
+.primary{
+  background:var(--primary);
+  border-color:var(--primary);
+}
+
+.danger{
+  color:#ff8c8c;
+}
+
+.success{
+  color:#78e6a0;
+}
+
+.muted{
+  color:var(--muted);
+}
+
+.hidden{
+  display:none!important;
+}
+
+.tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:12px;
+}
+
+.tabs button{
+  width:auto;
+}
+
+.server{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:15px;
+  margin:12px 0;
+}
+
+.nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:15px;
+}
+
+.nav button{
+  width:auto;
+}
+
+.badge{
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:12px;
+  background:#182131;
+}
+
+.online{
+  color:var(--success);
+}
+
+.offline{
+  color:var(--muted);
+}
+
+.auth-box{
+  max-width:420px;
+  margin:60px auto;
+}
+
+.logo{
+  font-size:38px;
+  text-align:center;
+  margin-bottom:8px;
+}
+
+hr{
+  border:0;
+  border-top:1px solid var(--border);
+  margin:20px 0;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+  <div class="brand">
+    <span id="panelIcon">⚡</span>
+    <span id="panelName">HarvixPanel</span>
+  </div>
+
+  <div>
+    <span id="userInfo" class="muted"></span>
+    <button id="logoutBtn" class="hidden" onclick="logout()" style="width:auto">
+      Logout
+    </button>
+  </div>
+</header>
+
+<!-- ================================================= -->
+
+<!-- AUTH -->
+
+<!-- ================================================= -->
+
+<div id="authPage" class="container">
+
+  <div class="card auth-box">
+
+```
+<div class="logo">⚡</div>
+
+<h2 id="authTitle">Login</h2>
+
+<input id="authUsername" placeholder="Username">
+<input id="authPassword" type="password" placeholder="Password">
+
+<button class="primary" onclick="login()" id="loginButton">
+  Login
+</button>
+
+<button onclick="showRegister()" id="registerButton">
+  Create Account
+</button>
+
+<p id="authMessage" class="muted"></p>
+```
+
+  </div>
+
+</div>
+
+<!-- ================================================= -->
+
+<!-- MAIN PANEL -->
+
+<!-- ================================================= -->
+
+<div id="panelPage" class="container hidden">
+
+  <div class="nav">
+
+```
+<button onclick="showSection('dashboard')">
+  🏠 Dashboard
+</button>
+
+<button onclick="showSection('servers')">
+  🖥️ My Servers
+</button>
+
+<button onclick="showSection('create')">
+  ➕ Create Server
+</button>
+
+<button id="adminButton" class="hidden" onclick="showSection('admin')">
+  👑 Admin Panel
+</button>
+```
+
+  </div>
+
+  <!-- DASHBOARD -->
+
+  <section id="dashboardSection">
+
+```
+<div class="card">
+
+  <h2>Welcome to <span id="welcomeName">HarvixPanel</span></h2>
+
+  <p class="muted">
+    Minecraft hosting management panel.
+  </p>
+
+  <div class="grid">
+
+    <div class="card">
+      <h3>🖥️ Servers</h3>
+      <h2 id="serverCount">0</h2>
+    </div>
+
+    <div class="card">
+      <h3>🟢 Status</h3>
+      <h2 class="success">Online</h2>
+    </div>
+
+    <div class="card">
+      <h3>👤 Account</h3>
+      <h2 id="roleDisplay">User</h2>
+    </div>
+
+  </div>
+
+</div>
+```
+
+  </section>
+
+  <!-- SERVERS -->
+
+  <section id="serversSection" class="hidden">
+
+```
+<div class="card">
+
+  <h2>🖥️ My Servers</h2>
+
+  <div id="servers">
+    Loading...
+  </div>
+
+</div>
+```
+
+  </section>
+
+  <!-- CREATE SERVER -->
+
+  <section id="createSection" class="hidden">
+
+```
+<div class="card">
+
+  <h2>➕ Create Server</h2>
+
+  <div class="grid">
+
+    <input id="serverName" placeholder="Server name">
+
+    <input id="serverRam"
+           type="number"
+           value="1024"
+           placeholder="RAM MB">
+
+    <input id="serverDisk"
+           type="number"
+           value="1024"
+           placeholder="Disk MB">
+
+    <input id="serverCpu"
+           type="number"
+           value="1"
+           step="0.1"
+           placeholder="vCPU">
+
+    <select id="serverSoftware">
+      <option>Paper</option>
+      <option>Vanilla</option>
+      <option>Fabric</option>
+      <option>Forge</option>
+    </select>
+
+    <input id="serverVersion"
+           value="1.21.4"
+           placeholder="Version">
+
+  </div>
+
+  <button class="primary" onclick="createServer()">
+    Create Server
+  </button>
+
+  <p class="muted">
+    Normal user limit: 4 GB RAM • 5 GB Disk • 1 vCore
+  </p>
+
+  <p id="createMessage"></p>
+
+</div>
+```
+
+  </section>
+
+  <!-- ADMIN PANEL -->
+
+  <section id="adminSection" class="hidden">
+
+```
+<div class="card">
+
+  <h2>👑 Admin Panel</h2>
+
+  <div class="nav">
+
+    <button onclick="adminSection('settings')">
+      ⚙️ Settings
+    </button>
+
+    <button onclick="adminSection('nodes')">
+      🖥️ Nodes
+    </button>
+
+    <button onclick="adminSection('create')">
+      ➕ Create Server
+    </button>
+
+    <button onclick="adminSection('users')">
+      👥 Users
+    </button>
+
+    <button onclick="adminSection('theme')">
+      🎨 Theme
+    </button>
+
+  </div>
+
+  <!-- ADMIN SETTINGS -->
+
+  <div id="adminSettings">
+
+    <h3>⚙️ Panel Settings</h3>
+
+    <input id="settingServerName"
+           placeholder="Server name">
+
+    <input id="settingServerIcon"
+           placeholder="Server icon">
+
+    <button class="primary" onclick="saveSettings()">
+      Save Changes
+    </button>
+
+    <p id="settingsMessage"></p>
+
+  </div>
+
+  <!-- NODES -->
+
+  <div id="adminNodes" class="hidden">
+
+    <h3>🖥️ Nodes</h3>
+
+    <div id="nodeList">
+      Loading...
+    </div>
+
+    <hr>
+
+    <h3>Add Node</h3>
+
+    <input id="nodeName" placeholder="Node name">
+
+    <input id="nodeAddress" placeholder="Node address">
+
+    <input id="nodeRam"
+           type="number"
+           placeholder="RAM MB">
+
+    <input id="nodeDisk"
+           type="number"
+           placeholder="Disk MB">
+
+    <input id="nodeCpu"
+           type="number"
+           step="0.1"
+           placeholder="CPU">
+
+    <button class="primary" onclick="createNode()">
+      Add Node
+    </button>
+
+  </div>
+
+  <!-- USERS -->
+
+  <div id="adminUsers" class="hidden">
+
+    <h3>👥 Users</h3>
+
+    <div id="userList">
+      Loading...
+    </div>
+
+  </div>
+
+  <!-- THEME -->
+
+  <div id="adminTheme" class="hidden">
+
+    <h3>🎨 Theme</h3>
+
+    <button onclick="setTheme('dark')">
+      🌙 Dark
+    </button>
+
+    <button onclick="setTheme('light')">
+      ☀️ Light
+    </button>
+
+  </div>
+
+</div>
+```
+
+  </section>
+
+</div>
+
+<script>
+
+// =====================================================
+// STATE
+// =====================================================
+
+let currentUser = null;
+
+// =====================================================
+// INIT
+// =====================================================
+
+async function init(){
+
+  try{
+
+    const r = await fetch("/api/settings");
+    const data = await r.json();
+
+    if(data.success){
+
+      document.getElementById("panelName").textContent =
+        data.settings.serverName;
+
+      document.getElementById("panelIcon").textContent =
+        data.settings.serverIcon;
+
+      document.title = data.settings.serverName;
+
+    }
+
+  }catch(e){
+
+    console.log("Settings unavailable");
+
+  }
+
+  const saved =
+    localStorage.getItem("harvix_user");
+
+  if(saved){
+
+    try{
+
+      currentUser = JSON.parse(saved);
+      showPanel();
+
+    }catch(e){
+
+      localStorage.removeItem("harvix_user");
+
+    }
+
+  }
+
+}
+
+// =====================================================
+// REGISTER
+// =====================================================
+
+function showRegister(){
+
+  document.getElementById("authTitle").textContent =
+    "Create Account";
+
+  document.getElementById("loginButton").textContent =
+    "Register";
+
+  document.getElementById("loginButton").onclick =
+    register;
+
+  document.getElementById("registerButton").textContent =
+    "Back to Login";
+
+  document.getElementById("registerButton").onclick =
+    showLogin;
+
+}
+
+function showLogin(){
+
+  document.getElementById("authTitle").textContent =
+    "Login";
+
+  document.getElementById("loginButton").textContent =
+    "Login";
+
+  document.getElementById("loginButton").onclick =
+    login;
+
+  document.getElementById("registerButton").textContent =
+    "Create Account";
+
+  document.getElementById("registerButton").onclick =
+    showRegister;
+
+}
+
+// =====================================================
+// REGISTER API
+// =====================================================
+
+async function register(){
+
+  const username =
+    document.getElementById("authUsername").value.trim();
+
+  const password =
+    document.getElementById("authPassword").value;
+
+  const message =
+    document.getElementById("authMessage");
+
+  const r = await fetch("/api/auth/register",{
+
+    method:"POST",
+
+    headers:{
+      "Content-Type":"application/json"
+    },
+
+    body:JSON.stringify({
+      username,
+      password
+    })
+
+  });
+
+  const data = await r.json();
+
+  if(!r.ok){
+
+    message.textContent =
+      data.error || "Registration failed.";
+
+    message.className = "danger";
+
+    return;
+
+  }
+
+  message.textContent =
+    "Account created. Please login.";
+
+  message.className = "success";
+
+  showLogin();
+
+}
+
+// =====================================================
+// LOGIN API
+// =====================================================
+
+async function login(){
+
+  const username =
+    document.getElementById("authUsername").value.trim();
+
+  const password =
+    document.getElementById("authPassword").value;
+
+  const message =
+    document.getElementById("authMessage");
+
+  const r = await fetch("/api/auth/login",{
+
+    method:"POST",
+
+    headers:{
+      "Content-Type":"application/json"
+    },
+
+    body:JSON.stringify({
+      username,
+      password
+    })
+
+  });
+
+  const data = await r.json();
+
+  if(!r.ok){
+
+    message.textContent =
+      data.error || "Login failed.";
+
+    message.className = "danger";
+
+    return;
+
+  }
+
+  currentUser = data.user;
+
+  localStorage.setItem(
+    "harvix_user",
+    JSON.stringify(currentUser)
+  );
+
+  showPanel();
+
+}
+
+// =====================================================
+// SHOW PANEL
+// =====================================================
+
+function showPanel(){
+
+  document.getElementById("authPage")
+    .classList.add("hidden");
+
+  document.getElementById("panelPage")
+    .classList.remove("hidden");
+
+  document.getElementById("logoutBtn")
+    .classList.remove("hidden");
+
+  document.getElementById("userInfo")
+    .textContent =
+      currentUser.username +
+      " • " +
+      currentUser.role;
+
+  document.getElementById("roleDisplay")
+    .textContent =
+      currentUser.role;
+
+  document.getElementById("welcomeName")
+    .textContent =
+      currentUser.username;
+
+  if(currentUser.role === "admin"){
+
+    document.getElementById("adminButton")
+      .classList.remove("hidden");
+
+  }
+
+  loadServers();
+
+}
+
+// =====================================================
+// LOGOUT
+// =====================================================
+
+function logout(){
+
+  localStorage.removeItem("harvix_user");
+
+  currentUser = null;
+
+  location.reload();
+
+}
+
+// =====================================================
+// SECTIONS
+// =====================================================
+
+function showSection(section){
+
+  const sections = [
+    "dashboard",
+    "servers",
+    "create",
+    "admin"
+  ];
+
+  sections.forEach(name => {
+
+    const element =
+      document.getElementById(
+        name + "Section"
+      );
+
+    if(element)
+      element.classList.add("hidden");
+
+  });
+
+  const selected =
+    document.getElementById(
+      section + "Section"
+    );
+
+  if(selected)
+    selected.classList.remove("hidden");
+
+  if(section === "servers")
+    loadServers();
+
+}
+
+// =====================================================
+// ADMIN SECTIONS
+// =====================================================
+
+function adminSection(section){
+
+  document.getElementById("adminSettings")
+    .classList.add("hidden");
+
+  document.getElementById("adminNodes")
+    .classList.add("hidden");
+
+  document.getElementById("adminUsers")
+    .classList.add("hidden");
+
+  document.getElementById("adminTheme")
+    .classList.add("hidden");
+
+  if(section === "settings"){
+
+    document.getElementById("adminSettings")
+      .classList.remove("hidden");
+
+    loadSettings();
+
+  }
+
+  if(section === "nodes"){
+
+    document.getElementById("adminNodes")
+      .classList.remove("hidden");
+
+    loadNodes();
+
+  }
+
+  if(section === "users"){
+
+    document.getElementById("adminUsers")
+      .classList.remove("hidden");
+
+    loadUsers();
+
+  }
+
+  if(section === "theme"){
+
+    document.getElementById("adminTheme")
+      .classList.remove("hidden");
+
+  }
+
+  if(section === "create"){
+
+    showSection("create");
+
+  }
+
+}
+
+// =====================================================
+// LOAD SERVERS
+// =====================================================
+
+async function loadServers(){
+
+  if(!currentUser) return;
+
+  const r = await fetch(
+    "/api/servers?username=" +
+    encodeURIComponent(currentUser.username)
+  );
+
+  const data = await r.json();
+
+  const container =
+    document.getElementById("servers");
+
+  if(!data.success){
+
+    container.innerHTML =
+      `<p class="danger">${data.error}</p>`;
+
+    return;
+
+  }
+
+  document.getElementById("serverCount")
+    .textContent =
+      data.servers.length;
+
+  if(!data.servers.length){
+
+    container.innerHTML =
+      `<p class="muted">No servers yet.</p>`;
+
+    return;
+
+  }
+
+  container.innerHTML =
+    data.servers.map(server => {
+
+      const r = server.resources;
+
+      return `
+
+      <div class="server">
+
+        <h3>🖥️ ${escapeHtml(server.name)}</h3>
+
+        <p class="muted">
+
+          ${escapeHtml(server.software)}
+          ${escapeHtml(server.version)}
+          • ${r.ramMB} MB RAM
+          • ${r.diskMB} MB Disk
+          • ${r.cpuVcpu} vCPU
+
+        </p>
+
+        <p>
+
+          Status:
+          <span class="${
+            server.status === "running"
+              ? "online"
+              : "offline"
+          }">
+
+            ${server.status}
+
+          </span>
+
+        </p>
+
+        <div class="tabs">
+
+          <button onclick="openServerModule('${server.id}','Console')">
+            🖥️ Console
+          </button>
+
+          <button onclick="openServerModule('${server.id}','File Manager')">
+            📁 File Manager
+          </button>
+
+          <button onclick="openServerModule('${server.id}','SFTP')">
+            🔐 SFTP
+          </button>
+
+          <button onclick="openServerModule('${server.id}','Plugin Installer')">
+            🧩 Plugin Installer
+          </button>
+
+          <button onclick="openServerModule('${server.id}','Mod Manager')">
+            🧱 Mod Manager
+          </button>
+
+          <button onclick="openServerModule('${server.id}','Votifier Test')">
+            🗳️ Votifier Test
+          </button>
+
+          <button onclick="openServerModule('${server.id}','Server Splitter')">
+            ✂️ Server Splitter
+          </button>
+
+          <button onclick="openServerSettings('${server.id}')">
+            ⚙️ Settings
+          </button>
+
+        </div>
+
+        <div id="module-${server.id}"
+             class="card hidden">
+        </div>
+
+        <div class="tabs">
+
+          <button
+            onclick="serverAction('${server.id}','start')">
+            ▶ Start
+          </button>
+
+          <button
+            onclick="serverAction('${server.id}','stop')">
+            ⏹ Stop
+          </button>
+
+          <button
+            onclick="serverAction('${server.id}','restart')">
+            🔄 Restart
+          </button>
+
+        </div>
+
+      </div>
+
+      `;
+
+    }).join("");
+
+}
+
+// =====================================================
+// CREATE SERVER
+// =====================================================
+
+async function createServer(){
+
+  const body = {
+
+    username:currentUser.username,
+
+    name:
+      document.getElementById("serverName")
+      .value.trim(),
+
+    ramMB:
+      Number(
+        document.getElementById("serverRam").value
+      ),
+
+    diskMB:
+      Number(
+        document.getElementById("serverDisk").value
+      ),
+
+    cpuVcpu:
+      Number(
+        document.getElementById("serverCpu").value
+      ),
+
+    software:
+      document.getElementById("serverSoftware").value,
+
+    version:
+      document.getElementById("serverVersion").value.trim()
+
+  };
+
+  const r = await fetch("/api/servers",{
+
+    method:"POST",
+
+    headers:{
+      "Content-Type":"application/json"
+    },
+
+    body:JSON.stringify(body)
+
+  });
+
+  const data = await r.json();
+
+  const message =
+    document.getElementById("createMessage");
+
+  if(!r.ok){
+
+    message.textContent =
+      data.error || "Server creation failed.";
+
+    message.className = "danger";
+
+    return;
+
+  }
+
+  message.textContent =
+    "Server created successfully.";
+
+  message.className = "success";
+
+  loadServers();
+
+}
+
+// =====================================================
+// SERVER ACTION
+// =====================================================
+
+async function serverAction(id, action){
+
+  const r = await fetch(
+    `/api/servers/${id}/${action}`,
+    {
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body:JSON.stringify({
+        username:currentUser.username
+      })
+    }
+  );
+
+  const data = await r.json();
+
+  if(!r.ok){
+
+    alert(data.error || "Action failed.");
+
+    return;
+
+  }
+
+  loadServers();
+
+}
+
+// =====================================================
+// SERVER MODULE
+// =====================================================
+
+function openServerModule(id,title){
+
+  const element =
+    document.getElementById(
+      "module-" + id
+    );
+
+  element.classList.remove("hidden");
+
+  element.innerHTML = `
+
+    <h3>${title}</h3>
+
+    <p class="muted">
+
+      ${title} UI is connected to HarvixPanel.
+      The real node-agent implementation will provide
+      the actual operations.
+
+    </p>
+
+  `;
+
+}
+
+// =====================================================
+// SERVER SETTINGS
+// =====================================================
+
+function openServerSettings(id){
+
+  const element =
+    document.getElementById(
+      "module-" + id
+    );
+
+  element.classList.remove("hidden");
+
+  let html = `
+
+    <h3>⚙️ Server Settings</h3>
+
+    <button onclick="openServerModule('${id}','Reinstall Server')">
+      Reinstall Server
+    </button>
+
+    <button onclick="openServerModule('${id}','Change Version Type')">
+      Change Version Type
+    </button>
+
+    <button onclick="openServerModule('${id}','Change Software')">
+      Change Software
+    </button>
+
+  `;
+
+  if(currentUser.role === "admin"){
+
+    html += `
+
+      <hr>
+
+      <h3>🔗 IP Alias</h3>
+
+      <p class="muted">
+
+        Admin-only field for an address/alias that you
+        already control, such as a Playit or MineKube address.
+
+      </p>
+
+      <input
+        id="alias-${id}"
+        placeholder="example.playit.gg:12345">
+
+      <button
+        onclick="saveAlias('${id}')">
+        Save IP Alias
+      </button>
+
+    `;
+
+  }
+
+  element.innerHTML = html;
+
+}
+
+// =====================================================
+// SAVE IP 
