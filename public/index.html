@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
@@ -11,1403 +12,817 @@
   <title>HarvixPanel</title>
 
   <style>
+
     * {
       box-sizing: border-box;
-    }
-
-    body {
       margin: 0;
-      background: #090c12;
-      color: #edf2f7;
+      padding: 0;
       font-family: Arial, sans-serif;
     }
 
-    header {
-      padding: 18px 22px;
-      background: #111722;
-      border-bottom: 1px solid #252d3a;
-
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    body {
+      min-height: 100vh;
+      background: #0b0b0f;
+      color: white;
     }
 
-    main {
-      max-width: 1100px;
+    .navbar {
+      height: 65px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      background: #111118;
+      border-bottom: 1px solid #292934;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 11px 17px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .login-btn {
+      background: #272733;
+      color: white;
+    }
+
+    .register-btn {
+      background: #6d35ff;
+      color: white;
+    }
+
+    .logout-btn {
+      background: #d83232;
+      color: white;
+    }
+
+    .container {
+      max-width: 1000px;
       margin: auto;
-      padding: 18px;
+      padding: 70px 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 45px;
+      margin-bottom: 15px;
+    }
+
+    .subtitle {
+      color: #aaa;
+      margin-bottom: 40px;
     }
 
     .card {
-      background: #111722;
-      border: 1px solid #252d3a;
+      background: #15151e;
+      border: 1px solid #292934;
       border-radius: 14px;
-      padding: 18px;
-      margin: 14px 0;
+      padding: 30px;
+      margin: 20px auto;
+      max-width: 450px;
     }
 
-    input,
-    select,
-    button {
-      padding: 11px;
-      border-radius: 8px;
-      border: 1px solid #303a49;
-      background: #0b1018;
-      color: white;
-      margin: 4px;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #182131;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns:
-        repeat(auto-fit, minmax(170px, 1fr));
-      gap: 8px;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .hidden {
+    .modal {
       display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
 
-    .muted {
-      color: #9ba7b7;
+    .modal.active {
+      display: flex;
     }
 
-    .ok {
-      color: #78e6a0;
+    .modal-box {
+      width: 100%;
+      max-width: 400px;
+      background: #15151e;
+      border: 1px solid #30303d;
+      border-radius: 14px;
+      padding: 28px;
     }
 
-    .danger {
-      color: #ff8c8c;
-    }
-
-    .server {
+    .modal-box h2 {
       margin-bottom: 20px;
     }
 
-    pre {
-      white-space: pre-wrap;
-      word-break: break-word;
-      background: #080b10;
-      padding: 12px;
+    input {
+      width: 100%;
+      padding: 13px;
+      margin-bottom: 13px;
       border-radius: 8px;
-      overflow: auto;
+      border: 1px solid #363642;
+      background: #0d0d13;
+      color: white;
+      outline: none;
     }
 
-    .badge {
-      padding: 5px 9px;
-      border-radius: 20px;
-      background: #182131;
-      font-size: 12px;
+    input:focus {
+      border-color: #6d35ff;
     }
+
+    .submit-btn {
+      width: 100%;
+      background: #6d35ff;
+      color: white;
+      margin-top: 5px;
+    }
+
+    .close-btn {
+      width: 100%;
+      background: #292934;
+      color: white;
+      margin-top: 10px;
+    }
+
+    .message {
+      min-height: 22px;
+      margin-top: 13px;
+      font-size: 14px;
+    }
+
+    .user-info {
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .welcome {
+      color: #aaa;
+    }
+
   </style>
 </head>
 
+
 <body>
 
-<header>
-  <b>
-    ⚡ <span id="brand">
+  <nav class="navbar">
+
+    <div class="logo">
       HarvixPanel
-    </span>
-  </b>
+    </div>
 
-  <span id="userInfo" class="muted">
-    Not logged in
-  </span>
-</header>
+    <div class="nav-buttons">
 
-<main>
-
-  <!-- AUTH -->
-
-  <section id="authBox" class="card">
-
-    <h2>HarvixPanel Login</h2>
-
-    <input
-      id="username"
-      placeholder="Username"
-      autocomplete="username"
-    >
-
-    <input
-      id="password"
-      type="password"
-      placeholder="Password"
-      autocomplete="current-password"
-    >
-
-    <br>
-
-    <button onclick="login()">
-      Login
-    </button>
-
-    <button onclick="register()">
-      Register
-    </button>
-
-    <p id="authMessage" class="muted"></p>
-
-  </section>
-
-
-  <!-- APP -->
-
-  <section id="appBox" class="hidden">
-
-    <div class="card">
-
-      <button onclick="logout()">
-        Logout
-      </button>
-
-      <button
-        id="adminButton"
-        class="hidden"
-        onclick="showAdminPanel()"
+      <div
+        id="authButtons"
+        class="nav-buttons"
       >
-        👑 Admin Panel
-      </button>
+
+        <button
+          class="login-btn"
+          id="loginButton"
+        >
+          Login
+        </button>
+
+        <button
+          class="register-btn"
+          id="registerButton"
+        >
+          Register
+        </button>
+
+      </div>
+
+
+      <div
+        id="userInfo"
+        class="user-info"
+      >
+
+        <span
+          class="welcome"
+          id="welcomeText"
+        ></span>
+
+        <button
+          class="logout-btn"
+          id="logoutButton"
+        >
+          Logout
+        </button>
+
+      </div>
 
     </div>
 
+  </nav>
 
-    <!-- CREATE SERVER -->
+
+  <main class="container">
+
+    <h1>
+      HarvixPanel
+    </h1>
+
+    <p class="subtitle">
+      Minecraft Hosting Control Panel
+    </p>
+
 
     <div class="card">
 
       <h2>
-        Create Server
+        Panel Online
       </h2>
 
-      <div class="grid">
-
-        <input
-          id="serverName"
-          placeholder="Server name"
-        >
-
-        <input
-          id="serverRam"
-          type="number"
-          value="1024"
-          placeholder="RAM MB"
-        >
-
-        <input
-          id="serverDisk"
-          type="number"
-          value="2048"
-          placeholder="Disk MB"
-        >
-
-        <input
-          id="serverCpu"
-          type="number"
-          value="1"
-          step="0.1"
-          placeholder="vCPU"
-        >
-
-        <select id="serverSoftware">
-
-          <option value="Paper">
-            Paper
-          </option>
-
-          <option value="Vanilla">
-            Vanilla
-          </option>
-
-          <option value="Fabric">
-            Fabric
-          </option>
-
-          <option value="Forge">
-            Forge
-          </option>
-
-        </select>
-
-        <input
-          id="serverVersion"
-          value="1.21.4"
-          placeholder="Version"
-        >
-
-      </div>
-
-      <button onclick="createServer()">
-        Create Server
-      </button>
-
-      <p class="muted">
-        Normal user limit:
-        4096 MB RAM •
-        5120 MB Disk •
-        1 vCore
+      <p style="color:#aaa;margin-top:10px;">
+        Create an account or login to continue.
       </p>
 
     </div>
 
+  </main>
 
-    <!-- SERVERS -->
 
-    <div class="card">
+  <!-- LOGIN MODAL -->
+
+  <div
+    class="modal"
+    id="loginModal"
+  >
+
+    <div class="modal-box">
 
       <h2>
-        My Servers
+        Login
       </h2>
 
-      <div id="servers">
-        Loading...
-      </div>
+      <form id="loginForm">
+
+        <input
+          type="text"
+          id="loginUsername"
+          placeholder="Username"
+          autocomplete="username"
+          required
+        >
+
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Password"
+          autocomplete="current-password"
+          required
+        >
+
+        <button
+          type="submit"
+          class="submit-btn"
+        >
+          Login
+        </button>
+
+      </form>
+
+      <div
+        class="message"
+        id="loginMessage"
+      ></div>
+
+      <button
+        class="close-btn"
+        id="closeLogin"
+      >
+        Close
+      </button>
 
     </div>
 
-
-    <!-- ADMIN -->
-
-    <div
-      id="adminPanel"
-      class="hidden"
-    ></div>
-
-  </section>
-
-</main>
+  </div>
 
 
-<script>
+  <!-- REGISTER MODAL -->
 
-let token =
-  localStorage.getItem(
-    "harvix_token"
-  );
+  <div
+    class="modal"
+    id="registerModal"
+  >
 
-let currentUser = null;
+    <div class="modal-box">
 
+      <h2>
+        Create Account
+      </h2>
 
-/* =========================
-   API HELPER
-========================= */
+      <form id="registerForm">
 
-async function api(
-  url,
-  options = {}
-) {
+        <input
+          type="text"
+          id="registerUsername"
+          placeholder="Username"
+          autocomplete="username"
+          required
+        >
 
-  options.headers =
-    options.headers || {};
+        <input
+          type="password"
+          id="registerPassword"
+          placeholder="Password"
+          autocomplete="new-password"
+          required
+        >
 
-  if (token) {
+        <button
+          type="submit"
+          class="submit-btn"
+        >
+          Register
+        </button>
 
-    options.headers.Authorization =
-      "Bearer " + token;
+      </form>
 
-  }
+      <div
+        class="message"
+        id="registerMessage"
+      ></div>
 
-  if (
-    options.body &&
-    typeof options.body !== "string"
-  ) {
+      <button
+        class="close-btn"
+        id="closeRegister"
+      >
+        Close
+      </button>
 
-    options.headers[
-      "Content-Type"
-    ] = "application/json";
+    </div>
 
-    options.body =
-      JSON.stringify(
-        options.body
-      );
-  }
-
-  const response =
-    await fetch(
-      url,
-      options
-    );
-
-  const data =
-    await response
-      .json()
-      .catch(() => ({}));
-
-  if (!response.ok) {
-
-    throw new Error(
-      data.error ||
-      "Request failed."
-    );
-
-  }
-
-  return data;
-}
+  </div>
 
 
-/* =========================
-   SAFE HTML
-========================= */
+  <script>
 
-function escapeHtml(value) {
-
-  return String(
-    value ?? ""
-  ).replace(
-    /[&<>"']/g,
-    character => {
-
-      const map = {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-      };
-
-      return map[character];
-
-    }
-  );
-}
-
-
-/* =========================
-   REGISTER
-========================= */
-
-async function register() {
-
-  const username =
-    document
-      .getElementById("username")
-      .value;
-
-  const password =
-    document
-      .getElementById("password")
-      .value;
-
-  try {
-
-    await api(
-      "/api/auth/register",
-      {
-        method: "POST",
-
-        body: {
-          username,
-          password
-        }
-      }
-    );
-
-    document
-      .getElementById(
-        "authMessage"
-      )
-      .textContent =
-      "Account created. Now login.";
-
-  } catch (error) {
-
-    document
-      .getElementById(
-        "authMessage"
-      )
-      .textContent =
-      error.message;
-
-  }
-}
-
-
-/* =========================
-   LOGIN
-========================= */
-
-async function login() {
-
-  const username =
-    document
-      .getElementById("username")
-      .value;
-
-  const password =
-    document
-      .getElementById("password")
-      .value;
-
-  try {
-
-    const result =
-      await api(
-        "/api/auth/login",
-        {
-          method: "POST",
-
-          body: {
-            username,
-            password
-          }
-        }
+    const loginButton =
+      document.getElementById(
+        "loginButton"
       );
 
-    token =
-      result.token;
-
-    localStorage.setItem(
-      "harvix_token",
-      token
-    );
-
-    await boot();
-
-  } catch (error) {
-
-    document
-      .getElementById(
-        "authMessage"
-      )
-      .textContent =
-      error.message;
-
-  }
-}
-
-
-/* =========================
-   BOOT
-========================= */
-
-async function boot() {
-
-  if (!token) {
-    return;
-  }
-
-  try {
-
-    currentUser =
-      await api(
-        "/api/auth/me"
+    const registerButton =
+      document.getElementById(
+        "registerButton"
       );
 
-    document
-      .getElementById(
-        "authBox"
-      )
-      .classList
-      .add("hidden");
+    const logoutButton =
+      document.getElementById(
+        "logoutButton"
+      );
 
-    document
-      .getElementById(
-        "appBox"
-      )
-      .classList
-      .remove("hidden");
 
-    document
-      .getElementById(
+    const loginModal =
+      document.getElementById(
+        "loginModal"
+      );
+
+    const registerModal =
+      document.getElementById(
+        "registerModal"
+      );
+
+
+    const closeLogin =
+      document.getElementById(
+        "closeLogin"
+      );
+
+    const closeRegister =
+      document.getElementById(
+        "closeRegister"
+      );
+
+
+    const loginForm =
+      document.getElementById(
+        "loginForm"
+      );
+
+    const registerForm =
+      document.getElementById(
+        "registerForm"
+      );
+
+
+    const loginMessage =
+      document.getElementById(
+        "loginMessage"
+      );
+
+    const registerMessage =
+      document.getElementById(
+        "registerMessage"
+      );
+
+
+    const authButtons =
+      document.getElementById(
+        "authButtons"
+      );
+
+    const userInfo =
+      document.getElementById(
         "userInfo"
-      )
-      .textContent =
-      currentUser.username +
-      " • " +
-      currentUser.role;
+      );
 
-    if (
-      currentUser.role ===
-      "admin"
-    ) {
+    const welcomeText =
+      document.getElementById(
+        "welcomeText"
+      );
 
-      document
-        .getElementById(
-          "adminButton"
-        )
-        .classList
-        .remove("hidden");
+
+    function openModal(modal) {
+
+      modal.classList.add(
+        "active"
+      );
 
     }
 
-    loadServers();
 
-  } catch (error) {
+    function closeModal(modal) {
 
-    logout();
-
-  }
-}
-
-
-/* =========================
-   LOGOUT
-========================= */
-
-function logout() {
-
-  localStorage.removeItem(
-    "harvix_token"
-  );
-
-  token = null;
-
-  location.reload();
-}
-
-
-/* =========================
-   CREATE SERVER
-========================= */
-
-async function createServer() {
-
-  try {
-
-    await api(
-      "/api/servers",
-      {
-        method: "POST",
-
-        body: {
-
-          name:
-            document
-              .getElementById(
-                "serverName"
-              ).value,
-
-          ram_mb:
-            Number(
-              document
-                .getElementById(
-                  "serverRam"
-                ).value
-            ),
-
-          disk_mb:
-            Number(
-              document
-                .getElementById(
-                  "serverDisk"
-                ).value
-            ),
-
-          cpu_vcpu:
-            Number(
-              document
-                .getElementById(
-                  "serverCpu"
-                ).value
-            ),
-
-          software:
-            document
-              .getElementById(
-                "serverSoftware"
-              ).value,
-
-          version:
-            document
-              .getElementById(
-                "serverVersion"
-              ).value
-
-        }
-
-      }
-    );
-
-    alert(
-      "Server created successfully."
-    );
-
-    loadServers();
-
-  } catch (error) {
-
-    alert(
-      error.message
-    );
-
-  }
-}
-
-
-/* =========================
-   LOAD SERVERS
-========================= */
-
-async function loadServers() {
-
-  const container =
-    document.getElementById(
-      "servers"
-    );
-
-  try {
-
-    const servers =
-      await api(
-        "/api/servers"
+      modal.classList.remove(
+        "active"
       );
 
-    if (!servers.length) {
-
-      container.innerHTML =
-        '<p class="muted">' +
-        "No servers yet." +
-        "</p>";
-
-      return;
     }
 
-    container.innerHTML =
-      servers
-        .map(
-          server =>
-            createServerCard(
-              server
-            )
-        )
-        .join("");
 
-  } catch (error) {
+    loginButton.addEventListener(
+      "click",
+      () => {
 
-    container.innerHTML =
-      `<p class="danger">
-        ${escapeHtml(
-          error.message
-        )}
-      </p>`;
+        loginMessage.textContent = "";
 
-  }
-}
+        openModal(loginModal);
 
-
-/* =========================
-   SERVER CARD
-========================= */
-
-function createServerCard(
-  server
-) {
-
-  const statusClass =
-    server.status ===
-    "running"
-      ? "ok"
-      : "danger";
-
-  return `
-
-    <div class="card server">
-
-      <h3>
-        🖥️
-        ${escapeHtml(
-          server.name
-        )}
-      </h3>
-
-      <p class="muted">
-
-        ${escapeHtml(
-          server.software
-        )}
-
-        ${escapeHtml(
-          server.version
-        )}
-
-        •
-        ${server.ram_mb} MB RAM
-
-        •
-        ${server.disk_mb} MB Disk
-
-        •
-        ${server.cpu_vcpu} vCPU
-
-      </p>
-
-      <p class="${statusClass}">
-        Status:
-        ${escapeHtml(
-          server.status
-        )}
-      </p>
-
-      <div class="tabs">
-
-        <button
-          onclick="openModule(
-            ${server.id},
-            'console'
-          )"
-        >
-          Console
-        </button>
-
-        <button
-          onclick="openModule(
-            ${server.id},
-            'file-manager'
-          )"
-        >
-          File Manager
-        </button>
-
-        <button
-          onclick="openModule(
-            ${server.id},
-            'sftp'
-          )"
-        >
-          SFTP
-        </button>
-
-        <button
-          onclick="openModule(
-            ${server.id},
-            'plugin-installer'
-          )"
-        >
-          Plugin Installer
-        </button>
-
-        <button
-          onclick="openModule(
-            ${server.id},
-            'mod-manager'
-          )"
-        >
-          Mod Manager
-        </button>
-
-        <button
-          onclick="openModule(
-            ${server.id},
-            'votifier'
-          )"
-        >
-          Votifier Test
-        </button>
-
-        <button
-          onclick="openModule(
-            ${server.id},
-            'server-splitter'
-          )"
-        >
-          Server Splitter
-        </button>
-
-        <button
-          onclick="openServerSettings(
-            ${server.id}
-          )"
-        >
-          Settings
-        </button>
-
-      </div>
-
-      <div
-        id="module-${server.id}"
-      ></div>
-
-      <hr>
-
-      <button
-        onclick="serverAction(
-          ${server.id},
-          'start'
-        )"
-      >
-        Start
-      </button>
-
-      <button
-        onclick="serverAction(
-          ${server.id},
-          'restart'
-        )"
-      >
-        Restart
-      </button>
-
-      <button
-        onclick="serverAction(
-          ${server.id},
-          'stop'
-        )"
-      >
-        Stop
-      </button>
-
-      <button
-        onclick="serverAction(
-          ${server.id},
-          'reinstall'
-        )"
-      >
-        Reinstall
-      </button>
-
-    </div>
-
-  `;
-}
-
-
-/* =========================
-   SERVER ACTION
-========================= */
-
-async function serverAction(
-  id,
-  action
-) {
-
-  try {
-
-    await api(
-      `/api/servers/${id}/${action}`,
-      {
-        method: "POST"
       }
     );
 
-    loadServers();
 
-  } catch (error) {
+    registerButton.addEventListener(
+      "click",
+      () => {
 
-    alert(
-      error.message
-    );
+        registerMessage.textContent = "";
 
-  }
-}
+        openModal(registerModal);
 
-
-/* =========================
-   MODULE
-========================= */
-
-async function openModule(
-  id,
-  module
-) {
-
-  const box =
-    document.getElementById(
-      `module-${id}`
-    );
-
-  try {
-
-    const result =
-      await api(
-        `/api/servers/${id}/${module}`
-      );
-
-    box.innerHTML = `
-
-      <div class="card">
-
-        <h3>
-          ${escapeHtml(
-            module
-          )}
-        </h3>
-
-        <pre>${escapeHtml(
-          JSON.stringify(
-            result,
-            null,
-            2
-          )
-        )}</pre>
-
-      </div>
-
-    `;
-
-  } catch (error) {
-
-    alert(
-      error.message
-    );
-
-  }
-}
-
-
-/* =========================
-   SERVER SETTINGS
-========================= */
-
-async function openServerSettings(
-  id
-) {
-
-  const box =
-    document.getElementById(
-      `module-${id}`
-    );
-
-  try {
-
-    const server =
-      await api(
-        `/api/servers/${id}`
-      );
-
-    box.innerHTML = `
-
-      <div class="card">
-
-        <h3>
-          ⚙️ Server Settings
-        </h3>
-
-        <p>
-          <button
-            onclick="serverAction(
-              ${id},
-              'reinstall'
-            )"
-          >
-            Reinstall Server
-          </button>
-        </p>
-
-        <p>
-
-          <input
-            id="version-${id}"
-            value="${escapeHtml(
-              server.version
-            )}"
-            placeholder="Version"
-          >
-
-          <button
-            onclick="changeVersion(
-              ${id}
-            )"
-          >
-            Change Version Type
-          </button>
-
-        </p>
-
-        <p>
-
-          <select
-            id="software-${id}"
-          >
-
-            <option>Paper</option>
-            <option>Vanilla</option>
-            <option>Fabric</option>
-            <option>Forge</option>
-
-          </select>
-
-          <button
-            onclick="changeSoftware(
-              ${id}
-            )"
-          >
-            Change Software
-          </button>
-
-        </p>
-
-        ${
-          currentUser.role ===
-          "admin"
-
-            ? `
-
-              <hr>
-
-              <h4>
-                🔐 IP Alias
-                (Admin Only)
-              </h4>
-
-              <input
-                id="alias-${id}"
-                value="${escapeHtml(
-                  server.alias_ip || ""
-                )}"
-                placeholder="Playit/MineKube address"
-              >
-
-              <button
-                onclick="saveAlias(
-                  ${id}
-                )"
-              >
-                Save
-              </button>
-
-              <p class="muted">
-                IP Alias only stores an
-                address you control. It
-                does not create DNS or
-                networking automatically.
-              </p>
-
-            `
-
-            : ""
-        }
-
-      </div>
-
-    `;
-
-  } catch (error) {
-
-    alert(
-      error.message
-    );
-
-  }
-}
-
-
-/* =========================
-   VERSION
-========================= */
-
-async function changeVersion(
-  id
-) {
-
-  const value =
-    document
-      .getElementById(
-        `version-${id}`
-      )
-      .value;
-
-  try {
-
-    await api(
-      `/api/servers/${id}/version`,
-      {
-        method: "PUT",
-
-        body: {
-          version: value
-        }
       }
     );
 
-    loadServers();
 
-  } catch (error) {
+    closeLogin.addEventListener(
+      "click",
+      () => {
 
-    alert(
-      error.message
-    );
+        closeModal(loginModal);
 
-  }
-}
-
-
-/* =========================
-   SOFTWARE
-========================= */
-
-async function changeSoftware(
-  id
-) {
-
-  const value =
-    document
-      .getElementById(
-        `software-${id}`
-      )
-      .value;
-
-  try {
-
-    await api(
-      `/api/servers/${id}/software`,
-      {
-        method: "PUT",
-
-        body: {
-          software: value
-        }
       }
     );
 
-    loadServers();
 
-  } catch (error) {
+    closeRegister.addEventListener(
+      "click",
+      () => {
 
-    alert(
-      error.message
-    );
+        closeModal(registerModal);
 
-  }
-}
-
-
-/* =========================
-   IP ALIAS
-========================= */
-
-async function saveAlias(
-  id
-) {
-
-  const value =
-    document
-      .getElementById(
-        `alias-${id}`
-      )
-      .value;
-
-  try {
-
-    await api(
-      `/api/servers/${id}/alias`,
-      {
-        method: "PUT",
-
-        body: {
-          alias_ip: value
-        }
       }
     );
 
-    alert(
-      "IP Alias saved."
+
+    window.addEventListener(
+      "click",
+      event => {
+
+        if (
+          event.target === loginModal
+        ) {
+          closeModal(loginModal);
+        }
+
+        if (
+          event.target === registerModal
+        ) {
+          closeModal(registerModal);
+        }
+
+      }
     );
 
-  } catch (error) {
 
-    alert(
-      error.message
-    );
+    registerForm.addEventListener(
+      "submit",
+      async event => {
 
-  }
-}
+        event.preventDefault();
 
+        registerMessage.textContent =
+          "Creating account...";
 
-/* =========================
-   ADMIN PANEL
-========================= */
+        const username =
+          document.getElementById(
+            "registerUsername"
+          ).value.trim();
 
-async function showAdminPanel() {
-
-  const panel =
-    document.getElementById(
-      "adminPanel"
-    );
-
-  panel.classList.remove(
-    "hidden"
-  );
-
-  panel.innerHTML = `
-
-    <div class="card">
-
-      <h2>
-        👑 Admin Panel
-      </h2>
-
-      <button
-        onclick="adminSettings()"
-      >
-        ⚙️ Settings
-      </button>
-
-      <button
-        onclick="adminNodes()"
-      >
-        🖥️ Nodes
-      </button>
-
-      <button
-        onclick="adminUsers()"
-      >
-        👥 Users
-      </button>
-
-      <div
-        id="adminContent"
-      ></div>
-
-    </div>
-
-  `;
-}
+        const password =
+          document.getElementById(
+            "registerPassword"
+          ).value;
 
 
-/* =========================
-   ADMIN SETTINGS
-========================= */
+        try {
 
-async function adminSettings() {
+          const response =
+            await fetch(
+              "/api/auth/register",
+              {
+                method: "POST",
 
-  const content =
-    document.getElementById(
-      "adminContent"
-    );
+                headers: {
+                  "Content-Type":
+                    "application/json"
+                },
 
-  try {
-
-    const settings =
-      await api(
-        "/api/settings"
-      );
-
-    content.innerHTML = `
-
-      <div class="card">
-
-        <h3>
-          Panel Settings
-        </h3>
-
-        <input
-          id="panelName"
-          value="${escapeHtml(
-            settings.server_name
-          )}"
-          placeholder="Server name"
-        >
-
-        <input
-          id="panelIcon"
-          value="${escapeHtml(
-            settings.server_icon
-          )}"
-          placeholder="Server icon"
-        >
-
-        <button
-          onclick="savePanelSettings()"
-        >
-          Save
-        </button>
-
-      </div>
-
-    `;
-
-  } catch (error) {
-
-    alert(
-      error.message
-    );
-
-  }
-}
+                body: JSON.stringify({
+                  username,
+                  password
+                })
+              }
+            );
 
 
-/* =========================
-   SAVE ADMIN SETTINGS
-========================= */
+          const data =
+            await response.json();
 
-async function savePanelSettings() {
 
-  try {
+          if (!response.ok) {
 
-    const result =
-      await api(
-        "/api/settings",
-        {
-          method: "PUT",
+            registerMessage.textContent =
+              data.message ||
+              "Registration failed.";
 
-          body: {
-
-            server_name:
-              document
-                .getElementById(
-                  "panelName"
-                ).value,
-
-            server_icon:
-              document
-                .getElementById(
-                  "panelIcon"
-                ).value
-
+            return;
           }
+
+
+          localStorage.setItem(
+            "harvix_token",
+            data.token
+          );
+
+
+          registerMessage.textContent =
+            "Account created!";
+
+
+          registerForm.reset();
+
+          setTimeout(
+            () => {
+
+              closeModal(
+                registerModal
+              );
+
+              updateUI(
+                data.user
+              );
+
+            },
+            500
+          );
+
+
+        } catch (error) {
+
+          registerMessage.textContent =
+            "Could not connect to panel.";
+
         }
-      );
 
-    document
-      .getElementById(
-        "brand"
-      )
-      .textContent =
-      result.server_name;
-
-    alert(
-      "Settings saved."
+      }
     );
 
-  } catch (error) {
 
-    alert(
-      error.message
+    loginForm.addEventListener(
+      "submit",
+      async event => {
+
+        event.preventDefault();
+
+        loginMessage.textContent =
+          "Logging in...";
+
+
+        const username =
+          document.getElementById(
+            "loginUsername"
+          ).value.trim();
+
+        const password =
+          document.getElementById(
+            "loginPassword"
+          ).value;
+
+
+        try {
+
+          const response =
+            await fetch(
+              "/api/auth/login",
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json"
+                },
+
+                body: JSON.stringify({
+                  username,
+                  password
+                })
+              }
+            );
+
+
+          const data =
+            await response.json();
+
+
+          if (!response.ok) {
+
+            loginMessage.textContent =
+              data.message ||
+              "Login failed.";
+
+            return;
+          }
+
+
+          localStorage.setItem(
+            "harvix_token",
+            data.token
+          );
+
+
+          loginMessage.textContent =
+            "Login successful!";
+
+
+          loginForm.reset();
+
+
+          setTimeout(
+            () => {
+
+              closeModal(
+                loginModal
+              );
+
+              updateUI(
+                data.user
+              );
+
+            },
+            400
+          );
+
+
+        } catch (error) {
+
+          loginMessage.textContent =
+            "Could not connect to panel.";
+
+        }
+
+      }
     );
 
-  }
-}
 
+    logoutButton.addEventListener(
+      "click",
+      async () => {
 
-/* =========================
-   ADMIN NODES
-========================= */
+        localStorage.removeItem(
+          "harvix_token"
+        );
 
-async function adminNodes() {
+        showLoggedOut();
 
-  const content =
-    document.getElementById(
-      "adminContent"
+      }
     );
 
-  try {
 
-    const nodes =
-      await api(
-        "/api/nodes"
-      );
+    function updateUI(user) {
 
-    if (!nodes.length) {
+      authButtons.style.display =
+        "none";
 
-      content.innerHTML =
-        `<div class="card">
-          No nodes found.
-        </div>`;
+      userInfo.style.display =
+        "flex";
 
-      retur
+      welcomeText.textContent =
+        `Hi, ${user.username}`;
+
+    }
+
+
+    function showLoggedOut() {
+
+      authButtons.style.display =
+        "flex";
+
+      userInfo.style.display =
+        "none";
+
+      welcomeText.textContent =
+        "";
+
+    }
+
+
+    async function checkLogin() {
+
+      const token =
+        localStorage.getItem(
+          "harvix_token"
+        );
+
+      if (!token) {
+
+        showLoggedOut();
+
+        return;
+
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/auth/me",
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`
+              }
+            }
+          );
+
+
+        if (!response.ok) {
+
+          localStorage.removeItem(
+            "harvix_token"
+          );
+
+          showLoggedOut();
+
+          return;
+        }
+
+
+        const data =
+          await response.json();
+
+
+        updateUI(
+          data.user
+        );
+
+
+      } catch (error) {
+
+        showLoggedOut();
+
+      }
+
+    }
+
+
+    checkLogin();
+
+  </script>
+
+</body>
+
+</html>
