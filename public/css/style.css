@@ -1,1 +1,35 @@
+.free-specs {
+    text-align: center;
+    padding: 25px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+}
 
+.free-specs h1 {
+    margin-bottom: 8px;
+}
+
+.spec-title {
+    color: #b968ff;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.spec {
+    display: flex;
+    justify-content: space-between;
+    max-width: 300px;
+    margin: 10px auto;
+    padding: 12px 15px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+}
+
+.spec span {
+    color: rgba(255,255,255,0.6);
+}
+
+.spec strong {
+    color: white;
+}
