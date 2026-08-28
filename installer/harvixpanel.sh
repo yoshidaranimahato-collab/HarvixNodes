@@ -46,7 +46,7 @@ echo "██║░░██║██████╔╝██║░╚═╝░�
 echo "╚═╝░░╚═╝╚═════╝░╚═╝░░░░░╚═╝╚═╝╚═╝░░╚══╝"
 
     while true; do
-        read -rp "Admin username: " ADMIN_USERNAME
+        read -rp "Admin username:  " ADMIN_USERNAME
 
         if [ -n "$ADMIN_USERNAME" ]; then
             break
