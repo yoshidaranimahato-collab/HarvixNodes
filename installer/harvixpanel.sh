@@ -5,8 +5,7 @@ set -e
 APP_NAME="HarvixPanel"
 APP_DIR="/opt/harvixpanel"
 REPO="https://github.com/yoshidaranimahato-collab/HarvixNodes.git"
-PORT="6969"
-SERVICE_NAME="harvixpanel"
+DEFAULT_PORT="6969"
 
 clear
 
@@ -34,9 +33,62 @@ check_root() {
 }
 
 
-check_dependencies() {
+ask_admin_setup() {
 
     echo
+    echo "╔══════════════════════════════════╗"
+    echo "║          Admin Setup             ║"
+    echo "╚══════════════════════════════════╝"
+    echo
+
+    while true; do
+        read -rp "Admin username: " ADMIN_USERNAME
+
+        if [ -n "$ADMIN_USERNAME" ]; then
+            break
+        fi
+
+        echo "Username cannot be empty."
+    done
+
+    while true; do
+        read -rsp "Admin password: " ADMIN_PASSWORD
+        echo
+
+        if [ -n "$ADMIN_PASSWORD" ]; then
+            break
+        fi
+
+        echo "Password cannot be empty."
+    done
+
+    read -rp "Panel port [$DEFAULT_PORT]: " PANEL_PORT
+
+    if [ -z "$PANEL_PORT" ]; then
+        PANEL_PORT="$DEFAULT_PORT"
+    fi
+
+    if ! [[ "$PANEL_PORT" =~ ^[0-9]+$ ]]; then
+        echo
+        echo "Invalid port."
+        exit 1
+    fi
+
+    if [ "$PANEL_PORT" -lt 1 ] || [ "$PANEL_PORT" -gt 65535 ]; then
+        echo
+        echo "Port must be between 1 and 65535."
+        exit 1
+    fi
+
+    echo
+    echo "Admin username: $ADMIN_USERNAME"
+    echo "Panel port: $PANEL_PORT"
+    echo
+}
+
+
+install_required_packages() {
+
     echo "[1/5] Checking required packages..."
     echo
 
@@ -44,46 +96,45 @@ check_dependencies() {
 
     apt-get update
 
-    # Do NOT upgrade existing Git.
-    # This avoids dpkg cross-device problems
-    # on some VPS/container environments.
+    # Do not upgrade Git if it already exists.
+    # This avoids the cross-device dpkg problem.
 
-    if ! command -v curl >/dev/null 2>&1; then
+    if command -v curl >/dev/null 2>&1; then
+        echo "✓ curl already installed"
+    else
         echo "Installing curl..."
         apt-get install -y curl
-    else
-        echo "curl: already installed"
     fi
 
-    if ! command -v git >/dev/null 2>&1; then
+    if command -v git >/dev/null 2>&1; then
+        echo "✓ git already installed"
+    else
         echo "Installing git..."
         apt-get install -y git
-    else
-        echo "git: already installed"
     fi
 
-    if ! command -v openssl >/dev/null 2>&1; then
+    if command -v openssl >/dev/null 2>&1; then
+        echo "✓ openssl already installed"
+    else
         echo "Installing openssl..."
         apt-get install -y openssl
-    else
-        echo "openssl: already installed"
     fi
 
     echo
-    echo "Required packages are ready."
+    echo "Required packages ready."
+    echo
 }
 
 
 install_node() {
 
-    echo
     echo "[2/5] Checking Node.js..."
     echo
 
     if command -v node >/dev/null 2>&1; then
 
-        NODE_VERSION="$(node -v)"
-        echo "Node.js already installed: $NODE_VERSION"
+        echo "✓ Node.js already installed"
+        echo "Node.js: $(node -v)"
 
     else
 
@@ -92,20 +143,19 @@ install_node() {
         curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
         apt-get install -y nodejs
 
+        echo "✓ Node.js installed"
+
     fi
 
     echo
-    echo "Node.js:"
-    node --version
-
-    echo "npm:"
-    npm --version
+    echo "Node.js: $(node -v)"
+    echo "npm: $(npm -v)"
+    echo
 }
 
 
 download_panel() {
 
-    echo
     echo "[3/5] Downloading HarvixPanel..."
     echo
 
@@ -132,13 +182,13 @@ download_panel() {
     fi
 
     echo
-    echo "Panel files downloaded."
+    echo "✓ Panel files downloaded."
+    echo
 }
 
 
-install_dependencies() {
+configure_panel() {
 
-    echo
     echo "[4/5] Installing dependencies..."
     echo
 
@@ -150,88 +200,212 @@ install_dependencies() {
 
     if [ ! -f "$APP_DIR/.env" ]; then
 
-        echo "Creating .env..."
-
         JWT_SECRET="$(openssl rand -hex 32)"
 
         cat > "$APP_DIR/.env" <<EOF
-PORT=$PORT
+PORT=$PANEL_PORT
 JWT_SECRET=$JWT_SECRET
 DATABASE_FILE=$APP_DIR/data/harvix.json
 EOF
 
         chmod 600 "$APP_DIR/.env"
 
+        echo "✓ .env created."
+
     else
 
-        echo ".env already exists. Keeping existing configuration."
+        echo "✓ Existing .env kept."
 
     fi
 
     echo
-    echo "Dependencies installed."
+    echo "✓ Dependencies installed."
+    echo
 }
 
 
-create_service() {
+create_admin() {
+
+    echo "[5/5] Creating admin account..."
+    echo
+
+    export HARVIX_ADMIN_USERNAME="$ADMIN_USERNAME"
+    export HARVIX_ADMIN_PASSWORD="$ADMIN_PASSWORD"
+    export HARVIX_DATABASE_FILE="$APP_DIR/data/harvix.json"
+
+    node <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const bcrypt = require("bcryptjs");
+
+const file = path.resolve(
+    process.env.HARVIX_DATABASE_FILE
+);
+
+fs.mkdirSync(
+    path.dirname(file),
+    { recursive: true }
+);
+
+let db = {
+    users: [],
+    servers: [],
+    nodes: [],
+    settings: {
+        server_name: "HarvixPanel",
+        server_icon: ""
+    },
+    nextUserId: 1,
+    nextServerId: 1,
+    nextNodeId: 1
+};
+
+if (fs.existsSync(file)) {
+    try {
+        db = JSON.parse(
+            fs.readFileSync(file, "utf8")
+        );
+    } catch (error) {
+        console.log(
+            "Existing database could not be read. Creating a new one."
+        );
+    }
+}
+
+if (!Array.isArray(db.users)) {
+    db.users = [];
+}
+
+if (!Array.isArray(db.servers)) {
+    db.servers = [];
+}
+
+if (!Array.isArray(db.nodes)) {
+    db.nodes = [];
+}
+
+if (!db.settings) {
+    db.settings = {
+        server_name: "HarvixPanel",
+        server_icon: ""
+    };
+}
+
+if (!db.nextUserId) {
+    db.nextUserId = 1;
+}
+
+if (!db.nextServerId) {
+    db.nextServerId = 1;
+}
+
+if (!db.nextNodeId) {
+    db.nextNodeId = 1;
+}
+
+const username =
+    process.env.HARVIX_ADMIN_USERNAME;
+
+const password =
+    process.env.HARVIX_ADMIN_PASSWORD;
+
+if (!username || !password) {
+    console.error(
+        "Admin username or password missing."
+    );
+    process.exit(1);
+}
+
+const passwordHash =
+    bcrypt.hashSync(password, 12);
+
+const existing =
+    db.users.find(
+        user => user.username === username
+    );
+
+if (existing) {
+
+    existing.role = "admin";
+    existing.password_hash = passwordHash;
+
+    console.log(
+        "✓ Existing user converted to admin."
+    );
+
+} else {
+
+    db.users.push({
+        id: db.nextUserId++,
+        username: username,
+        password_hash: passwordHash,
+        role: "admin",
+        created_at: new Date().toISOString()
+    });
+
+    console.log(
+        "✓ Admin account created."
+    );
+}
+
+if (db.nodes.length === 0) {
+
+    db.nodes.push({
+        id: db.nextNodeId++,
+        name: "HarvixNode-1",
+        status: "online",
+        ram_gb: 99999999,
+        disk_tb: 3,
+        cpu_vcores: 91,
+        created_at: new Date().toISOString()
+    });
+
+    console.log(
+        "✓ Default HarvixNode-1 created."
+    );
+}
+
+fs.writeFileSync(
+    file,
+    JSON.stringify(db, null, 2)
+);
+
+console.log(
+    "✓ Database saved."
+);
+NODE
+
+    unset HARVIX_ADMIN_USERNAME
+    unset HARVIX_ADMIN_PASSWORD
+    unset HARVIX_DATABASE_FILE
 
     echo
-    echo "[5/5] Creating system service..."
+}
+
+
+start_panel() {
+
+    echo
+    echo "╔══════════════════════════════════╗"
+    echo "║      Installation Complete       ║"
+    echo "╚══════════════════════════════════╝"
+    echo
+    echo "Admin username: $ADMIN_USERNAME"
+    echo "Panel port: $PANEL_PORT"
+    echo
+    echo "Starting HarvixPanel..."
+    echo
+    echo "Panel URL:"
+    echo "http://YOUR_SERVER_IP:$PANEL_PORT"
+    echo
+    echo "Running:"
+    echo "cd $APP_DIR"
+    echo "npm start"
     echo
 
-    cat > "/etc/systemd/system/$SERVICE_NAME.service" <<EOF
-[Unit]
-Description=HarvixPanel Minecraft Hosting Panel
-After=network.target
+    cd "$APP_DIR"
 
-[Service]
-Type=simple
-User=root
-WorkingDirectory=$APP_DIR
-EnvironmentFile=$APP_DIR/.env
-ExecStart=/usr/bin/node $APP_DIR/server.js
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    systemctl daemon-reload
-
-    systemctl enable "$SERVICE_NAME"
-
-    systemctl restart "$SERVICE_NAME"
-
-    sleep 2
-
-    if systemctl is-active --quiet "$SERVICE_NAME"; then
-
-        echo
-        echo "╔══════════════════════════════════╗"
-        echo "║      Installation Complete       ║"
-        echo "╚══════════════════════════════════╝"
-        echo
-        echo "Panel Port: $PORT"
-        echo
-        echo "Open:"
-        echo "http://YOUR_SERVER_IP:$PORT"
-        echo
-        echo "Service:"
-        echo "systemctl status $SERVICE_NAME"
-        echo
-
-    else
-
-        echo
-        echo "HarvixPanel service failed to start."
-        echo
-        echo "Run:"
-        echo "journalctl -u $SERVICE_NAME -n 50 --no-pager"
-        echo
-
-        exit 1
-    fi
+    npm start
 }
 
 
@@ -243,11 +417,19 @@ install_panel() {
     echo "Installing $APP_NAME..."
     echo
 
-    check_dependencies
+    ask_admin_setup
+
+    install_required_packages
+
     install_node
+
     download_panel
-    install_dependencies
-    create_service
+
+    configure_panel
+
+    create_admin
+
+    start_panel
 }
 
 
@@ -259,27 +441,21 @@ uninstall_panel() {
     echo "Stopping HarvixPanel..."
     echo
 
-    systemctl disable --now "$SERVICE_NAME" 2>/dev/null || true
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl disable --now harvixpanel 2>/dev/null || true
+    fi
 
-    rm -f "/etc/systemd/system/$SERVICE_NAME.service"
+    pkill -f "$APP_DIR/server.js" 2>/dev/null || true
 
-    systemctl daemon-reload
-
-    echo
     read -rp "Delete panel files from $APP_DIR? [y/N]: " CONFIRM
 
     if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
-
         rm -rf "$APP_DIR"
-
         echo
-        echo "Panel files deleted."
-
+        echo "✓ Panel files deleted."
     else
-
         echo
         echo "Panel files kept."
-
     fi
 
     echo
@@ -292,12 +468,9 @@ update_panel() {
     check_root
 
     if [ ! -d "$APP_DIR" ]; then
-
         echo
         echo "HarvixPanel is not installed."
-        echo "Choose option 1 first."
         exit 1
-
     fi
 
     echo
@@ -306,26 +479,14 @@ update_panel() {
 
     cd "$APP_DIR"
 
-    if [ ! -d ".git" ]; then
-
-        echo "Git repository not found."
-        echo "Please reinstall the panel."
-        exit 1
-
-    fi
-
     git fetch origin
     git reset --hard origin/main
 
     npm install --omit=dev
 
-    systemctl restart "$SERVICE_NAME"
-
     echo
-    echo "Update complete."
+    echo "✓ Update complete."
     echo
-    echo "Service status:"
-    systemctl --no-pager --full status "$SERVICE_NAME" || true
 }
 
 
@@ -337,11 +498,11 @@ reinstall_panel() {
     echo "Reinstalling HarvixPanel..."
     echo
 
-    systemctl disable --now "$SERVICE_NAME" 2>/dev/null || true
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl disable --now harvixpanel 2>/dev/null || true
+    fi
 
-    rm -f "/etc/systemd/system/$SERVICE_NAME.service"
-
-    systemctl daemon-reload
+    pkill -f "$APP_DIR/server.js" 2>/dev/null || true
 
     rm -rf "$APP_DIR"
 
