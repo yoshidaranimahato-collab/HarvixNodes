@@ -1,91 +1,469 @@
 const express = require("express");
-const Database = require("better-sqlite3");
 const path = require("path");
+const crypto = require("crypto");
 
 const app = express();
-const db = new Database("harvix.db");
+const PORT = process.env.PORT || 3000;
+
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded({ extended: true }));
 
-db.exec(`
-CREATE TABLE IF NOT EXISTS users (
- id INTEGER PRIMARY KEY AUTOINCREMENT,
- username TEXT UNIQUE NOT NULL,
- role TEXT NOT NULL DEFAULT 'user'
-);
-CREATE TABLE IF NOT EXISTS nodes (
- id INTEGER PRIMARY KEY AUTOINCREMENT,
- name TEXT NOT NULL,
- host TEXT NOT NULL,
- status TEXT NOT NULL DEFAULT 'offline'
-);
-CREATE TABLE IF NOT EXISTS servers (
- id INTEGER PRIMARY KEY AUTOINCREMENT,
- name TEXT NOT NULL,
- owner_id INTEGER NOT NULL,
- node_id INTEGER,
- ram_mb INTEGER NOT NULL,
- disk_mb INTEGER NOT NULL,
- cpu_vcpu REAL NOT NULL,
- status TEXT NOT NULL DEFAULT 'stopped',
- software TEXT DEFAULT 'Paper',
- version TEXT DEFAULT '1.21.x',
- alias_ip TEXT DEFAULT ''
-);
-`);
-if (!db.prepare("SELECT id FROM users WHERE username='admin'").get())
-  db.prepare("INSERT INTO users(username,role) VALUES('admin','admin')").run();
-if (!db.prepare("SELECT id FROM users WHERE username='demo'").get())
-  db.prepare("INSERT INTO users(username,role) VALUES('demo','user')").run();
+// Frontend
+app.use(express.static(__dirname));
 
-const USER_LIMITS={ram_mb:4096,disk_mb:5120,cpu_vcpu:1};
-const getUser=id=>db.prepare("SELECT * FROM users WHERE id=?").get(id);
+// =====================================================
+// HARVIXPANEL CONFIG
+// =====================================================
 
-app.get("/api/health",(_,res)=>res.json({ok:true,name:"HarvixPanel",version:"0.2.0"}));
+const CONFIG = {
+    normalUser: {
+        maxRamMB: 4096,   // 4 GB
+        maxDiskMB: 5120,  // 5 GB
+        maxCpu: 1         // 1 vCore
+    }
+};
 
-app.get("/api/servers",(req,res)=>{
- const user=getUser(Number(req.query.user_id||2));
- if(!user)return res.status(404).json({error:"user not found"});
- const rows=user.role==="admin"
-  ? db.prepare("SELECT * FROM servers ORDER BY id DESC").all()
-  : db.prepare("SELECT * FROM servers WHERE owner_id=? ORDER BY id DESC").all(user.id);
- res.json(rows.map(x=>user.role==="admin"?x:{...x,alias_ip:""}));
+// =====================================================
+// TEMP DATABASE
+// =====================================================
+// Abhi testing ke liye memory database.
+// Next phase me SQLite/PostgreSQL lagayenge.
+
+const users = [];
+const servers = [];
+
+// =====================================================
+// HELPERS
+// =====================================================
+
+function generateId(prefix) {
+    return (
+        prefix +
+        "_" +
+        crypto.randomBytes(6).toString("hex")
+    );
+}
+
+function findUser(username) {
+    return users.find(
+        user => user.username.toLowerCase() === username.toLowerCase()
+    );
+}
+
+// =====================================================
+// HEALTH CHECK
+// =====================================================
+
+app.get("/api/health", (req, res) => {
+    res.json({
+        success: true,
+        panel: "HarvixPanel",
+        status: "online"
+    });
 });
 
-app.post("/api/servers",(req,res)=>{
- const {name,owner_id=2,node_id=null,ram_mb=1024,disk_mb=1024,cpu_vcpu=1,software="Paper",version="1.21.x"}=req.body;
- const user=getUser(Number(owner_id));
- if(!user)return res.status(404).json({error:"owner not found"});
- if(!name)return res.status(400).json({error:"server name is required"});
- if(user.role!=="admin" && (Number(ram_mb)>4096||Number(disk_mb)>5120||Number(cpu_vcpu)>1))
-   return res.status(403).json({error:"Normal user limit: 4 GB RAM, 5 GB disk, 1 vCPU"});
- const r=db.prepare(`INSERT INTO servers(name,owner_id,node_id,ram_mb,disk_mb,cpu_vcpu,software,version)
- VALUES(?,?,?,?,?,?,?,?)`).run(name,user.id,node_id,+ram_mb,+disk_mb,+cpu_vcpu,software,version);
- res.json({ok:true,id:r.lastInsertRowid});
+// =====================================================
+// REGISTER
+// =====================================================
+
+app.post("/api/auth/register", (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({
+            success: false,
+            message: "Username and password required."
+        });
+    }
+
+    if (username.length < 3) {
+        return res.status(400).json({
+            success: false,
+            message: "Username must be at least 3 characters."
+        });
+    }
+
+    if (password.length < 6) {
+        return res.status(400).json({
+            success: false,
+            message: "Password must be at least 6 characters."
+        });
+    }
+
+    if (findUser(username)) {
+        return res.status(409).json({
+            success: false,
+            message: "Username already exists."
+        });
+    }
+
+    const user = {
+        id: generateId("user"),
+        username,
+        password,
+        role: "user",
+        createdAt: new Date().toISOString()
+    };
+
+    users.push(user);
+
+    res.json({
+        success: true,
+        message: "Account created successfully.",
+        user: {
+            id: user.id,
+            username: user.username,
+            role: user.role
+        }
+    });
 });
 
-app.post("/api/servers/:id/:action",(req,res)=>{
- const allowed=["start","stop","restart"];
- if(!allowed.includes(req.params.action))return res.status(400).json({error:"invalid action"});
- const status=req.params.action==="stop"?"stopped":"running";
- db.prepare("UPDATE servers SET status=? WHERE id=?").run(status,+req.params.id);
- res.json({ok:true,status});
+// =====================================================
+// LOGIN
+// =====================================================
+
+app.post("/api/auth/login", (req, res) => {
+    const { username, password } = req.body;
+
+    const user = findUser(username || "");
+
+    if (!user || user.password !== password) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid username or password."
+        });
+    }
+
+    res.json({
+        success: true,
+        message: "Login successful.",
+        user: {
+            id: user.id,
+            username: user.username,
+            role: user.role
+        }
+    });
 });
 
-/* Admin-only IP Alias. This is a display alias, not DNS/proxy magic. */
-app.put("/api/servers/:id/alias",(req,res)=>{
- const user=getUser(Number(req.body.user_id||2));
- if(!user||user.role!=="admin")return res.status(403).json({error:"Admin only"});
- const alias=String(req.body.alias_ip||"").trim();
- if(alias.length>255)return res.status(400).json({error:"Alias too long"});
- db.prepare("UPDATE servers SET alias_ip=? WHERE id=?").run(alias,+req.params.id);
- res.json({ok:true,alias_ip:alias});
+// =====================================================
+// GET SERVERS
+// =====================================================
+
+app.get("/api/servers", (req, res) => {
+    const username = req.query.username;
+
+    if (!username) {
+        return res.status(400).json({
+            success: false,
+            message: "Username required."
+        });
+    }
+
+    const user = findUser(username);
+
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            message: "User not found."
+        });
+    }
+
+    let result;
+
+    if (user.role === "admin") {
+        result = servers;
+    } else {
+        result = servers.filter(
+            server => server.ownerId === user.id
+        );
+    }
+
+    res.json({
+        success: true,
+        servers: result
+    });
 });
 
-app.get("/api/servers/:id/files",(_,res)=>res.json({ok:true,message:"File manager API is reserved for the node agent phase."}));
-app.get("/api/servers/:id/sftp",(_,res)=>res.json({ok:true,message:"SFTP credentials will be generated by the node agent."}));
-app.get("/api/servers/:id/plugins",(_,res)=>res.json({ok:true,message:"Plugin installer UI ready; package installation comes with the node agent."}));
-app.get("/api/servers/:id/mods",(_,res)=>res.json({ok:true,message:"Mod manager UI ready; package installation comes with the node agent."}));
-app.post("/api/servers/:id/votifier-test",(_,res)=>res.json({ok:true,message:"Votifier test endpoint placeholder."}));
+// =====================================================
+// CREATE SERVER
+// =====================================================
 
-app.listen(process.env.PORT||3000,()=>console.log("HarvixPanel v0.2.0 running"));
+app.post("/api/servers", (req, res) => {
+    const {
+        username,
+        name,
+        ram,
+        disk,
+        cpu,
+        software,
+        version
+    } = req.body;
+
+    if (!username || !name) {
+        return res.status(400).json({
+            success: false,
+            message: "Username and server name required."
+        });
+    }
+
+    const user = findUser(username);
+
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            message: "User not found."
+        });
+    }
+
+    const requestedRam = Number(ram);
+    const requestedDisk = Number(disk);
+    const requestedCpu = Number(cpu);
+
+    if (
+        !Number.isFinite(requestedRam) ||
+        !Number.isFinite(requestedDisk) ||
+        !Number.isFinite(requestedCpu)
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid resource values."
+        });
+    }
+
+    // =================================================
+    // NORMAL USER LIMIT
+    // =================================================
+
+    if (user.role !== "admin") {
+
+        if (requestedRam > CONFIG.normalUser.maxRamMB) {
+            return res.status(403).json({
+                success: false,
+                message: "Maximum RAM for normal users is 4 GB."
+            });
+        }
+
+        if (requestedDisk > CONFIG.normalUser.maxDiskMB) {
+            return res.status(403).json({
+                success: false,
+                message: "Maximum disk for normal users is 5 GB."
+            });
+        }
+
+        if (requestedCpu > CONFIG.normalUser.maxCpu) {
+            return res.status(403).json({
+                success: false,
+                message: "Maximum CPU for normal users is 1 vCore."
+            });
+        }
+    }
+
+    const server = {
+        id: generateId("srv"),
+        ownerId: user.id,
+        ownerUsername: user.username,
+
+        name,
+
+        resources: {
+            ramMB: requestedRam,
+            diskMB: requestedDisk,
+            cpu: requestedCpu
+        },
+
+        software: software || "Paper",
+        version: version || "1.21.4",
+
+        status: "offline",
+
+        // Admin-only field
+        ipAlias: null,
+
+        createdAt: new Date().toISOString()
+    };
+
+    servers.push(server);
+
+    res.json({
+        success: true,
+        message: "Server created successfully.",
+        server
+    });
+});
+
+// =====================================================
+// SERVER DETAILS
+// =====================================================
+
+app.get("/api/servers/:id", (req, res) => {
+    const server = servers.find(
+        s => s.id === req.params.id
+    );
+
+    if (!server) {
+        return res.status(404).json({
+            success: false,
+            message: "Server not found."
+        });
+    }
+
+    res.json({
+        success: true,
+        server
+    });
+});
+
+// =====================================================
+// SERVER START
+// =====================================================
+
+app.post("/api/servers/:id/start", (req, res) => {
+    const server = servers.find(
+        s => s.id === req.params.id
+    );
+
+    if (!server) {
+        return res.status(404).json({
+            success: false,
+            message: "Server not found."
+        });
+    }
+
+    server.status = "running";
+
+    res.json({
+        success: true,
+        message: "Server started.",
+        status: server.status
+    });
+});
+
+// =====================================================
+// SERVER STOP
+// =====================================================
+
+app.post("/api/servers/:id/stop", (req, res) => {
+    const server = servers.find(
+        s => s.id === req.params.id
+    );
+
+    if (!server) {
+        return res.status(404).json({
+            success: false,
+            message: "Server not found."
+        });
+    }
+
+    server.status = "offline";
+
+    res.json({
+        success: true,
+        message: "Server stopped.",
+        status: server.status
+    });
+});
+
+// =====================================================
+// SERVER RESTART
+// =====================================================
+
+app.post("/api/servers/:id/restart", (req, res) => {
+    const server = servers.find(
+        s => s.id === req.params.id
+    );
+
+    if (!server) {
+        return res.status(404).json({
+            success: false,
+            message: "Server not found."
+        });
+    }
+
+    server.status = "running";
+
+    res.json({
+        success: true,
+        message: "Server restarted.",
+        status: server.status
+    });
+});
+
+// =====================================================
+// ADMIN: SET IP ALIAS
+// =====================================================
+
+app.post("/api/admin/servers/:id/ip-alias", (req, res) => {
+    const { username, ipAlias } = req.body;
+
+    const admin = findUser(username || "");
+
+    if (!admin || admin.role !== "admin") {
+        return res.status(403).json({
+            success: false,
+            message: "Admin access required."
+        });
+    }
+
+    const server = servers.find(
+        s => s.id === req.params.id
+    );
+
+    if (!server) {
+        return res.status(404).json({
+            success: false,
+            message: "Server not found."
+        });
+    }
+
+    server.ipAlias = ipAlias || null;
+
+    res.json({
+        success: true,
+        message: "IP Alias saved.",
+        ipAlias: server.ipAlias
+    });
+});
+
+// =====================================================
+// DELETE SERVER
+// =====================================================
+
+app.delete("/api/servers/:id", (req, res) => {
+    const index = servers.findIndex(
+        s => s.id === req.params.id
+    );
+
+    if (index === -1) {
+        return res.status(404).json({
+            success: false,
+            message: "Server not found."
+        });
+    }
+
+    servers.splice(index, 1);
+
+    res.json({
+        success: true,
+        message: "Server deleted."
+    });
+});
+
+// =====================================================
+// FRONTEND FALLBACK
+// =====================================================
+
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// =====================================================
+// START
+// =====================================================
+
+app.listen(PORT, "0.0.0.0", () => {
+    console.log("=================================");
+    console.log("       HarvixPanel");
+    console.log("=================================");
+    console.log(`Panel running on port ${PORT}`);
+    console.log("Status: ONLINE");
+});
