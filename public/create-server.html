@@ -1,1 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Server - HarvixPanel</title>
 
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(155,45,255,.22), transparent 30%),
+        radial-gradient(circle at 85% 80%, rgba(255,40,190,.16), transparent 32%),
+        #0b0712;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 250px;
+      min-height: 100vh;
+      padding: 22px 15px;
+
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+
+      background: rgba(15,10,24,.88);
+      border-right: 1px solid rgba(255,255,255,.08);
+
+      backdrop-filter: blur(18px);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 8px 10px 25px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background: linear-gradient(135deg,#7d1cff,#bd45ff);
+
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .admin-label {
+      margin-top: 3px;
+      font-size: 11px;
+      color: #b968ff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .menu-title {
+      color: rgba(255,255,255,.4);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 12px 11px 8px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .menu a {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+
+      padding: 12px;
+      border-radius: 11px;
+
+      color: rgba(255,255,255,.7);
+      text-decoration: none;
+
+      font-size: 14px;
+      transition: .2s;
+    }
+
+    .menu a:hover,
+    .menu a.active {
+      color: #fff;
+      background: rgba(157,45,255,.18);
+    }
+
+    .menu-icon {
+      width: 22px;
+      text-align: center;
+      font-size: 17px;
+    }
+
+    .logout {
+      position: absolute;
+      left: 15px;
+      right: 15px;
+      bottom: 20px;
+    }
+
+    .logout button {
+      width: 100%;
+      padding: 12px;
+
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 11px;
+
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.7);
+
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .logout button:hover {
+      background: rgba(255,50,80,.12);
+      color: #ff9daa;
+    }
+
+    /* MAIN */
+
+    .main {
+      width: calc(100% - 250px);
+      margin-left: 250px;
+      padding: 30px;
+    }
+
+    .topbar {
+      margin-bottom: 25px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .page-subtitle {
+      margin-top: 6px;
+      color: rgba(255,255,255,.52);
+      font-size: 14px;
+    }
+
+    /* FORM */
+
+    .form-card {
+      max-width: 850px;
+      padding: 25px;
+
+      border-radius: 18px;
+
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+
+      backdrop-filter: blur(12px);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      color: rgba(255,255,255,.72);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 52px;
+
+      padding: 0 15px;
+
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 12px;
+
+      outline: none;
+
+      background: rgba(5,5,10,.5);
+      color: #fff;
+
+      font-size: 14px;
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    select option {
+      background: #17101f;
+      color: #fff;
+    }
+
+    input::placeholder {
+      color: rgba(255,255,255,.38);
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #a52cff;
+      box-shadow: 0 0 0 3px rgba(165,44,255,.12);
+    }
+
+    .hint {
+      color: rgba(255,255,255,.38);
+      font-size: 11px;
+      margin-top: -3px;
+    }
+
+    /* BUTTON */
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+
+      margin-top: 25px;
+      padding-top: 20px;
+
+      border-top: 1px solid rgba(255,255,255,.07);
+    }
+
+    .cancel-btn,
+    .create-btn {
+      min-height: 48px;
+      padding: 0 20px;
+
+      border-radius: 11px;
+
+      font-size: 14px;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+    .cancel-btn {
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.7);
+    }
+
+    .create-btn {
+      border: none;
+      color: #fff;
+
+      background: linear-gradient(135deg,#8b20e8,#a52cff);
+
+      box-shadow: 0 8px 22px rgba(143,35,235,.2);
+    }
+
+    .create-btn:hover {
+      filter: brightness(1.08);
+    }
+
+    /* MESSAGE */
+
+    .message {
+      display: none;
+      margin-bottom: 20px;
+      padding: 13px 15px;
+
+      border-radius: 11px;
+
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .message.success {
+      display: block;
+      color: #a8ffd1;
+      background: rgba(50,255,150,.08);
+      border: 1px solid rgba(50,255,150,.2);
+    }
+
+    .message.error {
+      display: block;
+      color: #ffb4bd;
+      background: rgba(255,50,80,.08);
+      border: 1px solid rgba(255,50,80,.2);
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 900px) {
+
+      .sidebar {
+        width: 70px;
+        padding: 15px 9px;
+      }
+
+      .brand {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .brand-name,
+      .admin-label,
+      .menu-title {
+        display: none;
+      }
+
+      .menu a {
+        justify-content: center;
+        padding: 13px 5px;
+      }
+
+      .menu a span:not(.menu-icon) {
+        display: none;
+      }
+
+      .logout button {
+        font-size: 0;
+      }
+
+      .logout button::before {
+        content: "↪";
+        font-size: 18px;
+      }
+
+      .main {
+        width: calc(100% - 70px);
+        margin-left: 70px;
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 600px) {
+
+      .main {
+        padding: 15px;
+      }
+
+      .page-title {
+        font-size: 23px;
+      }
+
+      .form-card {
+        padding: 18px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .field.full {
+        grid-column: auto;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .cancel-btn,
+      .create-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-logo">
+        H
+      </div>
+
+      <div>
+        <div class="brand-name">
+          HarvixPanel
+        </div>
+
+        <div class="admin-label">
+          Administrator
+        </div>
+      </div>
+
+    </div>
+
+    <div class="menu-title">
+      Management
+    </div>
+
+    <nav class="menu">
+
+      <a href="/admin.html">
+        <span class="menu-icon">⌂</span>
+        <span>Overview</span>
+      </a>
+
+      <a href="/settings.html">
+        <span class="menu-icon">⚙</span>
+        <span>Settings</span>
+      </a>
+
+      <a href="/sftp.html">
+        <span class="menu-icon">🔗</span>
+        <span>SFTP Connect</span>
+      </a>
+
+      <a href="/nodes.html">
+        <span class="menu-icon">🖥</span>
+        <span>Nodes</span>
+      </a>
+
+      <a href="/create-server.html" class="active">
+        <span class="menu-icon">＋</span>
+        <span>Create Server</span>
+      </a>
+
+      <a href="/themes.html">
+        <span class="menu-icon">🎨</span>
+        <span>Themes</span>
+      </a>
+
+      <a href="/fleet.html">
+        <span class="menu-icon">🚀</span>
+        <span>Fleet</span>
+      </a>
+
+    </nav>
+
+    <div class="logout">
+      <button id="logoutBtn">
+        Logout
+      </button>
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN -->
+
+  <main class="main">
+
+    <div class="topbar">
+
+      <h1 class="page-title">
+        Create Server
+      </h1>
+
+      <p class="page-subtitle">
+        Create and configure a new Minecraft server.
+      </p>
+
+    </div>
+
+
+    <div class="form-card">
+
+      <div id="message" class="message"></div>
+
+      <div class="section-title">
+        Server Configuration
+      </div>
+
+
+      <form id="createServerForm">
+
+        <div class="form-grid">
+
+
+          <!-- SERVER NAME -->
+
+          <div class="field">
+
+            <label for="serverName">
+              Server Name
+            </label>
+
+            <input
+              id="serverName"
+              type="text"
+              placeholder="Example: Survival"
+              required
+            >
+
+          </div>
+
+
+          <!-- USER -->
+
+          <div class="field">
+
+            <label for="serverUser">
+              Choose User
+            </label>
+
+            <select id="serverUser" required>
+
+              <option value="">
+                Select user
+              </option>
+
+              <option value="admin">
+                Admin
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- IP ALIAS -->
+
+          <div class="field">
+
+            <label for="ipAlias">
+              IP Alias
+            </label>
+
+            <input
+              id="ipAlias"
+              type="text"
+              placeholder="play.example.com"
+            >
+
+            <span class="hint">
+              Optional custom IP alias.
+            </span>
+
+          </div>
+
+
+          <!-- NODE -->
+
+          <div class="field">
+
+            <label for="node">
+              Select Node
+            </label>
+
+            <select id="node" required>
+
+              <option value="">
+                Select node
+              </option>
+
+              <option value="node-1">
+                Node-1
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- SOFTWARE -->
+
+          <div class="field">
+
+            <label for="software">
+              Select Software
+            </label>
+
+            <select id="software" required>
+
+              <option value="">
+                Select software
+              </option>
+
+              <option value="paper">
+                Paper
+              </option>
+
+              <option value="purpur">
+                Purpur
+              </option>
+
+              <option value="velocity">
+                Velocity
+              </option>
+
+              <option value="bungeecord">
+                BungeeCord
+              </option>
+
+              <option value="fabric">
+                Fabric
+              </option>
+
+              <option value="vanilla">
+                Vanilla
+              </option>
+
+              <option value="bedrock">
+                Bedrock
+              </option>
+
+              <option value="forge">
+                Forge
+              </option>
+
+              <option value="neoforge">
+                NeoForge
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- VERSION -->
+
+          <div class="field">
+
+            <label for="version">
+              Select Version
+            </label>
+
+            <select id="version" required>
+
+              <option value="">
+                Select version
+              </option>
+
+              <option value="latest">
+                Latest
+              </option>
+
+              <option value="1.21.4">
+                1.21.4
+              </option>
+
+              <option value="1.21.1">
+                1.21.1
+              </option>
+
+              <option value="1.20.6">
+                1.20.6
+              </option>
+
+              <option value="1.20.1">
+                1.20.1
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- RAM -->
+
+          <div class="field">
+
+            <label for="ram">
+              RAM (GB)
+            </label>
+
+            <input
+              id="ram"
+              type="number"
+              min="1"
+              step="1"
+              placeholder="4"
+              required
+            >
+
+          </div>
+
+
+          <!-- CPU -->
+
+          <div class="field">
+
+            <label for="cpu">
+              CPU (%)
+            </label>
+
+            <input
+              id="cpu"
+              type="number"
+              min="1"
+              max="100"
+              step="1"
+              placeholder="100"
+              required
+            >
+
+          </div>
+
+
+          <!-- STORAGE -->
+
+          <div class="field">
+
+            <label for="storage">
+              Storage (GB)
+            </label>
+
+            <input
+              id="storage"
+              type="number"
+              min="1"
+              step="1"
+              placeholder="10"
+              required
+            >
+
+          </div>
+
+
+          <!-- SUSPEND TIME -->
+
+          <div class="field">
+
+            <label for="suspendTime">
+              Suspend Time
+            </label>
+
+            <select id="suspendTime" required>
+
+              <option value="">
+                Select suspend time
+              </option>
+
+              <option value="month">
+                Month
+              </option>
+
+              <option value="year">
+                Year
+              </option>
+
+            </select>
+
+            <span class="hint">
+              Used for server suspension policy.
+            </span>
+
+          </div>
+
+
+        </div>
+
+
+        <!-- ACTIONS -->
+
+        <div class="actions">
+
+          <button
+            type="button"
+            class="cancel-btn"
+            onclick="window.location.href='/admin.html'"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="create-btn"
+          >
+            Create Server
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<script>
+
+  /* -----------------------------
+     ADMIN CHECK
+  ----------------------------- */
+
+  function checkAdmin() {
+
+    const userData =
+      localStorage.getItem("harvix_user");
+
+    if (!userData) {
+
+      window.location.href = "/";
+
+      return;
+    }
+
+    try {
+
+      const user =
+        JSON.parse(userData);
+
+      if (user.role !== "admin") {
+
+        window.location.href =
+          "/dashboard.html";
+
+      }
+
+    } catch (error) {
+
+      localStorage.removeItem("harvix_user");
+      localStorage.removeItem("harvix_token");
+
+      window.location.href = "/";
+
+    }
+
+  }
+
+  checkAdmin();
+
+
+  /* -----------------------------
+     LOGOUT
+  ----------------------------- */
+
+  document
+    .getElementById("logoutBtn")
+    .addEventListener("click", function () {
+
+      localStorage.removeItem("harvix_token");
+      localStorage.removeItem("harvix_user");
+
+      window.location.href = "/";
+
+    });
+
+
+  /* -----------------------------
+     SOFTWARE → VERSION
+  ----------------------------- */
+
+  const software =
+    document.getElementById("software");
+
+  const version =
+    document.getElementById("version");
+
+
+  software.addEventListener(
+    "change",
+    function () {
+
+      const selected =
+        software.value;
+
+      version.innerHTML = "";
+
+      const defaultOption =
+        document.createElement("option");
+
+      defaultOption.value = "";
+
+      defaultOption.textContent =
+        "Select version";
+
+      version.appendChild(
+        defaultOption
+      );
+
+
+      if (!selected) {
+        return;
+      }
+
+
+      /*
+       * Temporary versions.
+       *
+       * Later these will be loaded
+       * from the software API.
+       */
+
+      let versions = [
+        "latest",
+        "1.21.4",
+        "1.21.1",
+        "1.20.6",
+        "1.20.1"
+      ];
+
+
+      if (selected === "velocity") {
+
+        versions = [
+          "latest",
+          "3.4.x",
+          "3.3.x"
+        ];
+
+      }
+
+
+      if (selected === "bedrock") {
+
+        versions = [
+          "latest",
+          "1.21.x",
+          "1.20.x"
+        ];
+
+      }
+
+
+      versions.forEach(
+        function (item) {
+
+          const option =
+            document.createElement("option");
+
+          option.value = item;
+          option.textContent = item;
+
+          version.appendChild(option);
+
+        }
+      );
+
+    }
+  );
+
+
+  /* -----------------------------
+     CREATE SERVER
+  ----------------------------- */
+
+  document
+    .getElementById("createServerForm")
+    .addEventListener(
+      "submit",
+      async function (event) {
+
+        event.preventDefault();
+
+
+        const message =
+          document.getElementById("message");
+
+
+        const serverData = {
+
+          name:
+            document.getElementById(
+              "serverName"
+            ).value.trim(),
+
+          user:
+            document.getElementById(
+              "serverUser"
+            ).value,
+
+          ipAlias:
+            document.getElementById(
+              "ipAlias"
+            ).value.trim(),
+
+          node:
+            document.getElementById(
+              "node"
+            ).value,
+
+          software:
+            document.getElementById(
+              "software"
+            ).value,
+
+          version:
+            document.getElementById(
+              "version"
+            ).value,
+
+          ram:
+            Number(
+              document.getElementById(
+                "ram"
+              ).value
+            ),
+
+          cpu:
+            Number(
+              document.getElementById(
+                "cpu"
+              ).value
+            ),
+
+          storage:
+            Number(
+              document.getElementById(
+                "storage"
+              ).value
+            ),
+
+          suspendTime:
+            document.getElementById(
+              "suspendTime"
+            ).value
+
+        };
+
+
+        try {
+
+          const token =
+            localStorage.getItem(
+              "harvix_token"
+            );
+
+
+          const response =
+            await fetch(
+              "/api/admin/servers",
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json",
+
+                  "Authorization":
+                    "Bearer " + token
+                },
+
+                body:
+                  JSON.stringify(serverData)
+              }
+            );
+
+
+          const data =
+            await response.json();
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              data.message ||
+              "Server creation failed."
+            );
+
+          }
+
+
+          message.className =
+            "message success";
+
+          message.textContent =
+            "Server created successfully!";
+
+
+          document
+            .getElementById(
+              "createServerForm"
+            )
+            .reset();
+
+
+        } catch (error) {
+
+          /*
+           * API is not connected yet.
+           * This message makes that clear
+           * instead of pretending the server
+           * was actually created.
+           */
+
+          message.className =
+            "message error";
+
+          message.textContent =
+            error.message ||
+            "Server API is not connected yet.";
+
+        }
+
+      }
+    );
+
+</script>
+
+</body>
+</html>
