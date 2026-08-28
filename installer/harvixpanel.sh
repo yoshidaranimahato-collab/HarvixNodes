@@ -33,14 +33,21 @@ install_panel() {
         exit 1
     fi
 
-    echo "[1/5] Installing required packages..."
+    echo "[1/5] Checking required packages..."
 
-    apt-get update -y
+command -v curl >/dev/null 2>&1 || {
+    echo "Installing curl..."
+    sudo apt-get install -y curl
+}
 
-    apt-get install -y \
-        curl \
-        git \
-        ca-certificates
+command -v git >/dev/null 2>&1 || {
+    echo "Installing git..."
+    sudo apt-get install -y git
+}
+
+command -v ca-certificates >/dev/null 2>&1 || true
+
+echo "Required packages check complete."
 
     echo "[2/5] Installing Node.js..."
 
