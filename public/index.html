@@ -248,10 +248,9 @@
   <main class="page">
 
     <!-- REGISTER -->
-    <section class="auth-box" id="registerBox">
+    <section class="auth-box" id="register">
 
       <div class="brand">
-        <!-- Baad me apna HarvixPanel logo yahan laga sakte ho -->
         <div class="brand-name">HarvixPanel</div>
         <div class="brand-subtitle">Minecraft Hosting Panel</div>
       </div>
@@ -275,7 +274,7 @@
               type="text"
               id="registerUsername"
               placeholder="Choose a username"
-              minlength="3"
+              minlength="4"
               maxlength="24"
               required
             >
@@ -291,7 +290,7 @@
               type="password"
               id="registerPassword"
               placeholder="Create a password"
-              minlength="6"
+              minlength="8"
               required
             >
           </div>
@@ -306,7 +305,7 @@
               type="password"
               id="registerConfirm"
               placeholder="Confirm your password"
-              minlength="6"
+              minlength="8"
               required
             >
           </div>
@@ -327,7 +326,7 @@
 
 
     <!-- LOGIN -->
-    <section class="auth-box hidden" id="loginBox">
+    <section class="auth-box hidden" id="login">
 
       <div class="brand">
         <div class="brand-name">HarvixPanel</div>
@@ -389,8 +388,8 @@
 
 
   <script>
-    const registerBox = document.getElementById("registerBox");
-    const loginBox = document.getElementById("loginBox");
+    const registerBox = document.getElementById("register");
+    const loginBox = document.getElementById("login");
 
     function showLogin() {
       registerBox.classList.add("hidden");
