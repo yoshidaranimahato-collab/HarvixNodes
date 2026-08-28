@@ -4,13 +4,14 @@
   "description": "HarvixPanel - Minecraft Hosting Panel",
   "main": "server.js",
   "scripts": {
-  "start": "node server.js",
-  "dev": "node server.js",
-  "create-admin": "node create-admin.js"
-  }
+    "start": "node server.js",
+    "dev": "node server.js",
+    "create-admin": "node create-admin.js"
   },
   "dependencies": {
     "express": "^5.1.0",
     "bcryptjs": "^3.0.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.4.7"
   }
+}
