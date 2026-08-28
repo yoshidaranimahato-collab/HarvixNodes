@@ -1,1 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Nodes - HarvixPanel</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(155,45,255,.22), transparent 30%),
+        radial-gradient(circle at 85% 80%, rgba(255,40,190,.16), transparent 32%),
+        #0b0712;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 250px;
+      min-height: 100vh;
+      padding: 22px 15px;
+
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+
+      background: rgba(15,10,24,.88);
+      border-right: 1px solid rgba(255,255,255,.08);
+
+      backdrop-filter: blur(18px);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 8px 10px 25px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background: linear-gradient(135deg,#7d1cff,#bd45ff);
+
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .admin-label {
+      margin-top: 3px;
+      font-size: 11px;
+      color: #b968ff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .menu-title {
+      color: rgba(255,255,255,.4);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 12px 11px 8px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .menu a {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+
+      padding: 12px;
+      border-radius: 11px;
+
+      color: rgba(255,255,255,.7);
+      text-decoration: none;
+
+      font-size: 14px;
+      transition: .2s;
+    }
+
+    .menu a:hover,
+    .menu a.active {
+      color: #fff;
+      background: rgba(157,45,255,.18);
+    }
+
+    .menu-icon {
+      width: 22px;
+      text-align: center;
+      font-size: 17px;
+    }
+
+    .logout {
+      position: absolute;
+      left: 15px;
+      right: 15px;
+      bottom: 20px;
+    }
+
+    .logout button {
+      width: 100%;
+      padding: 12px;
+
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 11px;
+
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.7);
+
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .logout button:hover {
+      background: rgba(255,50,80,.12);
+      color: #ff9daa;
+    }
+
+    /* MAIN */
+
+    .main {
+      width: calc(100% - 250px);
+      margin-left: 250px;
+      padding: 30px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .page-subtitle {
+      margin-top: 6px;
+      color: rgba(255,255,255,.52);
+      font-size: 14px;
+    }
+
+    .add-node {
+      border: none;
+      border-radius: 12px;
+
+      padding: 13px 18px;
+
+      color: white;
+      background: linear-gradient(135deg,#8b20e8,#a52cff);
+
+      font-size: 14px;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+    .add-node:hover {
+      filter: brightness(1.08);
+    }
+
+    /* NODE CARD */
+
+    .nodes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .node-card {
+      padding: 22px;
+      border-radius: 18px;
+
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+
+      backdrop-filter: blur(12px);
+    }
+
+    .node-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .node-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .node-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background: rgba(155,45,255,.15);
+
+      font-size: 21px;
+    }
+
+    .node-name {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .node-address {
+      margin-top: 4px;
+      color: rgba(255,255,255,.45);
+      font-size: 12px;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+
+      padding: 7px 10px;
+      border-radius: 9px;
+
+      background: rgba(50,255,150,.08);
+      color: #9dffca;
+
+      font-size: 12px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #62ff9b;
+      box-shadow: 0 0 9px rgba(98,255,155,.8);
+    }
+
+    /* RESOURCE */
+
+    .resource {
+      margin-top: 17px;
+    }
+
+    .resource-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      margin-bottom: 8px;
+    }
+
+    .resource-name {
+      color: rgba(255,255,255,.65);
+      font-size: 13px;
+    }
+
+    .resource-value {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .progress {
+      width: 100%;
+      height: 8px;
+
+      overflow: hidden;
+      border-radius: 99px;
+
+      background: rgba(255,255,255,.08);
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 99px;
+
+      background: linear-gradient(90deg,#8b20e8,#bd45ff);
+
+      transition: width .4s ease;
+    }
+
+    .node-footer {
+      display: flex;
+      justify-content: space-between;
+
+      margin-top: 22px;
+      padding-top: 16px;
+
+      border-top: 1px solid rgba(255,255,255,.07);
+    }
+
+    .footer-item {
+      color: rgba(255,255,255,.48);
+      font-size: 12px;
+    }
+
+    .footer-item strong {
+      display: block;
+      color: #fff;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    /* EMPTY */
+
+    .empty {
+      grid-column: 1 / -1;
+
+      padding: 55px 20px;
+      text-align: center;
+
+      border-radius: 18px;
+
+      background: rgba(255,255,255,.035);
+      border: 1px dashed rgba(255,255,255,.12);
+    }
+
+    .empty-icon {
+      font-size: 38px;
+      margin-bottom: 12px;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .empty-text {
+      margin-top: 7px;
+      color: rgba(255,255,255,.45);
+      font-size: 13px;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 900px) {
+
+      .sidebar {
+        width: 70px;
+        padding: 15px 9px;
+      }
+
+      .brand {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .brand-name,
+      .admin-label,
+      .menu-title {
+        display: none;
+      }
+
+      .menu a {
+        justify-content: center;
+        padding: 13px 5px;
+      }
+
+      .menu a span:not(.menu-icon) {
+        display: none;
+      }
+
+      .logout button {
+        font-size: 0;
+      }
+
+      .logout button::before {
+        content: "↪";
+        font-size: 18px;
+      }
+
+      .main {
+        width: calc(100% - 70px);
+        margin-left: 70px;
+        padding: 20px;
+      }
+
+      .nodes {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 550px) {
+
+      .main {
+        padding: 15px;
+      }
+
+      .page-title {
+        font-size: 23px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .add-node {
+        padding: 10px 12px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-logo">
+        H
+      </div>
+
+      <div>
+        <div class="brand-name">
+          HarvixPanel
+        </div>
+
+        <div class="admin-label">
+          Administrator
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="menu-title">
+      Management
+    </div>
+
+
+    <nav class="menu">
+
+      <a href="/admin.html">
+        <span class="menu-icon">⌂</span>
+        <span>Overview</span>
+      </a>
+
+      <a href="/settings.html">
+        <span class="menu-icon">⚙</span>
+        <span>Settings</span>
+      </a>
+
+      <a href="/sftp.html">
+        <span class="menu-icon">🔗</span>
+        <span>SFTP Connect</span>
+      </a>
+
+      <a href="/nodes.html" class="active">
+        <span class="menu-icon">🖥</span>
+        <span>Nodes</span>
+      </a>
+
+      <a href="/create-server.html">
+        <span class="menu-icon">＋</span>
+        <span>Create Server</span>
+      </a>
+
+      <a href="/themes.html">
+        <span class="menu-icon">🎨</span>
+        <span>Themes</span>
+      </a>
+
+      <a href="/fleet.html">
+        <span class="menu-icon">🚀</span>
+        <span>Fleet</span>
+      </a>
+
+    </nav>
+
+
+    <div class="logout">
+      <button id="logoutBtn">
+        Logout
+      </button>
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN -->
+
+  <main class="main">
+
+    <div class="topbar">
+
+      <div>
+
+        <h1 class="page-title">
+          Nodes
+        </h1>
+
+        <p class="page-subtitle">
+          Monitor and manage your HarvixNode infrastructure.
+        </p>
+
+      </div>
+
+
+      <button class="add-node" id="addNodeBtn">
+        + Add Node
+      </button>
+
+    </div>
+
+
+    <!-- NODE LIST -->
+
+    <section class="nodes" id="nodeList">
+
+      <!-- Example node -->
+
+      <article class="node-card">
+
+        <div class="node-header">
+
+          <div class="node-info">
+
+            <div class="node-icon">
+              🖥️
+            </div>
+
+            <div>
+
+              <div class="node-name">
+                Node-1
+              </div>
+
+              <div class="node-address">
+                127.0.0.1
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="status">
+
+            <span class="status-dot"></span>
+
+            Online
+
+          </div>
+
+        </div>
+
+
+        <!-- CPU -->
+
+        <div class="resource">
+
+          <div class="resource-top">
+
+            <span class="resource-name">
+              CPU
+            </span>
+
+            <span class="resource-value" id="cpuValue">
+              0%
+            </span>
+
+          </div>
+
+          <div class="progress">
+
+            <div
+              class="progress-bar"
+              id="cpuBar"
+              style="width: 0%">
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- RAM -->
+
+        <div class="resource">
+
+          <div class="resource-top">
+
+            <span class="resource-name">
+              RAM
+            </span>
+
+            <span class="resource-value" id="ramValue">
+              0 GB / 0 GB
+            </span>
+
+          </div>
+
+          <div class="progress">
+
+            <div
+              class="progress-bar"
+              id="ramBar"
+              style="width: 0%">
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- DISK -->
+
+        <div class="resource">
+
+          <div class="resource-top">
+
+            <span class="resource-name">
+              Disk
+            </span>
+
+            <span class="resource-value" id="diskValue">
+              0 GB / 0 GB
+            </span>
+
+          </div>
+
+          <div class="progress">
+
+            <div
+              class="progress-bar"
+              id="diskBar"
+              style="width: 0%">
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="node-footer">
+
+          <div class="footer-item">
+            Servers
+            <strong id="serverCount">0</strong>
+          </div>
+
+          <div class="footer-item">
+            Uptime
+            <strong id="uptime">—</strong>
+          </div>
+
+          <div class="footer-item">
+            Agent
+            <strong>HarvixNode</strong>
+          </div>
+
+        </div>
+
+      </article>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<script>
+
+  /* --------------------------------
+     ADMIN CHECK
+  -------------------------------- */
+
+  function checkAdmin() {
+
+    const userData =
+      localStorage.getItem("harvix_user");
+
+    if (!userData) {
+
+      window.location.href = "/";
+
+      return;
+    }
+
+    try {
+
+      const user =
+        JSON.parse(userData);
+
+      if (user.role !== "admin") {
+
+        window.location.href =
+          "/dashboard.html";
+
+      }
+
+    } catch (error) {
+
+      localStorage.removeItem("harvix_user");
+      localStorage.removeItem("harvix_token");
+
+      window.location.href = "/";
+
+    }
+
+  }
+
+
+  checkAdmin();
+
+
+  /* --------------------------------
+     LOGOUT
+  -------------------------------- */
+
+  document
+    .getElementById("logoutBtn")
+    .addEventListener("click", function () {
+
+      localStorage.removeItem("harvix_token");
+      localStorage.removeItem("harvix_user");
+
+      window.location.href = "/";
+
+    });
+
+
+  /* --------------------------------
+     ADD NODE
+  -------------------------------- */
+
+  document
+    .getElementById("addNodeBtn")
+    .addEventListener("click", function () {
+
+      alert(
+        "Add Node system will be connected to the HarvixNode Agent in the next step."
+      );
+
+    });
+
+
+  /* --------------------------------
+     LOAD REAL NODE DATA
+  -------------------------------- */
+
+  async function loadNodeData() {
+
+    try {
+
+      const token =
+        localStorage.getItem("harvix_token");
+
+      const response =
+        await fetch("/api/admin/nodes", {
+
+          headers: {
+            "Authorization":
+              "Bearer " + token
+          }
+
+        });
+
+
+      if (!response.ok) {
+
+        console.log(
+          "Node API is not connected yet."
+        );
+
+        return;
+
+      }
+
+
+      const data =
+        await response.json();
+
+
+      if (!data || !data.node) {
+        return;
+      }
+
+
+      const node =
+        data.node;
+
+
+      /* CPU */
+
+      const cpu =
+        Number(node.cpu || 0);
+
+      document
+        .getElementById("cpuValue")
+        .textContent =
+        cpu.toFixed(1) + "%";
+
+      document
+        .getElementById("cpuBar")
+        .style.width =
+        Math.min(cpu, 100) + "%";
+
+
+      /* RAM */
+
+      const ramUsed =
+        Number(node.ramUsed || 0);
+
+      const ramTotal =
+        Number(node.ramTotal || 0);
+
+      const ramPercent =
+        ramTotal > 0
+          ? (ramUsed / ramTotal) * 100
+          : 0;
+
+      document
+        .getElementById("ramValue")
+        .textContent =
+        ramUsed.toFixed(1) +
+        " GB / " +
+        ramTotal.toFixed(1) +
+        " GB";
+
+      document
+        .getElementById("ramBar")
+        .style.width =
+        Math.min(ramPercent, 100) + "%";
+
+
+      /* DISK */
+
+      const diskUsed =
+        Number(node.diskUsed || 0);
+
+      const diskTotal =
+        Number(node.diskTotal || 0);
+
+      const diskPercent =
+        diskTotal > 0
+          ? (diskUsed / diskTotal) * 100
+          : 0;
+
+      document
+        .getElementById("diskValue")
+        .textContent =
+        diskUsed.toFixed(1) +
+        " GB / " +
+        diskTotal.toFixed(1) +
+        " GB";
+
+      document
+        .getElementById("diskBar")
+        .style.width =
+        Math.min(diskPercent, 100) + "%";
+
+
+      /* SERVERS */
+
+      document
+        .getElementById("serverCount")
+        .textContent =
+        node.servers ?? 0;
+
+
+      /* UPTIME */
+
+      document
+        .getElementById("uptime")
+        .textContent =
+        node.uptime || "—";
+
+    } catch (error) {
+
+      console.log(
+        "HarvixNode API unavailable."
+      );
+
+    }
+
+  }
+
+
+  /*
+   * Later the API will return actual
+   * CPU / RAM / Disk information.
+   */
+
+  loadNodeData();
+
+  /*
+   * Refresh every 5 seconds.
+   */
+
+  setInterval(
+    loadNodeData,
+    5000
+  );
+
+</script>
+
+</body>
+</html>
