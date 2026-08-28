@@ -47,10 +47,11 @@ Check the installation:
 ```npm install```
 
 # configure admin panel
-```export HARVIX_ADMIN_PASSWORD=YOUR-STRONG-PASSWORD```
+```npm run create-user```
 
 example
-export HARVIX_ADMIN_PASSWORD='RevengOp123' 
+user: admin
+password: admin
 
 # Manual Install has some problems so use one click command installer
 
