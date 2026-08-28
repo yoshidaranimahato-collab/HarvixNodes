@@ -1,116 +1,136 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
-
-const {
-  db,
-  save
-} = require("./src/database");
-
-const {
-  register,
-  login
-} = require("./src/auth");
-
-const {
-  auth,
-  admin
-} = require("./src/middleware");
-
-const {
-  validateLimits,
-  checkNodeCapacity,
-  calculateNodeUsage
-} = require("./src/server-manager");
-
-const {
-  ensureDefaultNode,
-  getNodeStatus
-} = require("./src/node-agent");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const app = express();
 
-const PORT =
-  Number(process.env.PORT) || 6969;
+const PORT = Number(process.env.PORT) || 6969;
+const JWT_SECRET =
+  process.env.JWT_SECRET || "change-this-secret";
 
+const DATABASE_FILE =
+  process.env.DATABASE_FILE ||
+  path.join(__dirname, "data", "harvix.json");
 
-/* =========================
-   BASIC CONFIG
-========================= */
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.disable("x-powered-by");
+const publicDir = path.join(__dirname, "public");
 
-app.use(
-  express.json({
-    limit: "1mb"
-  })
-);
+app.use(express.static(publicDir));
 
-app.use(
-  express.urlencoded({
-    extended: true,
-    limit: "1mb"
-  })
-);
+function ensureDatabase() {
+  const dir = path.dirname(DATABASE_FILE);
 
-
-/* =========================
-   DATA DIRECTORY
-========================= */
-
-fs.mkdirSync(
-  path.join(__dirname, "data"),
-  {
+  fs.mkdirSync(dir, {
     recursive: true
+  });
+
+  if (!fs.existsSync(DATABASE_FILE)) {
+    const database = {
+      users: [],
+      servers: [],
+      nodes: [],
+      nextUserId: 1,
+      nextServerId: 1,
+      nextNodeId: 1
+    };
+
+    fs.writeFileSync(
+      DATABASE_FILE,
+      JSON.stringify(database, null, 2)
+    );
   }
-);
+}
 
+function readDatabase() {
+  ensureDatabase();
 
-/* =========================
-   DEFAULT NODE
-========================= */
+  try {
+    return JSON.parse(
+      fs.readFileSync(
+        DATABASE_FILE,
+        "utf8"
+      )
+    );
+  } catch (error) {
+    return {
+      users: [],
+      servers: [],
+      nodes: [],
+      nextUserId: 1,
+      nextServerId: 1,
+      nextNodeId: 1
+    };
+  }
+}
 
-ensureDefaultNode();
+function saveDatabase(database) {
+  ensureDatabase();
 
-
-/* =========================
-   FRONTEND
-========================= */
-
-app.use(
-  express.static(
-    path.join(
-      __dirname,
-      "public"
+  fs.writeFileSync(
+    DATABASE_FILE,
+    JSON.stringify(
+      database,
+      null,
+      2
     )
-  )
-);
+  );
+}
 
+function createToken(user) {
+  return jwt.sign(
+    {
+      id: user.id,
+      username: user.username,
+      role: user.role
+    },
+    JWT_SECRET,
+    {
+      expiresIn: "7d"
+    }
+  );
+}
 
-/* =========================
-   HEALTH CHECK
-========================= */
+function authMiddleware(req, res, next) {
+  const header =
+    req.headers.authorization || "";
 
-app.get(
-  "/api/health",
-  (req, res) => {
-
-    res.json({
-      ok: true,
-      panel: "HarvixPanel",
-      version: "1.0.0",
-      port: PORT,
-      time:
-        new Date().toISOString()
+  if (!header.startsWith("Bearer ")) {
+    return res.status(401).json({
+      success: false,
+      message: "Not logged in"
     });
-
   }
-);
+
+  const token =
+    header.substring(7);
+
+  try {
+    req.user =
+      jwt.verify(
+        token,
+        JWT_SECRET
+      );
+
+    next();
+
+  } catch (error) {
+
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired session"
+    });
+  }
+}
 
 
-/* =========================
-   AUTH
-========================= */
+/*
+REGISTER
+*/
 
 app.post(
   "/api/auth/register",
@@ -118,28 +138,118 @@ app.post(
 
     try {
 
-      const user =
-        await register(
-          req.body.username,
-          req.body.password
+      const username =
+        String(
+          req.body.username || ""
+        ).trim();
+
+      const password =
+        String(
+          req.body.password || ""
         );
 
-      res.status(201).json(
-        user
-      );
+      if (!username || !password) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Username and password are required."
+        });
+      }
+
+      if (username.length < 3) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Username must be at least 3 characters."
+        });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Password must be at least 6 characters."
+        });
+      }
+
+      const database =
+        readDatabase();
+
+      const exists =
+        database.users.some(
+          user =>
+            user.username.toLowerCase() ===
+            username.toLowerCase()
+        );
+
+      if (exists) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "Username already exists."
+        });
+      }
+
+      const passwordHash =
+        await bcrypt.hash(
+          password,
+          12
+        );
+
+      const user = {
+        id:
+          database.nextUserId++,
+
+        username,
+
+        password_hash:
+          passwordHash,
+
+        role: "user",
+
+        created_at:
+          new Date().toISOString()
+      };
+
+      database.users.push(user);
+
+      saveDatabase(database);
+
+      const token =
+        createToken(user);
+
+      return res.json({
+        success: true,
+        message:
+          "Account created successfully.",
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          role: user.role
+        }
+      });
 
     } catch (error) {
 
-      res.status(400).json({
-        error:
-          error.message
+      console.error(
+        "Register error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Registration failed."
       });
-
     }
-
   }
 );
 
+
+/*
+LOGIN
+*/
 
 app.post(
   "/api/auth/login",
@@ -147,1004 +257,214 @@ app.post(
 
     try {
 
-      const result =
-        await login(
-          req.body.username,
-          req.body.password
+      const username =
+        String(
+          req.body.username || ""
+        ).trim();
+
+      const password =
+        String(
+          req.body.password || ""
         );
 
-      res.json(result);
+      if (!username || !password) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Username and password are required."
+        });
+      }
+
+      const database =
+        readDatabase();
+
+      const user =
+        database.users.find(
+          account =>
+            account.username.toLowerCase() ===
+            username.toLowerCase()
+        );
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message:
+            "Invalid username or password."
+        });
+      }
+
+      const valid =
+        await bcrypt.compare(
+          password,
+          user.password_hash
+        );
+
+      if (!valid) {
+        return res.status(401).json({
+          success: false,
+          message:
+            "Invalid username or password."
+        });
+      }
+
+      const token =
+        createToken(user);
+
+      return res.json({
+        success: true,
+        message:
+          "Login successful.",
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          role: user.role
+        }
+      });
 
     } catch (error) {
 
-      res.status(401).json({
-        error:
-          error.message
+      console.error(
+        "Login error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Login failed."
       });
-
     }
-
   }
 );
 
 
 /*
- * Current logged-in user
- */
+CURRENT USER
+*/
 
 app.get(
   "/api/auth/me",
-  auth,
+  authMiddleware,
   (req, res) => {
 
+    const database =
+      readDatabase();
+
     const user =
-      db.users.find(
-        u => u.id === req.user.id
+      database.users.find(
+        account =>
+          account.id === req.user.id
       );
 
     if (!user) {
-
-      return res
-        .status(404)
-        .json({
-          error:
-            "User not found."
-        });
-
-    }
-
-    res.json({
-      id: user.id,
-      username: user.username,
-      role: user.role
-    });
-
-  }
-);
-
-
-/* =========================
-   SERVER LIST
-========================= */
-
-app.get(
-  "/api/servers",
-  auth,
-  (req, res) => {
-
-    const servers =
-      req.user.role === "admin"
-
-        ? db.servers
-
-        : db.servers.filter(
-            server =>
-              server.owner_id ===
-              req.user.id
-          );
-
-    res.json(
-      servers.map(
-        server => {
-
-          /*
-           * IP alias is admin-only.
-           */
-
-          if (
-            req.user.role !==
-            "admin"
-          ) {
-
-            const copy = {
-              ...server
-            };
-
-            delete copy.alias_ip;
-
-            return copy;
-
-          }
-
-          return server;
-
-        }
-      )
-    );
-
-  }
-);
-
-
-/* =========================
-   GET ONE SERVER
-========================= */
-
-app.get(
-  "/api/servers/:id",
-  auth,
-  (req, res) => {
-
-    const id =
-      Number(req.params.id);
-
-    const server =
-      db.servers.find(
-        s => s.id === id
-      );
-
-    if (!server) {
-
-      return res
-        .status(404)
-        .json({
-          error:
-            "Server not found."
-        });
-
-    }
-
-    if (
-      req.user.role !== "admin" &&
-      server.owner_id !== req.user.id
-    ) {
-
-      return res
-        .status(403)
-        .json({
-          error:
-            "You do not own this server."
-        });
-
-    }
-
-    const result = {
-      ...server
-    };
-
-    if (
-      req.user.role !==
-      "admin"
-    ) {
-
-      delete result.alias_ip;
-
-    }
-
-    res.json(result);
-
-  }
-);
-
-
-/* =========================
-   CREATE SERVER
-========================= */
-
-app.post(
-  "/api/servers",
-  auth,
-  (req, res) => {
-
-    try {
-
-      const {
-        name,
-        software,
-        version
-      } = req.body;
-
-      if (
-        !name ||
-        !String(name).trim()
-      ) {
-
-        return res
-          .status(400)
-          .json({
-            error:
-              "Server name is required."
-          });
-
-      }
-
-      const resources =
-        validateLimits(
-          req.body,
-          req.user.role ===
-            "admin"
-        );
-
-      const node =
-        ensureDefaultNode();
-
-      /*
-       * Convert configured node
-       * capacity into MB.
-       */
-
-      const nodeCapacity = {
-
-        ...node,
-
-        ram_mb:
-          Number(node.ram_gb) *
-          1024,
-
-        disk_mb:
-          Number(node.disk_tb) *
-          1024 *
-          1024,
-
-        cpu_vcpu:
-          Number(node.cpu_vcores)
-
-      };
-
-      const serverForCapacity = {
-
-        ram_mb:
-          resources.ram,
-
-        disk_mb:
-          resources.disk,
-
-        cpu_vcpu:
-          resources.cpu
-
-      };
-
-      /*
-       * Note:
-       * The configured default node has
-       * very large virtual capacity.
-       */
-
-      if (
-        !checkNodeCapacity(
-          serverForCapacity,
-          {
-            ...nodeCapacity,
-            ...calculateUsageForNode(
-              node.id
-            )
-          }
-        )
-      ) {
-
-        return res
-          .status(400)
-          .json({
-            error:
-              "Not enough node capacity."
-          });
-
-      }
-
-      const server = {
-
-        id:
-          db.nextServerId++,
-
-        name:
-          String(name).trim(),
-
-        owner_id:
-          req.user.id,
-
-        node_id:
-          node.id,
-
-        ram_mb:
-          resources.ram,
-
-        disk_mb:
-          resources.disk,
-
-        cpu_vcpu:
-          resources.cpu,
-
-        software:
-          software ||
-          "Paper",
-
-        version:
-          version ||
-          "1.21.4",
-
-        status:
-          "stopped",
-
-        alias_ip:
-          "",
-
-        created_at:
-          new Date().toISOString()
-
-      };
-
-      db.servers.push(
-        server
-      );
-
-      save();
-
-      res.status(201).json(
-        server
-      );
-
-    } catch (error) {
-
-      res.status(400).json({
-        error:
-          error.message
+      return res.status(404).json({
+        success: false,
+        message:
+          "User not found."
       });
-
     }
 
-  }
-);
-
-
-/* =========================
-   NODE USAGE HELPER
-========================= */
-
-function calculateUsageForNode(
-  nodeId
-) {
-
-  const usage =
-    calculateNodeUsage(
-      db.servers,
-      nodeId
-    );
-
-  return {
-    used_ram_mb:
-      usage.ram,
-
-    used_disk_mb:
-      usage.disk,
-
-    used_cpu_vcpu:
-      usage.cpu
-  };
-
-}
-
-
-/* =========================
-   SERVER ACCESS HELPER
-========================= */
-
-function getOwnedServer(
-  req,
-  res
-) {
-
-  const id =
-    Number(req.params.id);
-
-  const server =
-    db.servers.find(
-      s => s.id === id
-    );
-
-  if (!server) {
-
-    res.status(404).json({
-      error:
-        "Server not found."
-    });
-
-    return null;
-  }
-
-  if (
-    req.user.role !== "admin" &&
-    server.owner_id !== req.user.id
-  ) {
-
-    res.status(403).json({
-      error:
-        "You do not own this server."
-    });
-
-    return null;
-  }
-
-  return server;
-
-}
-
-
-/* =========================
-   START
-========================= */
-
-app.post(
-  "/api/servers/:id/start",
-  auth,
-  (req, res) => {
-
-    const server =
-      getOwnedServer(
-        req,
-        res
-      );
-
-    if (!server) return;
-
-    server.status =
-      "running";
-
-    save();
-
     res.json({
       success: true,
-      status:
-        server.status
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role
+      }
     });
-
   }
 );
 
 
-/* =========================
-   STOP
-========================= */
+/*
+LOGOUT
+
+JWT is stored on the client,
+so logout simply removes the token.
+*/
 
 app.post(
-  "/api/servers/:id/stop",
-  auth,
+  "/api/auth/logout",
   (req, res) => {
-
-    const server =
-      getOwnedServer(
-        req,
-        res
-      );
-
-    if (!server) return;
-
-    server.status =
-      "stopped";
-
-    save();
-
-    res.json({
-      success: true,
-      status:
-        server.status
-    });
-
-  }
-);
-
-
-/* =========================
-   RESTART
-========================= */
-
-app.post(
-  "/api/servers/:id/restart",
-  auth,
-  (req, res) => {
-
-    const server =
-      getOwnedServer(
-        req,
-        res
-      );
-
-    if (!server) return;
-
-    server.status =
-      "running";
-
-    save();
-
-    res.json({
-      success: true,
-      status:
-        server.status
-    });
-
-  }
-);
-
-
-/* =========================
-   REINSTALL
-========================= */
-
-app.post(
-  "/api/servers/:id/reinstall",
-  auth,
-  (req, res) => {
-
-    const server =
-      getOwnedServer(
-        req,
-        res
-      );
-
-    if (!server) return;
-
-    /*
-     * This currently resets the
-     * server's management state.
-     *
-     * A real Minecraft node-agent
-     * will later perform the actual
-     * filesystem/world reinstall.
-     */
-
-    server.status =
-      "stopped";
-
-    server.reinstall_requested =
-      true;
-
-    server.reinstall_requested_at =
-      new Date().toISOString();
-
-    save();
 
     res.json({
       success: true,
       message:
-        "Reinstall request created."
+        "Logged out successfully."
     });
-
   }
 );
 
 
-/* =========================
-   CHANGE VERSION
-========================= */
+/*
+HEALTH CHECK
+*/
 
-app.put(
-  "/api/servers/:id/version",
-  auth,
+app.get(
+  "/api/health",
   (req, res) => {
-
-    const server =
-      getOwnedServer(
-        req,
-        res
-      );
-
-    if (!server) return;
-
-    const version =
-      String(
-        req.body.version || ""
-      ).trim();
-
-    if (!version) {
-
-      return res
-        .status(400)
-        .json({
-          error:
-            "Version is required."
-        });
-
-    }
-
-    server.version =
-      version;
-
-    save();
 
     res.json({
       success: true,
-      version
+      panel: "HarvixPanel",
+      status: "online",
+      port: PORT
     });
-
   }
 );
 
 
-/* =========================
-   CHANGE SOFTWARE
-========================= */
+/*
+PROTECTED ADMIN TEST
+*/
 
-app.put(
-  "/api/servers/:id/software",
-  auth,
+app.get(
+  "/api/admin",
+  authMiddleware,
   (req, res) => {
 
-    const server =
-      getOwnedServer(
-        req,
-        res
-      );
-
-    if (!server) return;
-
-    const allowed = [
-      "Paper",
-      "Vanilla",
-      "Fabric",
-      "Forge"
-    ];
-
-    const software =
-      String(
-        req.body.software || ""
-      );
-
-    if (
-      !allowed.includes(
-        software
-      )
-    ) {
-
-      return res
-        .status(400)
-        .json({
-          error:
-            "Unsupported software."
-        });
-
-    }
-
-    server.software =
-      software;
-
-    save();
-
-    res.json({
-      success: true,
-      software
-    });
-
-  }
-);
-
-
-/* =========================
-   IP ALIAS
-========================= */
-
-app.put(
-  "/api/servers/:id/alias",
-  auth,
-  admin,
-  (req, res) => {
-
-    const id =
-      Number(req.params.id);
-
-    const server =
-      db.servers.find(
-        s => s.id === id
-      );
-
-    if (!server) {
-
-      return res
-        .status(404)
-        .json({
-          error:
-            "Server not found."
-        });
-
-    }
-
-    const alias =
-      String(
-        req.body.alias_ip || ""
-      ).trim();
-
-    if (
-      alias.length > 255
-    ) {
-
-      return res
-        .status(400)
-        .json({
-          error:
-            "Alias is too long."
-        });
-
-    }
-
-    server.alias_ip =
-      alias;
-
-    save();
-
-    res.json({
-      success: true,
-      alias_ip:
-        server.alias_ip
-    });
-
-  }
-);
-
-
-/* =========================
-   SERVER MODULES
-========================= */
-
-const modules = [
-  "console",
-  "file-manager",
-  "sftp",
-  "plugin-installer",
-  "mod-manager",
-  "votifier",
-  "server-splitter"
-];
-
-
-for (
-  const moduleName of modules
-) {
-
-  app.get(
-    `/api/servers/:id/${moduleName}`,
-    auth,
-    (req, res) => {
-
-      const server =
-        getOwnedServer(
-          req,
-          res
-        );
-
-      if (!server) return;
-
-      res.json({
-
-        success: true,
-
-        server_id:
-          server.id,
-
-        module:
-          moduleName,
-
-        status:
-          server.status,
-
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
         message:
-          `${moduleName} API is ready for node-agent integration.`
-
+          "Admin access required."
       });
-
-    }
-  );
-
-}
-
-
-/* =========================
-   ADMIN: USERS
-========================= */
-
-app.get(
-  "/api/users",
-  auth,
-  admin,
-  (req, res) => {
-
-    res.json(
-      db.users.map(
-        user => ({
-          id:
-            user.id,
-
-          username:
-            user.username,
-
-          role:
-            user.role,
-
-          created_at:
-            user.created_at
-        })
-      )
-    );
-
-  }
-);
-
-
-/* =========================
-   ADMIN: NODES
-========================= */
-
-app.get(
-  "/api/nodes",
-  auth,
-  admin,
-  (req, res) => {
-
-    const nodes =
-      db.nodes.map(
-        node => {
-
-          const usage =
-            calculateNodeUsage(
-              db.servers,
-              node.id
-            );
-
-          return {
-
-            ...node,
-
-            used_ram_mb:
-              usage.ram,
-
-            used_disk_mb:
-              usage.disk,
-
-            used_cpu_vcpu:
-              usage.cpu
-
-          };
-
-        }
-      );
-
-    res.json(nodes);
-
-  }
-);
-
-
-/* =========================
-   NODE STATUS
-========================= */
-
-app.get(
-  "/api/node",
-  auth,
-  (req, res) => {
-
-    res.json(
-      getNodeStatus()
-    );
-
-  }
-);
-
-
-/* =========================
-   ADMIN SETTINGS
-========================= */
-
-app.get(
-  "/api/settings",
-  auth,
-  admin,
-  (req, res) => {
-
-    res.json(
-      db.settings
-    );
-
-  }
-);
-
-
-app.put(
-  "/api/settings",
-  auth,
-  admin,
-  (req, res) => {
-
-    if (
-      typeof req.body.server_name ===
-      "string"
-    ) {
-
-      const name =
-        req.body.server_name
-          .trim();
-
-      if (name.length > 0) {
-
-        db.settings.server_name =
-          name;
-
-      }
-
     }
 
-    if (
-      typeof req.body.server_icon ===
-      "string"
-    ) {
-
-      db.settings.server_icon =
-        req.body.server_icon;
-
-    }
-
-    save();
-
-    res.json(
-      db.settings
-    );
-
-  }
-);
-
-
-/* =========================
-   404 API
-========================= */
-
-app.use(
-  "/api",
-  (req, res) => {
-
-    res.status(404).json({
-      error:
-        "API endpoint not found."
+    res.json({
+      success: true,
+      message:
+        "Welcome to HarvixPanel Admin.",
+      user: req.user
     });
-
   }
 );
 
 
-/* =========================
-   FRONTEND FALLBACK
-========================= */
+/*
+FRONTEND FALLBACK
+*/
 
 app.get(
-  "*splat",
+  "*",
   (req, res) => {
 
     res.sendFile(
       path.join(
-        __dirname,
-        "public",
+        publicDir,
         "index.html"
       )
     );
-
   }
 );
 
 
-/* =========================
-   ERROR HANDLER
-========================= */
+/*
+START
+*/
 
-app.use(
-  (
-    error,
-    req,
-    res,
-    next
-  ) => {
-
-    console.error(
-      error
-    );
-
-    res.status(500).json({
-      error:
-        "Internal server error."
-    });
-
-  }
-);
-
-
-/* =========================
-   START SERVER
-========================= */
+ensureDatabase();
 
 app.listen(
   PORT,
@@ -1152,36 +472,23 @@ app.listen(
   () => {
 
     console.log(
-      "=================================="
+      "╔══════════════════════════════════╗"
     );
 
     console.log(
-      "        HarvixPanel"
+      "║        HarvixPanel Online        ║"
     );
 
     console.log(
-      "=================================="
+      "╚══════════════════════════════════╝"
     );
 
     console.log(
-      `Panel running on port ${PORT}`
+      `Port: ${PORT}`
     );
 
     console.log(
-      `http://0.0.0.0:${PORT}`
+      `Database: ${DATABASE_FILE}`
     );
-
-    console.log(
-      "Default node: HarvixNode-1"
-    );
-
-    console.log(
-      "Node status: ONLINE"
-    );
-
-    console.log(
-      "=================================="
-    );
-
   }
 );
