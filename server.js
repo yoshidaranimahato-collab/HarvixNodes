@@ -1,811 +1,1024 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const crypto = require("crypto");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+const PORT = Number(process.env.PORT || 3000);
+const DATA_DIR = path.join(__dirname, "data");
+const DB_FILE = path.join(DATA_DIR, "harvix.db.json");
+
+const NORMAL_LIMITS = {
+  ram_mb: 4096,
+  disk_mb: 5120,
+  cpu_vcpu: 1
+};
+
+app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
-
-// =====================================================
-// HARVIXPANEL CONFIG
-// =====================================================
-
-const CONFIG = {
-    panelName: "HarvixPanel",
-    panelIcon: "⚡",
-
-    normalUser: {
-        maxRamMB: 4096,
-        maxDiskMB: 5120,
-        maxCpu: 1
-    }
-};
-
-// =====================================================
-// DATABASE
-// =====================================================
-
-const users = [];
-const servers = [];
-const nodes = [];
-
-// Panel settings
-const panelSettings = {
-    serverName: "HarvixPanel",
-    serverIcon: "⚡"
-};
-
-// =====================================================
-// HELPERS
-// =====================================================
-
-function generateId(prefix) {
-    return `${prefix}_${crypto.randomBytes(6).toString("hex")}`;
-}
-
-function findUser(username) {
-    if (!username) return null;
-
-    return users.find(
-        user =>
-            user.username.toLowerCase() ===
-            username.toLowerCase()
-    );
-}
-
-function findServer(id) {
-    return servers.find(server => server.id === id);
-}
-
-function findNode(id) {
-    return nodes.find(node => node.id === id);
-}
-
-function isAdmin(username) {
-    const user = findUser(username);
-    return user && user.role === "admin";
-}
-
-// =====================================================
-// DEFAULT ADMIN
-// =====================================================
-
-const adminPassword =
-    process.env.HARVIX_ADMIN_PASSWORD || "ChangeThisAdminPassword123!";
-
-users.push({
-    id: generateId("user"),
-    username: "admin",
-    password: adminPassword,
-    role: "admin",
-    createdAt: new Date().toISOString()
-});
-
-console.log("=================================");
-console.log("       HarvixPanel");
-console.log("=================================");
-console.log("Default admin username: admin");
-console.log("Set HARVIX_ADMIN_PASSWORD in production.");
-console.log("=================================");
-
-// =====================================================
-// HEALTH
-// =====================================================
-
-app.get("/api/health", (req, res) => {
-    res.json({
-        success: true,
-        panel: panelSettings.serverName,
-        status: "online"
-    });
-});
-
-// =====================================================
-// PANEL SETTINGS
-// =====================================================
-
-// Get settings
-app.get("/api/settings", (req, res) => {
-    res.json({
-        success: true,
-        settings: panelSettings
-    });
-});
-
-// Update settings - ADMIN ONLY
-app.put("/api/admin/settings", (req, res) => {
-    const { username, serverName, serverIcon } = req.body;
-
-    if (!isAdmin(username)) {
-        return res.status(403).json({
-            success: false,
-            error: "Admin access required."
-        });
-    }
-
-    if (serverName !== undefined) {
-        const name = String(serverName).trim();
-
-        if (!name || name.length > 50) {
-            return res.status(400).json({
-                success: false,
-                error: "Server name must be 1-50 characters."
-            });
-        }
-
-        panelSettings.serverName = name;
-    }
-
-    if (serverIcon !== undefined) {
-        panelSettings.serverIcon = String(serverIcon).trim();
-    }
-
-    res.json({
-        success: true,
-        message: "Panel settings updated.",
-        settings: panelSettings
-    });
-});
-
-// =====================================================
-// REGISTER
-// =====================================================
-
-app.post("/api/auth/register", (req, res) => {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-        return res.status(400).json({
-            success: false,
-            error: "Username and password are required."
-        });
-    }
-
-    const cleanUsername = String(username).trim();
-
-    if (cleanUsername.length < 3 || cleanUsername.length > 24) {
-        return res.status(400).json({
-            success: false,
-            error: "Username must be 3-24 characters."
-        });
-    }
-
-    if (String(password).length < 6) {
-        return res.status(400).json({
-            success: false,
-            error: "Password must be at least 6 characters."
-        });
-    }
-
-    if (findUser(cleanUsername)) {
-        return res.status(409).json({
-            success: false,
-            error: "Username already exists."
-        });
-    }
-
-    const user = {
-        id: generateId("user"),
-        username: cleanUsername,
-        password: String(password),
-        role: "user",
-        createdAt: new Date().toISOString()
-    };
-
-    users.push(user);
-
-    res.json({
-        success: true,
-        message: "Account created successfully.",
-        user: {
-            id: user.id,
-            username: user.username,
-            role: user.role
-        }
-    });
-});
-
-// =====================================================
-// LOGIN
-// =====================================================
-
-app.post("/api/auth/login", (req, res) => {
-    const { username, password } = req.body;
-
-    const user = findUser(username);
-
-    if (!user || user.password !== String(password || "")) {
-        return res.status(401).json({
-            success: false,
-            error: "Invalid username or password."
-        });
-    }
-
-    res.json({
-        success: true,
-        message: "Login successful.",
-        user: {
-            id: user.id,
-            username: user.username,
-            role: user.role
-        }
-    });
-});
-
-// =====================================================
-// USERS - ADMIN
-// =====================================================
-
-app.get("/api/admin/users", (req, res) => {
-    const { username } = req.query;
-
-    if (!isAdmin(username)) {
-        return res.status(403).json({
-            success: false,
-            error: "Admin access required."
-        });
-    }
-
-    res.json({
-        success: true,
-        users: users.map(user => ({
-            id: user.id,
-            username: user.username,
-            role: user.role,
-            createdAt: user.createdAt
-        }))
-    });
-});
-
-// =====================================================
-// NODES - ADMIN
-// =====================================================
-
-// List nodes
-app.get("/api/admin/nodes", (req, res) => {
-    const { username } = req.query;
-
-    if (!isAdmin(username)) {
-        return res.status(403).json({
-            success: false,
-            error: "Admin access required."
-        });
-    }
-
-    res.json({
-        success: true,
-        nodes
-    });
-});
-
-// Create node
-app.post("/api/admin/nodes", (req, res) => {
-    const {
-        username,
-        name,
-        address,
-        totalRamMB,
-        totalDiskMB,
-        totalCpu
-    } = req.body;
-
-    if (!isAdmin(username)) {
-        return res.status(403).json({
-            success: false,
-            error: "Admin access required."
-        });
-    }
-
-    if (!name || !address) {
-        return res.status(400).json({
-            success: false,
-            error: "Node name and address are required."
-        });
-    }
-
-    const node = {
-        id: generateId("node"),
-        name: String(name),
-        address: String(address),
-        resources: {
-            totalRamMB: Number(totalRamMB) || 0,
-            totalDiskMB: Number(totalDiskMB) || 0,
-            totalCpu: Number(totalCpu) || 0
-        },
-        status: "offline",
-        createdAt: new Date().toISOString()
-    };
-
-    nodes.push(node);
-
-    res.json({
-        success: true,
-        message: "Node created.",
-        node
-    });
-});
-
-// Delete node
-app.delete("/api/admin/nodes/:id", (req, res) => {
-    const { username } = req.body;
-
-    if (!isAdmin(username)) {
-        return res.status(403).json({
-            success: false,
-            error: "Admin access required."
-        });
-    }
-
-    const index = nodes.findIndex(
-        node => node.id === req.params.id
-    );
-
-    if (index === -1) {
-        return res.status(404).json({
-            success: false,
-            error: "Node not found."
-        });
-    }
-
-    nodes.splice(index, 1);
-
-    res.json({
-        success: true,
-        message: "Node deleted."
-    });
-});
-
-// =====================================================
-// SERVER LIST
-// =====================================================
-
-app.get("/api/servers", (req, res) => {
-    const { username } = req.query;
-
-    const user = findUser(username);
-
-    if (!user) {
-        return res.status(401).json({
-            success: false,
-            error: "Authentication required."
-        });
-    }
-
-    let result;
-
-    if (user.role === "admin") {
-        result = servers;
-    } else {
-        result = servers.filter(
-            server => server.ownerId === user.id
-        );
-    }
-
-    // IP Alias is ADMIN ONLY
-    result = result.map(server => {
-        const data = { ...server };
-
-        if (user.role !== "admin") {
-            delete data.ipAlias;
-        }
-
-        return data;
-    });
-
-    res.json({
-        success: true,
-        servers: result
-    });
-});
-
-// =====================================================
-// CREATE SERVER
-// =====================================================
-
-app.post("/api/servers", (req, res) => {
-    const {
-        username,
-        name,
-        ramMB,
-        diskMB,
-        cpuVcpu,
-        software,
-        version,
-        nodeId
-    } = req.body;
-
-    const user = findUser(username);
-
-    if (!user) {
-        return res.status(401).json({
-            success: false,
-            error: "Authentication required."
-        });
-    }
-
-    if (!name) {
-        return res.status(400).json({
-            success: false,
-            error: "Server name is required."
-        });
-    }
-
-    const ram = Number(ramMB);
-    const disk = Number(diskMB);
-    const cpu = Number(cpuVcpu);
-
-    if (
-        !Number.isFinite(ram) ||
-        !Number.isFinite(disk) ||
-        !Number.isFinite(cpu) ||
-        ram <= 0 ||
-        disk <= 0 ||
-        cpu <= 0
-    ) {
-        return res.status(400).json({
-            success: false,
-            error: "Invalid resource values."
-        });
-    }
-
-    // ================================================
-    // NORMAL USER RESOURCE LIMIT
-    // ================================================
-
-    if (user.role !== "admin") {
-
-        if (ram > CONFIG.normalUser.maxRamMB) {
-            return res.status(403).json({
-                success: false,
-                error: "Normal users can use maximum 4 GB RAM."
-            });
-        }
-
-        if (disk > CONFIG.normalUser.maxDiskMB) {
-            return res.status(403).json({
-                success: false,
-                error: "Normal users can use maximum 5 GB disk."
-            });
-        }
-
-        if (cpu > CONFIG.normalUser.maxCpu) {
-            return res.status(403).json({
-                success: false,
-                error: "Normal users can use maximum 1 vCore."
-            });
-        }
-    }
-
-    // ================================================
-    // NODE CHECK
-    // ================================================
-
-    if (nodeId) {
-        const node = findNode(nodeId);
-
-        if (!node) {
-            return res.status(404).json({
-                success: false,
-                error: "Selected node not found."
-            });
-        }
-    }
-
-    const server = {
-        id: generateId("srv"),
-
-        name: String(name),
-
-        ownerId: user.id,
-        ownerUsername: user.username,
-
-        nodeId: nodeId || null,
-
-        resources: {
-            ramMB: ram,
-            diskMB: disk,
-            cpuVcpu: cpu
-        },
-
-        software: software || "Paper",
-        version: version || "1.21.4",
-
-        status: "offline",
-
-        // Admin only
-        ipAlias: null,
-
-        createdAt: new Date().toISOString()
-    };
-
-    servers.push(server);
-
-    res.json({
-        success: true,
-        message: "Server created successfully.",
-        server
-    });
-});
-
-// =====================================================
-// SERVER DETAILS
-// =====================================================
-
-app.get("/api/servers/:id", (req, res) => {
-    const { username } = req.query;
-
-    const user = findUser(username);
-    const server = findServer(req.params.id);
-
-    if (!user) {
-        return res.status(401).json({
-            success: false,
-            error: "Authentication required."
-        });
-    }
-
-    if (!server) {
-        return res.status(404).json({
-            success: false,
-            error: "Server not found."
-        });
-    }
-
-    if (
-        user.role !== "admin" &&
-        server.ownerId !== user.id
-    ) {
-        return res.status(403).json({
-            success: false,
-            error: "Access denied."
-        });
-    }
-
-    const result = { ...server };
-
-    if (user.role !== "admin") {
-        delete result.ipAlias;
-    }
-
-    res.json({
-        success: true,
-        server: result
-    });
-});
-
-// =====================================================
-// SERVER START
-// =====================================================
-
-app.post("/api/servers/:id/start", (req, res) => {
-    const { username } = req.body;
-
-    const user = findUser(username);
-    const server = findServer(req.params.id);
-
-    if (!user) {
-        return res.status(401).json({
-            success: false,
-            error: "Authentication required."
-        });
-    }
-
-    if (!server) {
-        return res.status(404).json({
-            success: false,
-            error: "Server not found."
-        });
-    }
-
-    if (
-        user.role !== "admin" &&
-        server.ownerId !== user.id
-    ) {
-        return res.status(403).json({
-            success: false,
-            error: "Access denied."
-        });
-    }
-
-    server.status = "running";
-
-    res.json({
-        success: true,
-        message: "Server started.",
-        status: server.status
-    });
-});
-
-// =====================================================
-// SERVER STOP
-// =====================================================
-
-app.post("/api/servers/:id/stop", (req, res) => {
-    const { username } = req.body;
-
-    const user = findUser(username);
-    const server = findServer(req.params.id);
-
-    if (!user) {
-        return res.status(401).json({
-            success: false,
-            error: "Authentication required."
-        });
-    }
-
-    if (!server) {
-        return res.status(404).json({
-            success: false,
-            error: "Server not found."
-        });
-    }
-
-    if (
-        user.role !== "admin" &&
-        server.ownerId !== user.id
-    ) {
-        return res.status(403).json({
-            success: false,
-            error: "Access denied."
-        });
-    }
-
-    server.status = "offline";
-
-    res.json({
-        success: true,
-        message: "Server stopped.",
-        status: server.status
-    });
-});
-
-// =====================================================
-// SERVER RESTART
-// =====================================================
-
-app.post("/api/servers/:id/restart", (req, res) => {
-    const { username } = req.body;
-
-    const user = findUser(username);
-    const server = findServer(req.params.id);
-
-    if (!user) {
-        return res.status(401).json({
-            success: false,
-            error: "Authentication required."
-        });
-    }
-
-    if (!server) {
-        return res.status(404).json({
-            success: false,
-            error: "Server not found."
-        });
-    }
-
-    if (
-        user.role !== "admin" &&
-        server.ownerId !== user.id
-    ) {
-        return res.status(403).json({
-            success: false,
-            error: "Access denied."
-        });
-    }
-
-    server.status = "running";
-
-    res.json({
-        success: true,
-        message: "Server restarted.",
-        status: server.status
-    });
-});
-
-// =====================================================
-// ADMIN IP ALIAS
-// =====================================================
-
-app.put("/api/servers/:id/alias", (req, res) => {
-    const { username, alias_ip } = req.body;
-
-    if (!isAdmin(username)) {
-        return res.status(403).json({
-            success: false,
-            error: "Only administrators can manage IP Alias."
-        });
-    }
-
-    const server = findServer(req.params.id);
-
-    if (!server) {
-        return res.status(404).json({
-            success: false,
-            error: "Server not found."
-        });
-    }
-
-    server.ipAlias =
-        alias_ip
-            ? String(alias_ip).trim()
-            : null;
-
-    res.json({
-        success: true,
-        message: "IP Alias saved.",
-        ipAlias: server.ipAlias
-    });
-});
-
-// =====================================================
-// DELETE SERVER
-// =====================================================
-
-app.delete("/api/servers/:id", (req, res) => {
-    const { username } = req.body;
-
-    const user = findUser(username);
-    const server = findServer(req.params.id);
-
-    if (!user) {
-        return res.status(401).json({
-            success: false,
-            error: "Authentication required."
-        });
-    }
-
-    if (!server) {
-        return res.status(404).json({
-            success: false,
-            error: "Server not found."
-        });
-    }
-
-    if (
-        user.role !== "admin" &&
-        server.ownerId !== user.id
-    ) {
-        return res.status(403).json({
-            success: false,
-            error: "Access denied."
-        });
-    }
-
-    const index = servers.findIndex(
-        s => s.id === server.id
-    );
-
-    servers.splice(index, 1);
-
-    res.json({
-        success: true,
-        message: "Server deleted."
-    });
-});
-
-// =====================================================
-// FRONTEND
-// =====================================================
-
 app.use(express.static(__dirname));
 
-app.get("*", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "index.html")
+/* =========================================================
+   DATABASE
+   ========================================================= */
+
+function ensureDatabase() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+
+  if (!fs.existsSync(DB_FILE)) {
+    const adminPassword = process.env.HARVIX_ADMIN_PASSWORD || "change-me";
+
+    const db = {
+      settings: {
+        server_name: "HarvixNodes",
+        server_icon: "⚡"
+      },
+
+      users: [
+        {
+          id: 1,
+          username: "admin",
+          password: hashPassword(adminPassword),
+          role: "admin",
+          created_at: new Date().toISOString()
+        }
+      ],
+
+      nodes: [],
+
+      servers: [],
+
+      sessions: []
+    };
+
+    saveDatabase(db);
+  }
+}
+
+function loadDatabase() {
+  ensureDatabase();
+
+  try {
+    return JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
+  } catch (error) {
+    console.error("Database read error:", error);
+    process.exit(1);
+  }
+}
+
+function saveDatabase(db) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+
+  const temp = `${DB_FILE}.tmp`;
+
+  fs.writeFileSync(
+    temp,
+    JSON.stringify(db, null, 2),
+    "utf8"
+  );
+
+  fs.renameSync(temp, DB_FILE);
+}
+
+/* =========================================================
+   PASSWORD / SESSION HELPERS
+   ========================================================= */
+
+function hashPassword(password) {
+  return crypto
+    .createHash("sha256")
+    .update(String(password))
+    .digest("hex");
+}
+
+function createToken() {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+function getUserFromRequest(req) {
+  const auth = req.headers.authorization || "";
+
+  if (!auth.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const token = auth.substring(7);
+
+  const db = loadDatabase();
+
+  const session = db.sessions.find(
+    (x) => x.token === token
+  );
+
+  if (!session) {
+    return null;
+  }
+
+  return db.users.find(
+    (x) => x.id === session.user_id
+  ) || null;
+}
+
+function requireAuth(req, res, next) {
+  const user = getUserFromRequest(req);
+
+  if (!user) {
+    return res.status(401).json({
+      error: "Authentication required"
+    });
+  }
+
+  req.user = user;
+  next();
+}
+
+function requireAdmin(req, res, next) {
+  const user = getUserFromRequest(req);
+
+  if (!user) {
+    return res.status(401).json({
+      error: "Authentication required"
+    });
+  }
+
+  if (user.role !== "admin") {
+    return res.status(403).json({
+      error: "Administrator access required"
+    });
+  }
+
+  req.user = user;
+  next();
+}
+
+/* =========================================================
+   VALIDATION
+   ========================================================= */
+
+function cleanString(value, max = 200) {
+  if (typeof value !== "string") return "";
+  return value.trim().slice(0, max);
+}
+
+function validNumber(value) {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function serverForUser(db, serverId, user) {
+  const server = db.servers.find(
+    (x) => x.id === Number(serverId)
+  );
+
+  if (!server) {
+    return null;
+  }
+
+  if (user.role === "admin") {
+    return server;
+  }
+
+  if (server.owner_id !== user.id) {
+    return null;
+  }
+
+  return server;
+}
+
+/* =========================================================
+   BASIC ROUTES
+   ========================================================= */
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.get("/api/health", (req, res) => {
+  res.json({
+    ok: true,
+    panel: "HarvixPanel",
+    version: "0.2.0"
+  });
+});
+
+/* =========================================================
+   AUTH
+   ========================================================= */
+
+app.post("/api/auth/register", (req, res) => {
+  const username = cleanString(req.body.username, 50);
+  const password = String(req.body.password || "");
+
+  if (!username || password.length < 6) {
+    return res.status(400).json({
+      error: "Username and password are required. Password must be at least 6 characters."
+    });
+  }
+
+  const db = loadDatabase();
+
+  const exists = db.users.some(
+    (x) => x.username.toLowerCase() === username.toLowerCase()
+  );
+
+  if (exists) {
+    return res.status(409).json({
+      error: "Username already exists"
+    });
+  }
+
+  const user = {
+    id: Date.now(),
+    username,
+    password: hashPassword(password),
+    role: "user",
+    created_at: new Date().toISOString()
+  };
+
+  db.users.push(user);
+  saveDatabase(db);
+
+  res.status(201).json({
+    message: "Account created",
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role
+    }
+  });
+});
+
+app.post("/api/auth/login", (req, res) => {
+  const username = cleanString(req.body.username, 50);
+  const password = String(req.body.password || "");
+
+  const db = loadDatabase();
+
+  const user = db.users.find(
+    (x) =>
+      x.username.toLowerCase() === username.toLowerCase()
+  );
+
+  if (!user || user.password !== hashPassword(password)) {
+    return res.status(401).json({
+      error: "Invalid username or password"
+    });
+  }
+
+  const token = createToken();
+
+  db.sessions = db.sessions.filter(
+    (x) => x.user_id !== user.id
+  );
+
+  db.sessions.push({
+    token,
+    user_id: user.id,
+    created_at: new Date().toISOString()
+  });
+
+  saveDatabase(db);
+
+  res.json({
+    token,
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role
+    }
+  });
+});
+
+app.post("/api/auth/logout", requireAuth, (req, res) => {
+  const auth = req.headers.authorization || "";
+  const token = auth.substring(7);
+
+  const db = loadDatabase();
+
+  db.sessions = db.sessions.filter(
+    (x) => x.token !== token
+  );
+
+  saveDatabase(db);
+
+  res.json({
+    message: "Logged out"
+  });
+});
+
+app.get("/api/auth/me", requireAuth, (req, res) => {
+  res.json({
+    id: req.user.id,
+    username: req.user.username,
+    role: req.user.role
+  });
+});
+
+/* =========================================================
+   PANEL SETTINGS
+   ========================================================= */
+
+app.get("/api/settings", requireAuth, (req, res) => {
+  const db = loadDatabase();
+
+  res.json(db.settings);
+});
+
+app.put("/api/settings", requireAdmin, (req, res) => {
+  const db = loadDatabase();
+
+  const serverName = cleanString(
+    req.body.server_name,
+    100
+  );
+
+  const serverIcon = cleanString(
+    req.body.server_icon,
+    20
+  );
+
+  if (serverName) {
+    db.settings.server_name = serverName;
+  }
+
+  if (serverIcon) {
+    db.settings.server_icon = serverIcon;
+  }
+
+  saveDatabase(db);
+
+  res.json({
+    message: "Settings updated",
+    settings: db.settings
+  });
+});
+
+/* =========================================================
+   USERS - ADMIN
+   ========================================================= */
+
+app.get("/api/users", requireAdmin, (req, res) => {
+  const db = loadDatabase();
+
+  res.json(
+    db.users.map((user) => ({
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      created_at: user.created_at
+    }))
+  );
+});
+
+app.delete("/api/users/:id", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id === req.user.id) {
+    return res.status(400).json({
+      error: "You cannot delete your own account"
+    });
+  }
+
+  const db = loadDatabase();
+
+  const user = db.users.find(
+    (x) => x.id === id
+  );
+
+  if (!user) {
+    return res.status(404).json({
+      error: "User not found"
+    });
+  }
+
+  db.users = db.users.filter(
+    (x) => x.id !== id
+  );
+
+  db.sessions = db.sessions.filter(
+    (x) => x.user_id !== id
+  );
+
+  saveDatabase(db);
+
+  res.json({
+    message: "User deleted"
+  });
+});
+
+/* =========================================================
+   NODES - ADMIN
+   ========================================================= */
+
+app.get("/api/nodes", requireAdmin, (req, res) => {
+  const db = loadDatabase();
+
+  res.json(db.nodes);
+});
+
+app.post("/api/nodes", requireAdmin, (req, res) => {
+  const name = cleanString(req.body.name, 100);
+  const address = cleanString(req.body.address, 200);
+
+  const ram = Number(req.body.ram_mb);
+  const disk = Number(req.body.disk_mb);
+  const cpu = Number(req.body.cpu_vcpu);
+
+  if (!name || !address) {
+    return res.status(400).json({
+      error: "Node name and address are required"
+    });
+  }
+
+  if (
+    !validNumber(ram) ||
+    !validNumber(disk) ||
+    !validNumber(cpu) ||
+    ram <= 0 ||
+    disk <= 0 ||
+    cpu <= 0
+  ) {
+    return res.status(400).json({
+      error: "Invalid node resources"
+    });
+  }
+
+  const db = loadDatabase();
+
+  const node = {
+    id: Date.now(),
+    name,
+    address,
+    ram_mb: ram,
+    disk_mb: disk,
+    cpu_vcpu: cpu,
+    status: "offline",
+    created_at: new Date().toISOString()
+  };
+
+  db.nodes.push(node);
+
+  saveDatabase(db);
+
+  res.status(201).json(node);
+});
+
+app.delete("/api/nodes/:id", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+
+  const db = loadDatabase();
+
+  const node = db.nodes.find(
+    (x) => x.id === id
+  );
+
+  if (!node) {
+    return res.status(404).json({
+      error: "Node not found"
+    });
+  }
+
+  const assignedServers = db.servers.some(
+    (x) => x.node_id === id
+  );
+
+  if (assignedServers) {
+    return res.status(400).json({
+      error: "Cannot delete node while servers are assigned to it"
+    });
+  }
+
+  db.nodes = db.nodes.filter(
+    (x) => x.id !== id
+  );
+
+  saveDatabase(db);
+
+  res.json({
+    message: "Node deleted"
+  });
+});
+
+/* =========================================================
+   SERVERS
+   ========================================================= */
+
+app.get("/api/servers", requireAuth, (req, res) => {
+  const db = loadDatabase();
+
+  let servers;
+
+  if (req.user.role === "admin") {
+    servers = db.servers;
+  } else {
+    servers = db.servers.filter(
+      (x) => x.owner_id === req.user.id
     );
+  }
+
+  res.json(
+    servers.map((server) => ({
+      ...server,
+
+      /*
+       * IP alias is intentionally admin-only.
+       */
+      alias_ip:
+        req.user.role === "admin"
+          ? server.alias_ip || ""
+          : undefined
+    }))
+  );
 });
 
-// =====================================================
-// START
-// =====================================================
+app.get("/api/servers/:id", requireAuth, (req, res) => {
+  const db = loadDatabase();
 
-app.listen(PORT, "0.0.0.0", () => {
-    console.log("=================================");
-    console.log(` ${panelSettings.serverIcon} ${panelSettings.serverName}`);
-    console.log("=================================");
-    console.log(`Panel running on port ${PORT}`);
-    console.log("Status: ONLINE");
-    console.log("=================================");
+  const server = serverForUser(
+    db,
+    req.params.id,
+    req.user
+  );
+
+  if (!server) {
+    return res.status(404).json({
+      error: "Server not found"
+    });
+  }
+
+  const result = {
+    ...server
+  };
+
+  if (req.user.role !== "admin") {
+    delete result.alias_ip;
+  }
+
+  res.json(result);
 });
+
+/* =========================================================
+   CREATE SERVER
+   ========================================================= */
+
+app.post("/api/servers", requireAuth, (req, res) => {
+  const name = cleanString(req.body.name, 100);
+
+  const ram = Number(req.body.ram_mb);
+  const disk = Number(req.body.disk_mb);
+  const cpu = Number(req.body.cpu_vcpu);
+
+  const software = cleanString(
+    req.body.software,
+    30
+  );
+
+  const version = cleanString(
+    req.body.version,
+    30
+  );
+
+  if (!name || !software || !version) {
+    return res.status(400).json({
+      error: "Name, software and version are required"
+    });
+  }
+
+  if (
+    !validNumber(ram) ||
+    !validNumber(disk) ||
+    !validNumber(cpu)
+  ) {
+    return res.status(400).json({
+      error: "Invalid resource values"
+    });
+  }
+
+  if (ram <= 0 || disk <= 0 || cpu <= 0) {
+    return res.status(400).json({
+      error: "Resources must be greater than zero"
+    });
+  }
+
+  /*
+   * Normal users are restricted here on the SERVER side.
+   * This cannot be bypassed by changing the HTML.
+   */
+  if (req.user.role !== "admin") {
+    if (ram > NORMAL_LIMITS.ram_mb) {
+      return res.status(400).json({
+        error: "Normal users can use a maximum of 4096 MB RAM"
+      });
+    }
+
+    if (disk > NORMAL_LIMITS.disk_mb) {
+      return res.status(400).json({
+        error: "Normal users can use a maximum of 5120 MB disk"
+      });
+    }
+
+    if (cpu > NORMAL_LIMITS.cpu_vcpu) {
+      return res.status(400).json({
+        error: "Normal users can use a maximum of 1 vCPU"
+      });
+    }
+  }
+
+  const allowedSoftware = [
+    "Paper",
+    "Vanilla",
+    "Fabric",
+    "Forge"
+  ];
+
+  if (!allowedSoftware.includes(software)) {
+    return res.status(400).json({
+      error: "Unsupported software"
+    });
+  }
+
+  const db = loadDatabase();
+
+  /*
+   * Select the first node with enough configured resources.
+   * This is allocation metadata only; real resource enforcement
+   * requires a Node Agent/container runtime.
+   */
+  let selectedNode = null;
+
+  for (const node of db.nodes) {
+    if (node.status === "offline") {
+      continue;
+    }
+
+    const usedRam = db.servers
+      .filter((s) => s.node_id === node.id)
+      .reduce((sum, s) => sum + s.ram_mb, 0);
+
+    const usedDisk = db.servers
+      .filter((s) => s.node_id === node.id)
+      .reduce((sum, s) => sum + s.disk_mb, 0);
+
+    const usedCpu = db.servers
+      .filter((s) => s.node_id === node.id)
+      .reduce((sum, s) => sum + s.cpu_vcpu, 0);
+
+    if (
+      usedRam + ram <= node.ram_mb &&
+      usedDisk + disk <= node.disk_mb &&
+      usedCpu + cpu <= node.cpu_vcpu
+    ) {
+      selectedNode = node;
+      break;
+    }
+  }
+
+  const server = {
+    id: Date.now(),
+    name,
+    owner_id: req.user.id,
+    node_id: selectedNode ? selectedNode.id : null,
+
+    ram_mb: ram,
+    disk_mb: disk,
+    cpu_vcpu: cpu,
+
+    software,
+    version,
+
+    status: "stopped",
+
+    alias_ip: "",
+
+    created_at: new Date().toISOString()
+  };
+
+  db.servers.push(server);
+
+  saveDatabase(db);
+
+  const result = {
+    ...server
+  };
+
+  if (req.user.role !== "admin") {
+    delete result.alias_ip;
+  }
+
+  res.status(201).json(result);
+});
+
+/* =========================================================
+   SERVER START / STOP / RESTART
+   ========================================================= */
+
+function changeServerStatus(req, res, status) {
+  const db = loadDatabase();
+
+  const server = serverForUser(
+    db,
+    req.params.id,
+    req.user
+  );
+
+  if (!server) {
+    return res.status(404).json({
+      error: "Server not found"
+    });
+  }
+
+  /*
+   * This changes panel state only.
+   * A real Minecraft process controller/Node Agent
+   * must be connected for actual server start/stop.
+   */
+
+  server.status = status;
+  server.updated_at = new Date().toISOString();
+
+  saveDatabase(db);
+
+  res.json({
+    message: `Server ${status}`,
+    server
+  });
+}
+
+app.post(
+  "/api/servers/:id/start",
+  requireAuth,
+  (req, res) => changeServerStatus(req, res, "running")
+);
+
+app.post(
+  "/api/servers/:id/stop",
+  requireAuth,
+  (req, res) => changeServerStatus(req, res, "stopped")
+);
+
+app.post(
+  "/api/servers/:id/restart",
+  requireAuth,
+  (req, res) => changeServerStatus(req, res, "restarting")
+);
+
+/* =========================================================
+   IP ALIAS - ADMIN ONLY
+   ========================================================= */
+
+app.put(
+  "/api/servers/:id/alias",
+  requireAdmin,
+  (req, res) => {
+    const db = loadDatabase();
+
+    const server = db.servers.find(
+      (x) => x.id === Number(req.params.id)
+    );
+
+    if (!server) {
+      return res.status(404).json({
+        error: "Server not found"
+      });
+    }
+
+    const alias = cleanString(
+      req.body.alias_ip,
+      200
+    );
+
+    if (alias.length > 200) {
+      return res.status(400).json({
+        error: "Alias is too long"
+      });
+    }
+
+    server.alias_ip = alias;
+    server.updated_at = new Date().toISOString();
+
+    saveDatabase(db);
+
+    res.json({
+      message: "IP Alias saved",
+      alias_ip: server.alias_ip
+    });
+  }
+);
+
+/* =========================================================
+   SERVER SETTINGS
+   ========================================================= */
+
+app.put(
+  "/api/servers/:id/software",
+  requireAuth,
+  (req, res) => {
+    const db = loadDatabase();
+
+    const server = serverForUser(
+      db,
+      req.params.id,
+      req.user
+    );
+
+    if (!server) {
+      return res.status(404).json({
+        error: "Server not found"
+      });
+    }
+
+    const software = cleanString(
+      req.body.software,
+      30
+    );
+
+    const allowed = [
+      "Paper",
+      "Vanilla",
+      "Fabric",
+      "Forge"
+    ];
+
+    if (!allowed.includes(software)) {
+      return res.status(400).json({
+        error: "Unsupported software"
+      });
+    }
+
+    server.software = software;
+    server.updated_at = new Date().toISOString();
+
+    saveDatabase(db);
+
+    res.json({
+      message: "Software changed",
+      server
+    });
+  }
+);
+
+app.put(
+  "/api/servers/:id/version",
+  requireAuth,
+  (req, res) => {
+    const db = loadDatabase();
+
+    const server = serverForUser(
+      db,
+      req.params.id,
+      req.user
+    );
+
+    if (!server) {
+      return res.status(404).json({
+        error: "Server not found"
+      });
+    }
+
+    const version = cleanString(
+      req.body.version,
+      30
+    );
+
+    if (!version) {
+      return res.status(400).json({
+        error: "Version is required"
+      });
+    }
+
+    server.version = version;
+    server.updated_at = new Date().toISOString();
+
+    saveDatabase(db);
+
+    res.json({
+      message: "Version changed",
+      server
+    });
+  }
+);
+
+/* =========================================================
+   REINSTALL
+   ========================================================= */
+
+app.post(
+  "/api/servers/:id/reinstall",
+  requireAuth,
+  (req, res) => {
+    const db = loadDatabase();
+
+    const server = serverForUser(
+      db,
+      req.params.id,
+      req.user
+    );
+
+    if (!server) {
+      return res.status(404).json({
+        error: "Server not found"
+      });
+    }
+
+    server.status = "reinstalling";
+    server.updated_at = new Date().toISOString();
+
+    saveDatabase(db);
+
+    res.json({
+      message:
+        "Reinstall requested. A Node Agent is required to perform the actual Minecraft reinstall.",
+      server
+    });
+  }
+);
+
+/* =========================================================
+   SERVER MODULES
+   ========================================================= */
+
+const modules = [
+  "console",
+  "file-manager",
+  "sftp",
+  "plugin-installer",
+  "mod-manager",
+  "votifier",
+  "server-splitter"
+];
+
+for (const moduleName of modules) {
+  app.get(
+    `/api/servers/:id/${moduleName}`,
+    requireAuth,
+    (req, res) => {
+      const db = loadDatabase();
+
+      const server = serverForUser(
+        db,
+        req.params.id,
+        req.user
+      );
+
+      if (!server) {
+        return res.status(404).json({
+          error: "Server not found"
+        });
+      }
+
+      res.json({
+        server_id: server.id,
+        module: moduleName,
+        status: "not_connected",
+        message:
+          `The ${moduleName} module requires the Harvix Node Agent.`
+      });
+    }
+  );
+}
+
+/* =========================================================
+   DELETE SERVER
+   ========================================================= */
+
+app.delete(
+  "/api/servers/:id",
+  requireAuth,
+  (req, res) => {
+    const db = loadDatabase();
+
+    const server = serverForUser(
+      db,
+      req.params.id,
+      req.user
+    );
+
+    if (!server) {
+      return res.status(404).json({
+        error: "Server not found"
+      });
+    }
+
+    db.servers = db.servers.filter(
+      (x) => x.id !== server.id
+    );
+
+    saveDatabase(db);
+
+    res.json({
+      message: "Server removed from panel"
+    });
+  }
+);
+
+/* =========================================================
+   404
+   ========================================================= */
+
+app.use("/api", (req, res) => {
+  res.status(404).json({
+    error: "API endpoint not found"
+  });
+})
