@@ -4,8 +4,10 @@
   "description": "HarvixPanel - Minecraft Hosting Panel",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+  "start": "node server.js",
+  "dev": "node server.js",
+  "create-admin": "node create-admin.js"
+  }
   },
   "dependencies": {
     "express": "^5.1.0",
