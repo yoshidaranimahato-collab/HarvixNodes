@@ -1,0 +1,49 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HarvixPanel</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#090c12;color:#edf2f7;font-family:Arial,sans-serif}
+header{padding:18px 22px;background:#111722;border-bottom:1px solid #252d3a;display:flex;justify-content:space-between}
+main{max-width:1100px;margin:auto;padding:18px}.card{background:#111722;border:1px solid #252d3a;border-radius:14px;padding:18px;margin:14px 0}
+input,select,button{padding:11px;border-radius:8px;border:1px solid #303a49;background:#0b1018;color:#fff;margin:4px}
+button{cursor:pointer}.tabs{display:flex;gap:7px;flex-wrap:wrap}.tab{padding:10px 13px}.hidden{display:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.muted{color:#9ba7b7}.danger{color:#ff8c8c}.ok{color:#78e6a0}
+</style></head>
+<body><header><b>⚡ HarvixPanel</b><span class="muted">v0.2.0</span></header><main>
+<div class="card"><h2>Create Server</h2><div class="grid">
+<input id="name" placeholder="Server name"><input id="ram" type="number" value="1024" placeholder="RAM MB">
+<input id="disk" type="number" value="1024" placeholder="Disk MB"><input id="cpu" type="number" value="1" step=".1" placeholder="vCPU">
+<select id="software"><option>Paper</option><option>Vanilla</option><option>Fabric</option><option>Forge</option></select>
+<input id="version" value="1.21.x" placeholder="Version">
+</div><button onclick="createServer()">Create Server</button>
+<p class="muted">Normal user: max 4096 MB RAM • 5120 MB disk • 1 vCPU</p></div>
+<div class="card"><h2>My Servers</h2><div id="servers">Loading...</div></div>
+</main>
+<script>
+async function load(){
+ let r=await fetch("/api/servers?user_id=2"),s=await r.json();
+ document.getElementById("servers").innerHTML=s.length?s.map(x=>`
+ <div class="card"><h3>${x.name}</h3><p class="muted">${x.software} ${x.version} • ${x.ram_mb} MB • ${x.disk_mb} MB • ${x.cpu_vcpu} vCPU • ${x.status}</p>
+ <div class="tabs">
+ <button onclick="openPanel(${x.id},'Console')">Console</button><button onclick="openPanel(${x.id},'File Manager')">File Manager</button>
+ <button onclick="openPanel(${x.id},'SFTP')">SFTP</button><button onclick="openPanel(${x.id},'Plugin Installer')">Plugin Installer</button>
+ <button onclick="openPanel(${x.id},'Mod Manager')">Mod Manager</button><button onclick="openPanel(${x.id},'Votifier Test')">Votifier Test</button>
+ <button onclick="openPanel(${x.id},'Server Splitter')">Server Splitter</button><button onclick="openSettings(${x.id})">Settings</button>
+ </div><div id="p${x.id}" class="card hidden"></div>
+ <button onclick="act(${x.id},'start')">Start</button><button onclick="act(${x.id},'stop')">Stop</button><button onclick="act(${x.id},'restart')">Restart</button></div>`).join(""):"No servers yet.";
+}
+function openPanel(id,title){let e=document.getElementById("p"+id);e.classList.remove("hidden");
+e.innerHTML=`<b>${title}</b><p class="muted">UI module is connected. The real node-agent implementation will provide ${title.toLowerCase()} operations.</p>`;}
+function openSettings(id){let e=document.getElementById("p"+id);e.classList.remove("hidden");e.innerHTML=`
+<b>Settings</b><p><button onclick="openPanel(${id},'Reinstall Server')">Reinstall Server</button>
+<button onclick="openPanel(${id},'Change Version Type')">Change Version Type</button>
+<button onclick="openPanel(${id},'Change Software')">Change Software</button></p>
+<hr><b>IP Alias (Admin only)</b><p class="muted">Example: a Playit/MineKube address that you already own/control. This is only stored/displayed as an alias; it does not create DNS or bypass networking.</p>
+<input id="alias${id}" placeholder="example.playit.gg:12345"><button onclick="saveAlias(${id})">Save</button>`;}
+async function saveAlias(id){let alias=document.getElementById("alias"+id).value;
+let r=await fetch("/api/servers/"+id+"/alias",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({user_id:1,alias_ip:alias})});
+let j=await r.json();alert(j.error||"Alias saved for admin.");}
+async function createServer(){let body={name:name.value,ram_mb:+ram.value,disk_mb:+disk.value,cpu_vcpu:+cpu.value,owner_id:2,software:software.value,version:version.value};
+let r=await fetch("/api/servers",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();if(!r.ok)return alert(j.error);load();}
+async function act(id,a){await fetch(`/api/servers/${id}/${a}`,{method:"POST"});load()} load();
+</script></body></html>
