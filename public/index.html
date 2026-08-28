@@ -1,342 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>HarvixPanel</title>
 
   <style>
-    :root {
-      --bg: #090c12;
-      --card: #111722;
-      --card2: #0d131d;
-      --border: #252d3a;
-      --text: #edf2f7;
-      --muted: #9ba7b7;
-      --primary: #7c5cff;
-      --primary2: #6847f5;
-      --danger: #ff6262;
-      --success: #48d597;
-      --warning: #f4c95d;
-    }
-
     * {
       box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
+      background: #090c12;
+      color: #edf2f7;
+      font-family: Arial, sans-serif;
     }
 
-    button,
+    header {
+      padding: 18px 22px;
+      background: #111722;
+      border-bottom: 1px solid #252d3a;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 18px;
+    }
+
+    .card {
+      background: #111722;
+      border: 1px solid #252d3a;
+      border-radius: 14px;
+      padding: 18px;
+      margin: 14px 0;
+    }
+
     input,
-    select {
-      font: inherit;
+    select,
+    button {
+      padding: 11px;
+      border-radius: 8px;
+      border: 1px solid #303a49;
+      background: #0b1018;
+      color: white;
+      margin: 4px;
     }
 
     button {
       cursor: pointer;
     }
 
-    .hidden {
-      display: none !important;
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: rgba(17, 23, 34, .95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .header-inner {
-      max-width: 1200px;
-      margin: auto;
-      min-height: 64px;
-      padding: 0 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .brand {
-      font-size: 19px;
-      font-weight: 800;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    main {
-      max-width: 1200px;
-      margin: auto;
-      padding: 20px;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 16px;
-    }
-
-    .small-card {
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-    }
-
-    h1,
-    h2,
-    h3 {
-      margin-top: 0;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .success {
-      color: var(--success);
-    }
-
-    .danger {
-      color: var(--danger);
-    }
-
-    .warning {
-      color: var(--warning);
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 11px 12px;
-      margin: 5px 0;
-      color: var(--text);
-      background: #090e16;
-      border: 1px solid #303a49;
-      border-radius: 9px;
-      outline: none;
-    }
-
-    input:focus,
-    select:focus {
-      border-color: var(--primary);
-    }
-
-    button {
-      border: 1px solid #303a49;
-      background: #0c121c;
-      color: white;
-      padding: 10px 13px;
-      border-radius: 9px;
-      margin: 4px;
-    }
-
     button:hover {
-      border-color: var(--primary);
-    }
-
-    .primary {
-      background: var(--primary);
-      border-color: var(--primary);
-    }
-
-    .primary:hover {
-      background: var(--primary2);
-    }
-
-    .danger-btn {
-      background: #35151a;
-      border-color: #70313a;
-    }
-
-    .success-btn {
-      background: #10291f;
-      border-color: #286c4e;
-    }
-
-    .top-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-bottom: 16px;
+      background: #182131;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-
-    .server-card {
-      margin-bottom: 16px;
-    }
-
-    .server-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    .server-name {
-      font-size: 19px;
-      font-weight: bold;
-    }
-
-    .status {
-      padding: 5px 9px;
-      border-radius: 999px;
-      background: #202936;
-      font-size: 12px;
-    }
-
-    .status.running {
-      color: var(--success);
-      background: #10291f;
-    }
-
-    .status.stopped {
-      color: var(--muted);
-    }
-
-    .status.restarting,
-    .status.reinstalling {
-      color: var(--warning);
-      background: #302914;
+      grid-template-columns:
+        repeat(auto-fit, minmax(170px, 1fr));
+      gap: 8px;
     }
 
     .tabs {
       display: flex;
+      gap: 6px;
       flex-wrap: wrap;
-      gap: 5px;
-      margin-top: 13px;
     }
 
-    .tabs button {
-      font-size: 13px;
-    }
-
-    .module {
-      margin-top: 14px;
-      padding: 15px;
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-    }
-
-    .module pre {
-      white-space: pre-wrap;
-      word-break: break-word;
-      background: #070a0f;
-      padding: 12px;
-      border-radius: 8px;
-      min-height: 130px;
-      color: #cdd6e4;
-      overflow: auto;
-    }
-
-    .auth {
-      max-width: 430px;
-      margin: 50px auto;
-    }
-
-    .auth-tabs {
-      display: flex;
-      margin-bottom: 12px;
-    }
-
-    .auth-tabs button {
-      flex: 1;
-    }
-
-    .user-info {
-      padding: 8px 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-    }
-
-    .admin-badge {
-      color: #d7caff;
-    }
-
-    .message {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
+    .hidden {
       display: none;
     }
 
-    .message.show {
-      display: block;
+    .muted {
+      color: #9ba7b7;
     }
 
-    .message.error {
-      background: #32161a;
-      color: #ff9ca4;
+    .ok {
+      color: #78e6a0;
     }
 
-    .message.ok {
-      background: #10291f;
-      color: #83e2b3;
+    .danger {
+      color: #ff8c8c;
     }
 
-    .stat {
-      font-size: 24px;
-      font-weight: bold;
+    .server {
+      margin-bottom: 20px;
     }
 
-    .empty {
-      text-align: center;
-      padding: 25px;
-      color: var(--muted);
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #080b10;
+      padding: 12px;
+      border-radius: 8px;
+      overflow: auto;
     }
 
-    hr {
-      border: 0;
-      border-top: 1px solid var(--border);
-      margin: 18px 0;
-    }
-
-    footer {
-      text-align: center;
-      color: var(--muted);
-      padding: 25px;
-      font-size: 13px;
-    }
-
-    @media (max-width: 600px) {
-      main {
-        padding: 12px;
-      }
-
-      .header-inner {
-        padding: 0 12px;
-      }
-
-      .header-right {
-        flex-wrap: wrap;
-        justify-content: flex-end;
-      }
-
-      .user-info {
-        display: none;
-      }
+    .badge {
+      padding: 5px 9px;
+      border-radius: 20px;
+      background: #182131;
+      font-size: 12px;
     }
   </style>
 </head>
@@ -344,169 +119,160 @@
 <body>
 
 <header>
-  <div class="header-inner">
-    <div class="brand">⚡ HarvixPanel</div>
+  <b>
+    ⚡ <span id="brand">
+      HarvixPanel
+    </span>
+  </b>
 
-    <div class="header-right">
-      <span id="userInfo" class="user-info hidden"></span>
-      <button id="adminButton" class="primary hidden" onclick="showAdmin()">Admin Panel</button>
-      <button id="logoutButton" class="hidden" onclick="logout()">Logout</button>
-    </div>
-  </div>
+  <span id="userInfo" class="muted">
+    Not logged in
+  </span>
 </header>
 
 <main>
 
-  <!-- =====================================================
-       AUTH
-       ===================================================== -->
+  <!-- AUTH -->
 
-  <section id="authSection" class="auth">
+  <section id="authBox" class="card">
 
-    <div class="card">
+    <h2>HarvixPanel Login</h2>
 
-      <h2 id="authTitle">Login</h2>
+    <input
+      id="username"
+      placeholder="Username"
+      autocomplete="username"
+    >
 
-      <div class="auth-tabs">
-        <button onclick="showLogin()">Login</button>
-        <button onclick="showRegister()">Register</button>
-      </div>
+    <input
+      id="password"
+      type="password"
+      placeholder="Password"
+      autocomplete="current-password"
+    >
 
-      <div id="loginBox">
+    <br>
 
-        <input
-          id="loginUsername"
-          placeholder="Username"
-          autocomplete="username"
-        >
+    <button onclick="login()">
+      Login
+    </button>
 
-        <input
-          id="loginPassword"
-          type="password"
-          placeholder="Password"
-          autocomplete="current-password"
-        >
+    <button onclick="register()">
+      Register
+    </button>
 
-        <button class="primary" onclick="login()">
-          Login
-        </button>
-
-      </div>
-
-      <div id="registerBox" class="hidden">
-
-        <input
-          id="registerUsername"
-          placeholder="Username"
-          autocomplete="username"
-        >
-
-        <input
-          id="registerPassword"
-          type="password"
-          placeholder="Password (minimum 6 characters)"
-          autocomplete="new-password"
-        >
-
-        <button class="primary" onclick="registerUser()">
-          Create Account
-        </button>
-
-      </div>
-
-      <div id="authMessage" class="message"></div>
-
-    </div>
+    <p id="authMessage" class="muted"></p>
 
   </section>
 
 
-  <!-- =====================================================
-       DASHBOARD
-       ===================================================== -->
+  <!-- APP -->
 
-  <section id="dashboardSection" class="hidden">
+  <section id="appBox" class="hidden">
 
-    <div class="top-actions">
+    <div class="card">
 
-      <button class="primary" onclick="showDashboard()">
-        🏠 Dashboard
+      <button onclick="logout()">
+        Logout
       </button>
 
-      <button id="adminTopButton" class="hidden" onclick="showAdmin()">
-        👑 Admin
-      </button>
-
-      <button onclick="loadServers()">
-        🔄 Refresh
+      <button
+        id="adminButton"
+        class="hidden"
+        onclick="showAdminPanel()"
+      >
+        👑 Admin Panel
       </button>
 
     </div>
 
 
-    <!-- Create Server -->
+    <!-- CREATE SERVER -->
 
     <div class="card">
 
-      <h2>➕ Create Server</h2>
-
-      <p class="muted">
-        Normal users: maximum 4096 MB RAM, 5120 MB disk and 1 vCore.
-      </p>
+      <h2>
+        Create Server
+      </h2>
 
       <div class="grid">
 
-        <div>
-          <label>Server Name</label>
-          <input id="serverName" placeholder="My Survival Server">
-        </div>
+        <input
+          id="serverName"
+          placeholder="Server name"
+        >
 
-        <div>
-          <label>RAM (MB)</label>
-          <input id="serverRam" type="number" value="1024" min="1">
-        </div>
+        <input
+          id="serverRam"
+          type="number"
+          value="1024"
+          placeholder="RAM MB"
+        >
 
-        <div>
-          <label>Disk (MB)</label>
-          <input id="serverDisk" type="number" value="2048" min="1">
-        </div>
+        <input
+          id="serverDisk"
+          type="number"
+          value="2048"
+          placeholder="Disk MB"
+        >
 
-        <div>
-          <label>CPU (vCore)</label>
-          <input id="serverCpu" type="number" value="1" min="0.1" step="0.1">
-        </div>
+        <input
+          id="serverCpu"
+          type="number"
+          value="1"
+          step="0.1"
+          placeholder="vCPU"
+        >
 
-        <div>
-          <label>Software</label>
-          <select id="serverSoftware">
-            <option>Paper</option>
-            <option>Vanilla</option>
-            <option>Fabric</option>
-            <option>Forge</option>
-          </select>
-        </div>
+        <select id="serverSoftware">
 
-        <div>
-          <label>Version</label>
-          <input id="serverVersion" value="1.21.4">
-        </div>
+          <option value="Paper">
+            Paper
+          </option>
+
+          <option value="Vanilla">
+            Vanilla
+          </option>
+
+          <option value="Fabric">
+            Fabric
+          </option>
+
+          <option value="Forge">
+            Forge
+          </option>
+
+        </select>
+
+        <input
+          id="serverVersion"
+          value="1.21.4"
+          placeholder="Version"
+        >
 
       </div>
 
-      <button class="primary" onclick="createServer()">
+      <button onclick="createServer()">
         Create Server
       </button>
 
-      <div id="createMessage" class="message"></div>
+      <p class="muted">
+        Normal user limit:
+        4096 MB RAM •
+        5120 MB Disk •
+        1 vCore
+      </p>
 
     </div>
 
 
-    <!-- Servers -->
+    <!-- SERVERS -->
 
     <div class="card">
 
-      <h2>🖥️ My Servers</h2>
+      <h2>
+        My Servers
+      </h2>
 
       <div id="servers">
         Loading...
@@ -514,262 +280,137 @@
 
     </div>
 
-  </section>
 
+    <!-- ADMIN -->
 
-  <!-- =====================================================
-       ADMIN PANEL
-       ===================================================== -->
-
-  <section id="adminSection" class="hidden">
-
-    <div class="top-actions">
-
-      <button onclick="showDashboard()">
-        🏠 Dashboard
-      </button>
-
-      <button class="primary" onclick="showAdmin()">
-        👑 Admin Panel
-      </button>
-
-    </div>
-
-
-    <div class="card">
-
-      <h2>👑 Admin Panel</h2>
-
-      <div class="tabs">
-
-        <button onclick="adminSettings()">
-          ⚙️ Settings
-        </button>
-
-        <button onclick="adminNodes()">
-          🖥️ Nodes
-        </button>
-
-        <button onclick="adminCreateServer()">
-          ➕ Create Server
-        </button>
-
-        <button onclick="adminUsers()">
-          👥 Users
-        </button>
-
-        <button onclick="adminTheme()">
-          🎨 Theme
-        </button>
-
-      </div>
-
-    </div>
-
-    <div id="adminContent"></div>
+    <div
+      id="adminPanel"
+      class="hidden"
+    ></div>
 
   </section>
 
 </main>
 
-<footer>
-  HarvixPanel • HarvixNodes
-</footer>
-
 
 <script>
-/* =========================================================
-   GLOBAL STATE
-   ========================================================= */
 
-let authToken = localStorage.getItem("harvix_token") || "";
+let token =
+  localStorage.getItem(
+    "harvix_token"
+  );
+
 let currentUser = null;
 
 
-/* =========================================================
+/* =========================
    API HELPER
-   ========================================================= */
+========================= */
 
-async function api(url, options = {}) {
+async function api(
+  url,
+  options = {}
+) {
 
-  const headers = {
-    ...(options.headers || {})
-  };
+  options.headers =
+    options.headers || {};
 
-  if (authToken) {
-    headers.Authorization = "Bearer " + authToken;
+  if (token) {
+
+    options.headers.Authorization =
+      "Bearer " + token;
+
   }
 
   if (
     options.body &&
     typeof options.body !== "string"
   ) {
-    headers["Content-Type"] = "application/json";
-    options.body = JSON.stringify(options.body);
+
+    options.headers[
+      "Content-Type"
+    ] = "application/json";
+
+    options.body =
+      JSON.stringify(
+        options.body
+      );
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers
-  });
+  const response =
+    await fetch(
+      url,
+      options
+    );
 
-  let data = {};
-
-  try {
-    data = await response.json();
-  } catch {
-    data = {};
-  }
+  const data =
+    await response
+      .json()
+      .catch(() => ({}));
 
   if (!response.ok) {
+
     throw new Error(
-      data.error || "Request failed"
+      data.error ||
+      "Request failed."
     );
+
   }
 
   return data;
 }
 
 
-/* =========================================================
-   AUTH UI
-   ========================================================= */
+/* =========================
+   SAFE HTML
+========================= */
 
-function showLogin() {
+function escapeHtml(value) {
 
-  document.getElementById("authTitle").textContent = "Login";
+  return String(
+    value ?? ""
+  ).replace(
+    /[&<>"']/g,
+    character => {
 
-  document.getElementById("loginBox")
-    .classList.remove("hidden");
+      const map = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      };
 
-  document.getElementById("registerBox")
-    .classList.add("hidden");
+      return map[character];
 
-  clearMessage("authMessage");
+    }
+  );
 }
 
 
-function showRegister() {
-
-  document.getElementById("authTitle").textContent = "Create Account";
-
-  document.getElementById("loginBox")
-    .classList.add("hidden");
-
-  document.getElementById("registerBox")
-    .classList.remove("hidden");
-
-  clearMessage("authMessage");
-}
-
-
-function showMessage(id, text, type = "ok") {
-
-  const element = document.getElementById(id);
-
-  if (!element) return;
-
-  element.textContent = text;
-
-  element.className =
-    "message show " +
-    (type === "error" ? "error" : "ok");
-}
-
-
-function clearMessage(id) {
-
-  const element = document.getElementById(id);
-
-  if (!element) return;
-
-  element.textContent = "";
-  element.className = "message";
-}
-
-
-/* =========================================================
+/* =========================
    REGISTER
-   ========================================================= */
+========================= */
 
-async function registerUser() {
+async function register() {
 
   const username =
-    document.getElementById("registerUsername").value.trim();
+    document
+      .getElementById("username")
+      .value;
 
   const password =
-    document.getElementById("registerPassword").value;
-
-  if (!username || !password) {
-
-    showMessage(
-      "authMessage",
-      "Username and password are required.",
-      "error"
-    );
-
-    return;
-  }
+    document
+      .getElementById("password")
+      .value;
 
   try {
 
-    await api("/api/auth/register", {
-      method: "POST",
-      body: {
-        username,
-        password
-      }
-    });
-
-    showMessage(
-      "authMessage",
-      "Account created successfully. You can now login."
-    );
-
-    document.getElementById("registerPassword").value = "";
-
-    showLogin();
-
-  } catch (error) {
-
-    showMessage(
-      "authMessage",
-      error.message,
-      "error"
-    );
-  }
-}
-
-
-/* =========================================================
-   LOGIN
-   ========================================================= */
-
-async function login() {
-
-  const username =
-    document.getElementById("loginUsername").value.trim();
-
-  const password =
-    document.getElementById("loginPassword").value;
-
-  if (!username || !password) {
-
-    showMessage(
-      "authMessage",
-      "Enter username and password.",
-      "error"
-    );
-
-    return;
-  }
-
-  try {
-
-    const result = await api(
-      "/api/auth/login",
+    await api(
+      "/api/auth/register",
       {
         method: "POST",
+
         body: {
           username,
           password
@@ -777,262 +418,165 @@ async function login() {
       }
     );
 
-    authToken = result.token;
-
-    localStorage.setItem(
-      "harvix_token",
-      authToken
-    );
-
-    currentUser = result.user;
-
-    updateHeader();
-
-    showDashboard();
+    document
+      .getElementById(
+        "authMessage"
+      )
+      .textContent =
+      "Account created. Now login.";
 
   } catch (error) {
 
-    showMessage(
-      "authMessage",
-      error.message,
-      "error"
-    );
+    document
+      .getElementById(
+        "authMessage"
+      )
+      .textContent =
+      error.message;
+
   }
 }
 
 
-/* =========================================================
-   LOGOUT
-   ========================================================= */
+/* =========================
+   LOGIN
+========================= */
 
-async function logout() {
+async function login() {
+
+  const username =
+    document
+      .getElementById("username")
+      .value;
+
+  const password =
+    document
+      .getElementById("password")
+      .value;
 
   try {
 
-    await api(
-      "/api/auth/logout",
-      {
-        method: "POST"
-      }
+    const result =
+      await api(
+        "/api/auth/login",
+        {
+          method: "POST",
+
+          body: {
+            username,
+            password
+          }
+        }
+      );
+
+    token =
+      result.token;
+
+    localStorage.setItem(
+      "harvix_token",
+      token
     );
 
-  } catch {}
+    await boot();
 
-  authToken = "";
+  } catch (error) {
 
-  currentUser = null;
+    document
+      .getElementById(
+        "authMessage"
+      )
+      .textContent =
+      error.message;
 
-  localStorage.removeItem(
-    "harvix_token"
-  );
-
-  updateHeader();
-
-  document.getElementById("dashboardSection")
-    .classList.add("hidden");
-
-  document.getElementById("adminSection")
-    .classList.add("hidden");
-
-  document.getElementById("authSection")
-    .classList.remove("hidden");
-
-  showLogin();
+  }
 }
 
 
-/* =========================================================
-   CHECK LOGIN
-   ========================================================= */
+/* =========================
+   BOOT
+========================= */
 
-async function checkLogin() {
+async function boot() {
 
-  if (!authToken) {
-
-    updateHeader();
-
+  if (!token) {
     return;
   }
 
   try {
 
     currentUser =
-      await api("/api/auth/me");
+      await api(
+        "/api/auth/me"
+      );
 
-    updateHeader();
+    document
+      .getElementById(
+        "authBox"
+      )
+      .classList
+      .add("hidden");
 
-    showDashboard();
+    document
+      .getElementById(
+        "appBox"
+      )
+      .classList
+      .remove("hidden");
 
-  } catch {
+    document
+      .getElementById(
+        "userInfo"
+      )
+      .textContent =
+      currentUser.username +
+      " • " +
+      currentUser.role;
 
-    authToken = "";
+    if (
+      currentUser.role ===
+      "admin"
+    ) {
 
-    localStorage.removeItem(
-      "harvix_token"
-    );
+      document
+        .getElementById(
+          "adminButton"
+        )
+        .classList
+        .remove("hidden");
 
-    updateHeader();
+    }
+
+    loadServers();
+
+  } catch (error) {
+
+    logout();
+
   }
 }
 
 
-/* =========================================================
-   HEADER
-   ========================================================= */
+/* =========================
+   LOGOUT
+========================= */
 
-function updateHeader() {
+function logout() {
 
-  const userInfo =
-    document.getElementById("userInfo");
+  localStorage.removeItem(
+    "harvix_token"
+  );
 
-  const logoutButton =
-    document.getElementById("logoutButton");
+  token = null;
 
-  const adminButton =
-    document.getElementById("adminButton");
-
-  const adminTopButton =
-    document.getElementById("adminTopButton");
-
-  if (!currentUser) {
-
-    userInfo.classList.add("hidden");
-
-    logoutButton.classList.add("hidden");
-
-    adminButton.classList.add("hidden");
-
-    adminTopButton.classList.add("hidden");
-
-    return;
-  }
-
-  userInfo.textContent =
-    currentUser.username +
-    " • " +
-    currentUser.role;
-
-  userInfo.classList.remove("hidden");
-
-  logoutButton.classList.remove("hidden");
-
-  if (currentUser.role === "admin") {
-
-    adminButton.classList.remove("hidden");
-
-    adminTopButton.classList.remove("hidden");
-
-  } else {
-
-    adminButton.classList.add("hidden");
-
-    adminTopButton.classList.add("hidden");
-  }
+  location.reload();
 }
 
 
-/* =========================================================
-   PAGE SWITCHING
-   ========================================================= */
-
-function hideAllSections() {
-
-  document.getElementById("authSection")
-    .classList.add("hidden");
-
-  document.getElementById("dashboardSection")
-    .classList.add("hidden");
-
-  document.getElementById("adminSection")
-    .classList.add("hidden");
-}
-
-
-function showDashboard() {
-
-  if (!currentUser) {
-
-    hideAllSections();
-
-    document.getElementById("authSection")
-      .classList.remove("hidden");
-
-    return;
-  }
-
-  hideAllSections();
-
-  document.getElementById("dashboardSection")
-    .classList.remove("hidden");
-
-  loadServers();
-}
-
-
-function showAdmin() {
-
-  if (
-    !currentUser ||
-    currentUser.role !== "admin"
-  ) {
-
-    alert("Administrator access required.");
-
-    return;
-  }
-
-  hideAllSections();
-
-  document.getElementById("adminSection")
-    .classList.remove("hidden");
-
-  adminSettings();
-}
-
-
-/* =========================================================
+/* =========================
    CREATE SERVER
-   ========================================================= */
+========================= */
 
 async function createServer() {
-
-  const body = {
-
-    name:
-      document.getElementById("serverName").value.trim(),
-
-    ram_mb:
-      Number(
-        document.getElementById("serverRam").value
-      ),
-
-    disk_mb:
-      Number(
-        document.getElementById("serverDisk").value
-      ),
-
-    cpu_vcpu:
-      Number(
-        document.getElementById("serverCpu").value
-      ),
-
-    software:
-      document.getElementById("serverSoftware").value,
-
-    version:
-      document.getElementById("serverVersion").value.trim()
-  };
-
-  if (!body.name) {
-
-    showMessage(
-      "createMessage",
-      "Enter a server name.",
-      "error"
-    );
-
-    return;
-  }
 
   try {
 
@@ -1040,92 +584,830 @@ async function createServer() {
       "/api/servers",
       {
         method: "POST",
-        body
+
+        body: {
+
+          name:
+            document
+              .getElementById(
+                "serverName"
+              ).value,
+
+          ram_mb:
+            Number(
+              document
+                .getElementById(
+                  "serverRam"
+                ).value
+            ),
+
+          disk_mb:
+            Number(
+              document
+                .getElementById(
+                  "serverDisk"
+                ).value
+            ),
+
+          cpu_vcpu:
+            Number(
+              document
+                .getElementById(
+                  "serverCpu"
+                ).value
+            ),
+
+          software:
+            document
+              .getElementById(
+                "serverSoftware"
+              ).value,
+
+          version:
+            document
+              .getElementById(
+                "serverVersion"
+              ).value
+
+        }
+
       }
     );
 
-    showMessage(
-      "createMessage",
+    alert(
       "Server created successfully."
     );
 
-    document.getElementById("serverName").value = "";
-
-    await loadServers();
+    loadServers();
 
   } catch (error) {
 
-    showMessage(
-      "createMessage",
-      error.message,
-      "error"
+    alert(
+      error.message
     );
+
   }
 }
 
 
-/* =========================================================
+/* =========================
    LOAD SERVERS
-   ========================================================= */
+========================= */
 
 async function loadServers() {
 
   const container =
-    document.getElementById("servers");
-
-  container.innerHTML =
-    '<div class="empty">Loading servers...</div>';
+    document.getElementById(
+      "servers"
+    );
 
   try {
 
     const servers =
-      await api("/api/servers");
+      await api(
+        "/api/servers"
+      );
 
     if (!servers.length) {
 
       container.innerHTML =
-        '<div class="empty">No servers yet.</div>';
+        '<p class="muted">' +
+        "No servers yet." +
+        "</p>";
 
       return;
     }
 
     container.innerHTML =
-      servers.map(renderServer).join("");
+      servers
+        .map(
+          server =>
+            createServerCard(
+              server
+            )
+        )
+        .join("");
 
   } catch (error) {
 
     container.innerHTML =
-      `<div class="danger">${escapeHtml(error.message)}</div>`;
+      `<p class="danger">
+        ${escapeHtml(
+          error.message
+        )}
+      </p>`;
+
   }
 }
 
 
-/* =========================================================
+/* =========================
    SERVER CARD
-   ========================================================= */
+========================= */
 
-function renderServer(server) {
+function createServerCard(
+  server
+) {
 
-  const status =
-    server.status || "stopped";
+  const statusClass =
+    server.status ===
+    "running"
+      ? "ok"
+      : "danger";
 
   return `
-    <div class="card server-card">
 
-      <div class="server-head">
+    <div class="card server">
 
-        <div>
+      <h3>
+        🖥️
+        ${escapeHtml(
+          server.name
+        )}
+      </h3>
 
-          <div class="server-name">
-            🖥️ ${escapeHtml(server.name)}
-          </div>
+      <p class="muted">
 
-          <div class="muted">
-            ${escapeHtml(server.software)}
-            ${escapeHtml(server.version)}
-          </div>
+        ${escapeHtml(
+          server.software
+        )}
 
-        </div>
+        ${escapeHtml(
+          server.version
+        )}
 
-        <span class="status ${escapeHtml(status)}">
-          ${escapeHtml(sta
+        •
+        ${server.ram_mb} MB RAM
+
+        •
+        ${server.disk_mb} MB Disk
+
+        •
+        ${server.cpu_vcpu} vCPU
+
+      </p>
+
+      <p class="${statusClass}">
+        Status:
+        ${escapeHtml(
+          server.status
+        )}
+      </p>
+
+      <div class="tabs">
+
+        <button
+          onclick="openModule(
+            ${server.id},
+            'console'
+          )"
+        >
+          Console
+        </button>
+
+        <button
+          onclick="openModule(
+            ${server.id},
+            'file-manager'
+          )"
+        >
+          File Manager
+        </button>
+
+        <button
+          onclick="openModule(
+            ${server.id},
+            'sftp'
+          )"
+        >
+          SFTP
+        </button>
+
+        <button
+          onclick="openModule(
+            ${server.id},
+            'plugin-installer'
+          )"
+        >
+          Plugin Installer
+        </button>
+
+        <button
+          onclick="openModule(
+            ${server.id},
+            'mod-manager'
+          )"
+        >
+          Mod Manager
+        </button>
+
+        <button
+          onclick="openModule(
+            ${server.id},
+            'votifier'
+          )"
+        >
+          Votifier Test
+        </button>
+
+        <button
+          onclick="openModule(
+            ${server.id},
+            'server-splitter'
+          )"
+        >
+          Server Splitter
+        </button>
+
+        <button
+          onclick="openServerSettings(
+            ${server.id}
+          )"
+        >
+          Settings
+        </button>
+
+      </div>
+
+      <div
+        id="module-${server.id}"
+      ></div>
+
+      <hr>
+
+      <button
+        onclick="serverAction(
+          ${server.id},
+          'start'
+        )"
+      >
+        Start
+      </button>
+
+      <button
+        onclick="serverAction(
+          ${server.id},
+          'restart'
+        )"
+      >
+        Restart
+      </button>
+
+      <button
+        onclick="serverAction(
+          ${server.id},
+          'stop'
+        )"
+      >
+        Stop
+      </button>
+
+      <button
+        onclick="serverAction(
+          ${server.id},
+          'reinstall'
+        )"
+      >
+        Reinstall
+      </button>
+
+    </div>
+
+  `;
+}
+
+
+/* =========================
+   SERVER ACTION
+========================= */
+
+async function serverAction(
+  id,
+  action
+) {
+
+  try {
+
+    await api(
+      `/api/servers/${id}/${action}`,
+      {
+        method: "POST"
+      }
+    );
+
+    loadServers();
+
+  } catch (error) {
+
+    alert(
+      error.message
+    );
+
+  }
+}
+
+
+/* =========================
+   MODULE
+========================= */
+
+async function openModule(
+  id,
+  module
+) {
+
+  const box =
+    document.getElementById(
+      `module-${id}`
+    );
+
+  try {
+
+    const result =
+      await api(
+        `/api/servers/${id}/${module}`
+      );
+
+    box.innerHTML = `
+
+      <div class="card">
+
+        <h3>
+          ${escapeHtml(
+            module
+          )}
+        </h3>
+
+        <pre>${escapeHtml(
+          JSON.stringify(
+            result,
+            null,
+            2
+          )
+        )}</pre>
+
+      </div>
+
+    `;
+
+  } catch (error) {
+
+    alert(
+      error.message
+    );
+
+  }
+}
+
+
+/* =========================
+   SERVER SETTINGS
+========================= */
+
+async function openServerSettings(
+  id
+) {
+
+  const box =
+    document.getElementById(
+      `module-${id}`
+    );
+
+  try {
+
+    const server =
+      await api(
+        `/api/servers/${id}`
+      );
+
+    box.innerHTML = `
+
+      <div class="card">
+
+        <h3>
+          ⚙️ Server Settings
+        </h3>
+
+        <p>
+          <button
+            onclick="serverAction(
+              ${id},
+              'reinstall'
+            )"
+          >
+            Reinstall Server
+          </button>
+        </p>
+
+        <p>
+
+          <input
+            id="version-${id}"
+            value="${escapeHtml(
+              server.version
+            )}"
+            placeholder="Version"
+          >
+
+          <button
+            onclick="changeVersion(
+              ${id}
+            )"
+          >
+            Change Version Type
+          </button>
+
+        </p>
+
+        <p>
+
+          <select
+            id="software-${id}"
+          >
+
+            <option>Paper</option>
+            <option>Vanilla</option>
+            <option>Fabric</option>
+            <option>Forge</option>
+
+          </select>
+
+          <button
+            onclick="changeSoftware(
+              ${id}
+            )"
+          >
+            Change Software
+          </button>
+
+        </p>
+
+        ${
+          currentUser.role ===
+          "admin"
+
+            ? `
+
+              <hr>
+
+              <h4>
+                🔐 IP Alias
+                (Admin Only)
+              </h4>
+
+              <input
+                id="alias-${id}"
+                value="${escapeHtml(
+                  server.alias_ip || ""
+                )}"
+                placeholder="Playit/MineKube address"
+              >
+
+              <button
+                onclick="saveAlias(
+                  ${id}
+                )"
+              >
+                Save
+              </button>
+
+              <p class="muted">
+                IP Alias only stores an
+                address you control. It
+                does not create DNS or
+                networking automatically.
+              </p>
+
+            `
+
+            : ""
+        }
+
+      </div>
+
+    `;
+
+  } catch (error) {
+
+    alert(
+      error.message
+    );
+
+  }
+}
+
+
+/* =========================
+   VERSION
+========================= */
+
+async function changeVersion(
+  id
+) {
+
+  const value =
+    document
+      .getElementById(
+        `version-${id}`
+      )
+      .value;
+
+  try {
+
+    await api(
+      `/api/servers/${id}/version`,
+      {
+        method: "PUT",
+
+        body: {
+          version: value
+        }
+      }
+    );
+
+    loadServers();
+
+  } catch (error) {
+
+    alert(
+      error.message
+    );
+
+  }
+}
+
+
+/* =========================
+   SOFTWARE
+========================= */
+
+async function changeSoftware(
+  id
+) {
+
+  const value =
+    document
+      .getElementById(
+        `software-${id}`
+      )
+      .value;
+
+  try {
+
+    await api(
+      `/api/servers/${id}/software`,
+      {
+        method: "PUT",
+
+        body: {
+          software: value
+        }
+      }
+    );
+
+    loadServers();
+
+  } catch (error) {
+
+    alert(
+      error.message
+    );
+
+  }
+}
+
+
+/* =========================
+   IP ALIAS
+========================= */
+
+async function saveAlias(
+  id
+) {
+
+  const value =
+    document
+      .getElementById(
+        `alias-${id}`
+      )
+      .value;
+
+  try {
+
+    await api(
+      `/api/servers/${id}/alias`,
+      {
+        method: "PUT",
+
+        body: {
+          alias_ip: value
+        }
+      }
+    );
+
+    alert(
+      "IP Alias saved."
+    );
+
+  } catch (error) {
+
+    alert(
+      error.message
+    );
+
+  }
+}
+
+
+/* =========================
+   ADMIN PANEL
+========================= */
+
+async function showAdminPanel() {
+
+  const panel =
+    document.getElementById(
+      "adminPanel"
+    );
+
+  panel.classList.remove(
+    "hidden"
+  );
+
+  panel.innerHTML = `
+
+    <div class="card">
+
+      <h2>
+        👑 Admin Panel
+      </h2>
+
+      <button
+        onclick="adminSettings()"
+      >
+        ⚙️ Settings
+      </button>
+
+      <button
+        onclick="adminNodes()"
+      >
+        🖥️ Nodes
+      </button>
+
+      <button
+        onclick="adminUsers()"
+      >
+        👥 Users
+      </button>
+
+      <div
+        id="adminContent"
+      ></div>
+
+    </div>
+
+  `;
+}
+
+
+/* =========================
+   ADMIN SETTINGS
+========================= */
+
+async function adminSettings() {
+
+  const content =
+    document.getElementById(
+      "adminContent"
+    );
+
+  try {
+
+    const settings =
+      await api(
+        "/api/settings"
+      );
+
+    content.innerHTML = `
+
+      <div class="card">
+
+        <h3>
+          Panel Settings
+        </h3>
+
+        <input
+          id="panelName"
+          value="${escapeHtml(
+            settings.server_name
+          )}"
+          placeholder="Server name"
+        >
+
+        <input
+          id="panelIcon"
+          value="${escapeHtml(
+            settings.server_icon
+          )}"
+          placeholder="Server icon"
+        >
+
+        <button
+          onclick="savePanelSettings()"
+        >
+          Save
+        </button>
+
+      </div>
+
+    `;
+
+  } catch (error) {
+
+    alert(
+      error.message
+    );
+
+  }
+}
+
+
+/* =========================
+   SAVE ADMIN SETTINGS
+========================= */
+
+async function savePanelSettings() {
+
+  try {
+
+    const result =
+      await api(
+        "/api/settings",
+        {
+          method: "PUT",
+
+          body: {
+
+            server_name:
+              document
+                .getElementById(
+                  "panelName"
+                ).value,
+
+            server_icon:
+              document
+                .getElementById(
+                  "panelIcon"
+                ).value
+
+          }
+        }
+      );
+
+    document
+      .getElementById(
+        "brand"
+      )
+      .textContent =
+      result.server_name;
+
+    alert(
+      "Settings saved."
+    );
+
+  } catch (error) {
+
+    alert(
+      error.message
+    );
+
+  }
+}
+
+
+/* =========================
+   ADMIN NODES
+========================= */
+
+async function adminNodes() {
+
+  const content =
+    document.getElementById(
+      "adminContent"
+    );
+
+  try {
+
+    const nodes =
+      await api(
+        "/api/nodes"
+      );
+
+    if (!nodes.length) {
+
+      content.innerHTML =
+        `<div class="card">
+          No nodes found.
+        </div>`;
+
+      retur
