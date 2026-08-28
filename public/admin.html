@@ -1,1 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Admin Panel - HarvixPanel</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(155, 45, 255, .22), transparent 30%),
+        radial-gradient(circle at 85% 80%, rgba(255, 40, 190, .16), transparent 32%),
+        #0b0712;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 250px;
+      min-height: 100vh;
+      padding: 22px 15px;
+
+      background: rgba(15, 10, 24, .88);
+      border-right: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(18px);
+
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 8px 10px 25px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #7d1cff, #bd45ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .admin-label {
+      font-size: 11px;
+      color: #b968ff;
+      margin-top: 3px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .menu-title {
+      color: rgba(255,255,255,.4);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 12px 11px 8px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .menu a {
+      color: rgba(255,255,255,.7);
+      text-decoration: none;
+      padding: 12px;
+      border-radius: 11px;
+      font-size: 14px;
+      transition: .2s;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .menu a:hover,
+    .menu a.active {
+      color: #fff;
+      background: rgba(157, 45, 255, .18);
+    }
+
+    .menu-icon {
+      width: 22px;
+      text-align: center;
+      font-size: 17px;
+    }
+
+    .logout {
+      position: absolute;
+      left: 15px;
+      right: 15px;
+      bottom: 20px;
+    }
+
+    .logout button {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.7);
+      padding: 12px;
+      border-radius: 11px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .logout button:hover {
+      background: rgba(255,50,80,.12);
+      color: #ff9daa;
+    }
+
+    /* MAIN */
+
+    .main {
+      margin-left: 250px;
+      width: calc(100% - 250px);
+      padding: 30px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .page-subtitle {
+      margin-top: 6px;
+      color: rgba(255,255,255,.52);
+      font-size: 14px;
+    }
+
+    .admin-badge {
+      padding: 9px 13px;
+      border-radius: 10px;
+      background: rgba(155,45,255,.13);
+      border: 1px solid rgba(155,45,255,.25);
+      color: #d18bff;
+      font-size: 13px;
+    }
+
+    /* STATS */
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat {
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .stat-name {
+      color: rgba(255,255,255,.5);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    /* CARDS */
+
+    .section-title {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .card {
+      text-decoration: none;
+      color: #fff;
+      padding: 22px;
+      border-radius: 17px;
+
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+
+      transition: .2s;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      background: rgba(155,45,255,.10);
+      border-color: rgba(155,45,255,.25);
+    }
+
+    .card-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background: rgba(155,45,255,.15);
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .card-description {
+      color: rgba(255,255,255,.5);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 900px) {
+
+      .sidebar {
+        width: 70px;
+        padding: 15px 9px;
+      }
+
+      .brand {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .brand-name,
+      .admin-label,
+      .menu-title {
+        display: none;
+      }
+
+      .menu a {
+        justify-content: center;
+        padding: 13px 5px;
+      }
+
+      .menu a span:not(.menu-icon) {
+        display: none;
+      }
+
+      .logout button {
+        font-size: 0;
+      }
+
+      .logout button::before {
+        content: "↪";
+        font-size: 18px;
+      }
+
+      .main {
+        margin-left: 70px;
+        width: calc(100% - 70px);
+        padding: 20px;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 550px) {
+
+      .main {
+        padding: 15px;
+      }
+
+      .page-title {
+        font-size: 23px;
+      }
+
+      .admin-badge {
+        display: none;
+      }
+
+      .stats,
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-logo">H</div>
+
+      <div>
+        <div class="brand-name">HarvixPanel</div>
+        <div class="admin-label">Administrator</div>
+      </div>
+    </div>
+
+    <div class="menu-title">Management</div>
+
+    <nav class="menu">
+
+      <a href="/admin.html" class="active">
+        <span class="menu-icon">⌂</span>
+        <span>Overview</span>
+      </a>
+
+      <a href="/settings.html">
+        <span class="menu-icon">⚙</span>
+        <span>Settings</span>
+      </a>
+
+      <a href="/sftp.html">
+        <span class="menu-icon">🔗</span>
+        <span>SFTP Connect</span>
+      </a>
+
+      <a href="/nodes.html">
+        <span class="menu-icon">🖥</span>
+        <span>Nodes</span>
+      </a>
+
+      <a href="/create-server.html">
+        <span class="menu-icon">＋</span>
+        <span>Create Server</span>
+      </a>
+
+      <a href="/themes.html">
+        <span class="menu-icon">🎨</span>
+        <span>Themes</span>
+      </a>
+
+      <a href="/fleet.html">
+        <span class="menu-icon">🚀</span>
+        <span>Fleet</span>
+      </a>
+
+    </nav>
+
+    <div class="logout">
+      <button id="logoutBtn">Logout</button>
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN -->
+
+  <main class="main">
+
+    <div class="topbar">
+
+      <div>
+        <h1 class="page-title">Admin Panel</h1>
+
+        <p class="page-subtitle">
+          Manage your HarvixPanel infrastructure.
+        </p>
+      </div>
+
+      <div class="admin-badge">
+        👑 Administrator
+      </div>
+
+    </div>
+
+
+    <!-- STATS -->
+
+    <div class="stats">
+
+      <div class="stat">
+        <div class="stat-name">Total Servers</div>
+        <div class="stat-value" id="serverCount">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-name">Online Servers</div>
+        <div class="stat-value" id="onlineCount">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-name">Nodes</div>
+        <div class="stat-value" id="nodeCount">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-name">Users</div>
+        <div class="stat-value" id="userCount">0</div>
+      </div>
+
+    </div>
+
+
+    <!-- MANAGEMENT -->
+
+    <div class="section-title">
+      Management
+    </div>
+
+    <div class="cards">
+
+      <a class="card" href="/settings.html">
+        <div class="card-icon">⚙</div>
+
+        <div class="card-title">
+          Settings
+        </div>
+
+        <div class="card-description">
+          Change panel name, logo and configuration.
+        </div>
+      </a>
+
+
+      <a class="card" href="/sftp.html">
+        <div class="card-icon">🔗</div>
+
+        <div class="card-title">
+          SFTP Connect
+        </div>
+
+        <div class="card-description">
+          Manage SFTP connection settings.
+        </div>
+      </a>
+
+
+      <a class="card" href="/nodes.html">
+        <div class="card-icon">🖥</div>
+
+        <div class="card-title">
+          Nodes
+        </div>
+
+        <div class="card-description">
+          Manage nodes and monitor real resources.
+        </div>
+      </a>
+
+
+      <a class="card" href="/create-server.html">
+        <div class="card-icon">＋</div>
+
+        <div class="card-title">
+          Create Server
+        </div>
+
+        <div class="card-description">
+          Create a Minecraft server with custom resources.
+        </div>
+      </a>
+
+
+      <a class="card" href="/themes.html">
+        <div class="card-icon">🎨</div>
+
+        <div class="card-title">
+          Themes
+        </div>
+
+        <div class="card-description">
+          Choose Normal, Nebula or Euphoria themes.
+        </div>
+      </a>
+
+
+      <a class="card" href="/fleet.html">
+        <div class="card-icon">🚀</div>
+
+        <div class="card-title">
+          Fleet
+        </div>
+
+        <div class="card-description">
+          View and manage all Minecraft servers.
+        </div>
+      </a>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<script>
+
+  /*
+   * Admin protection
+   *
+   * The backend must ALSO protect /admin.html and all
+   * admin APIs. This frontend check is only for UI.
+   */
+
+  function checkAdmin() {
+
+    const userData = localStorage.getItem("harvix_user");
+
+    if (!userData) {
+      window.location.href = "/";
+      return;
+    }
+
+    try {
+
+      const user = JSON.parse(userData);
+
+      if (user.role !== "admin") {
+        window.location.href = "/dashboard.html";
+        return;
+      }
+
+    } catch (error) {
+
+      localStorage.removeItem("harvix_user");
+      localStorage.removeItem("harvix_token");
+
+      window.location.href = "/";
+    }
+  }
+
+
+  checkAdmin();
+
+
+  document
+    .getElementById("logoutBtn")
+    .addEventListener("click", function() {
+
+      localStorage.removeItem("harvix_token");
+      localStorage.removeItem("harvix_user");
+
+      window.location.href = "/";
+
+    });
+
+
+  /*
+   * Placeholder stats.
+   *
+   * Later these will come from the HarvixPanel API.
+   */
+
+  async function loadStats() {
+
+    try {
+
+      const token =
+        localStorage.getItem("harvix_token");
+
+      const response = await fetch("/api/admin/stats", {
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      document.getElementById("serverCount").textContent =
+        data.servers ?? 0;
+
+      document.getElementById("onlineCount").textContent =
+        data.onlineServers ?? 0;
+
+      document.getElementById("nodeCount").textContent =
+        data.nodes ?? 0;
+
+      document.getElementById("userCount").textContent =
+        data.users ?? 0;
+
+    } catch (error) {
+
+      console.log("Stats API not available yet.");
+
+    }
+
+  }
+
+
+  loadStats();
+
+</script>
+
+</body>
+</html>
