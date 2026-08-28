@@ -392,15 +392,15 @@
     const loginBox = document.getElementById("login");
 
     function showLogin() {
-      registerBox.classList.add("hidden");
-      loginBox.classList.remove("hidden");
+      register.classList.add("show");
+      login.classList.remove("show");
 
       clearMessages();
     }
 
     function showRegister() {
-      loginBox.classList.add("hidden");
-      registerBox.classList.remove("hidden");
+      login.classList.add("show");
+      register.classList.remove("show");
 
       clearMessages();
     }
