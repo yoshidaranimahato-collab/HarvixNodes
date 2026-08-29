@@ -1,35 +1,790 @@
-.free-specs {
-    text-align: center;
+/* ========================================
+   HARVIXPANEL - MAIN STYLE
+======================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #08070d;
+    color: #ffffff;
+}
+
+
+/* ========================================
+   AUTH PAGE
+======================================== */
+
+.auth-page {
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     padding: 25px;
-    border-radius: 18px;
-    background: rgba(255,255,255,0.05);
+
+    background:
+        linear-gradient(
+            rgba(7, 7, 15, 0.38),
+            rgba(7, 7, 15, 0.58)
+        ),
+        url("/assets/auth-bg.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+
+/* ========================================
+   AUTH CARD
+======================================== */
+
+.auth-card {
+    width: 100%;
+    max-width: 520px;
+
+    padding: 34px 38px 27px;
+
+    background: rgba(13, 13, 25, 0.95);
+
+    border: 1px solid rgba(157, 48, 255, 0.25);
+
+    border-radius: 8px;
+
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.65),
+        0 0 35px rgba(135, 35, 255, 0.12);
+}
+
+
+/* ========================================
+   LOGO
+======================================== */
+
+.logo {
+    width: 48px;
+    height: 48px;
+
+    margin: 0 auto 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #731cff,
+            #bd2cff
+        );
+
+    color: white;
+
+    font-size: 22px;
+    font-weight: 900;
+
+    box-shadow:
+        0 0 25px rgba(150, 40, 255, 0.45);
+}
+
+
+.brand {
+    text-align: center;
+
+    margin-bottom: 30px;
+
+    color: #ffffff;
+
+    font-size: 19px;
+    font-weight: 800;
+}
+
+
+.brand span {
+    color: #a832ff;
+}
+
+
+/* ========================================
+   AUTH FORM
+======================================== */
+
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+
+/* ========================================
+   TITLE
+======================================== */
+
+.title {
+    text-align: center;
+
+    margin-bottom: 7px;
+
+    color: #ffffff;
+
+    font-size: 23px;
+    font-weight: 700;
+}
+
+
+.subtitle {
+    text-align: center;
+
+    margin-bottom: 27px;
+
+    color: #9999aa;
+
+    font-size: 12px;
+}
+
+
+/* ========================================
+   INPUT FIELDS
+======================================== */
+
+.field {
+    margin-bottom: 17px;
+}
+
+
+.field label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #b7a8ff;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    text-transform: uppercase;
+}
+
+
+.field input {
+    width: 100%;
+    height: 45px;
+
+    padding: 0 13px;
+
+    border: 1px solid #333345;
+    border-radius: 5px;
+
+    outline: none;
+
+    background: #11111e;
+
+    color: #ffffff;
+
+    font-size: 13px;
+
+    transition: 0.2s;
+}
+
+
+.field input::placeholder {
+    color: #686878;
+}
+
+
+.field input:hover {
+    border-color: #45455a;
+}
+
+
+.field input:focus {
+    border-color: #8e32ff;
+
+    box-shadow:
+        0 0 0 2px rgba(142, 50, 255, 0.12);
+}
+
+
+/* ========================================
+   TWO COLUMN FORM
+======================================== */
+
+.two-columns {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 13px;
+}
+
+
+/* ========================================
+   SUBMIT BUTTON
+======================================== */
+
+.submit-btn {
+    width: 100%;
+    height: 45px;
+
+    margin-top: 5px;
+
+    border: none;
+    border-radius: 6px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #7620ff,
+            #a82cff
+        );
+
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 25px rgba(130, 35, 255, 0.25);
+
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s,
+        opacity 0.2s;
+}
+
+
+.submit-btn:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 10px 30px rgba(130, 35, 255, 0.38);
+}
+
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+
+.submit-btn:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+/* ========================================
+   FORGOT PASSWORD
+======================================== */
+
+.forgot {
+    display: block;
+
+    margin-top: 17px;
+
+    text-align: center;
+
+    color: #777785;
+
+    font-size: 10px;
+
+    text-decoration: none;
+
+    transition: 0.2s;
+}
+
+
+.forgot:hover {
+    color: #a832ff;
+}
+
+
+/* ========================================
+   LOGIN / REGISTER SWITCH
+======================================== */
+
+.switch {
+    text-align: center;
+
+    margin-top: 25px;
+    padding-top: 20px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+
+    color: #9a9aa8;
+
+    font-size: 11px;
+}
+
+
+.switch button {
+    border: none;
+
+    background: none;
+
+    color: #a832ff;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+.switch button:hover {
+    text-decoration: underline;
+}
+
+
+/* ========================================
+   MESSAGE
+======================================== */
+
+.message {
+    display: none;
+
+    width: 100%;
+
+    padding: 11px;
+
+    margin-bottom: 17px;
+
+    border-radius: 5px;
+
+    text-align: center;
+
+    font-size: 11px;
+
+    line-height: 1.4;
+}
+
+
+.message.show {
+    display: block;
+}
+
+
+.message.error {
+    background: rgba(255, 60, 80, 0.12);
+
+    border: 1px solid rgba(255, 60, 80, 0.25);
+
+    color: #ff9aa8;
+}
+
+
+.message.success {
+    background: rgba(40, 220, 130, 0.10);
+
+    border: 1px solid rgba(40, 220, 130, 0.25);
+
+    color: #7ff0a8;
+}
+
+
+/* ========================================
+   FOOTER
+======================================== */
+
+.footer {
+    margin-top: 24px;
+
+    text-align: center;
+
+    color: #4e4e5b;
+
+    font-size: 9px;
+}
+
+
+/* ========================================
+   DASHBOARD BASIC STYLES
+======================================== */
+
+.dashboard {
+    min-height: 100vh;
+
+    background: #090812;
+}
+
+
+.free-specs {
+    padding: 25px;
+
+    border-radius: 14px;
+
+    background: rgba(20, 16, 30, 0.9);
+
     border: 1px solid rgba(255,255,255,0.08);
 }
 
+
 .free-specs h1 {
-    margin-bottom: 8px;
+    font-size: 24px;
 }
 
+
 .spec-title {
-    color: #b968ff;
+    margin-top: 5px;
+
+    color: #a832ff;
+
+    text-transform: uppercase;
+
+    font-size: 11px;
     font-weight: 700;
-    margin-bottom: 20px;
 }
+
 
 .spec {
     display: flex;
+
+    align-items: center;
     justify-content: space-between;
-    max-width: 300px;
-    margin: 10px auto;
-    padding: 12px 15px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.04);
+
+    padding: 13px 0;
+
+    border-bottom: 1px solid rgba(255,255,255,0.06);
 }
+
+
+.spec:last-child {
+    border-bottom: none;
+}
+
 
 .spec span {
-    color: rgba(255,255,255,0.6);
+    color: #8c8c99;
+
+    font-size: 12px;
 }
 
+
 .spec strong {
+    color: #ffffff;
+
+    font-size: 13px;
+}
+
+
+/* ========================================
+   SERVER LIST
+======================================== */
+
+.server-list,
+.servers-list {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(260px, 1fr)
+        );
+
+    gap: 18px;
+}
+
+
+.server-card {
+    padding: 20px;
+
+    border-radius: 14px;
+
+    background: rgba(20, 16, 30, 0.9);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    transition: 0.2s;
+}
+
+
+.server-card:hover {
+    transform: translateY(-2px);
+
+    border-color:
+        rgba(160, 45, 255, 0.35);
+}
+
+
+.server-card-header {
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+}
+
+
+.server-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background:
+        rgba(142, 50, 255, 0.15);
+
+    font-size: 18px;
+}
+
+
+.server-info h3 {
+    font-size: 15px;
+}
+
+
+.server-status {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    margin-top: 5px;
+
+    font-size: 10px;
+}
+
+
+.server-status i {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #777;
+}
+
+
+.server-status.online {
+    color: #7ff0a8;
+}
+
+
+.server-status.online i {
+    background: #42e982;
+
+    box-shadow:
+        0 0 8px rgba(66, 233, 130, 0.6);
+}
+
+
+.server-status.offline {
+    color: #9999a5;
+}
+
+
+/* ========================================
+   SERVER RESOURCES
+======================================== */
+
+.server-resources {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin-top: 20px;
+}
+
+
+.server-resources div {
+    padding: 10px;
+
+    border-radius: 8px;
+
+    background: rgba(255,255,255,0.035);
+}
+
+
+.server-resources span {
+    display: block;
+
+    color: #777784;
+
+    font-size: 9px;
+
+    text-transform: uppercase;
+}
+
+
+.server-resources strong {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 11px;
+}
+
+
+/* ========================================
+   MANAGE BUTTON
+======================================== */
+
+.server-open-btn {
+    width: 100%;
+    height: 40px;
+
+    margin-top: 15px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background:
+        rgba(142, 50, 255, 0.15);
+
+    color: #bd83ff;
+
+    cursor: pointer;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+.server-open-btn:hover {
+    background:
+        rgba(142, 50, 255, 0.25);
+}
+
+
+/* ========================================
+   EMPTY SERVERS
+======================================== */
+
+.empty-servers {
+    padding: 40px 20px;
+
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.03);
+
+    border: 1px dashed rgba(255,255,255,0.1);
+
+    text-align: center;
+}
+
+
+.empty-icon {
+    margin-bottom: 10px;
+
+    font-size: 30px;
+}
+
+
+.empty-servers h3 {
+    font-size: 16px;
+}
+
+
+.empty-servers p {
+    margin-top: 7px;
+
+    color: #777784;
+
+    font-size: 11px;
+}
+
+
+.empty-servers button {
+    margin-top: 17px;
+
+    padding: 10px 16px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: #8b2cff;
+
     color: white;
+
+    cursor: pointer;
+}
+
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 600px) {
+
+    .auth-page {
+        padding: 15px;
+    }
+
+    .auth-card {
+        padding: 30px 20px 24px;
+    }
+
+    .two-columns {
+        grid-template-columns: 1fr;
+
+        gap: 0;
+    }
+
+    .title {
+        font-size: 21px;
+    }
+
+    .server-resources {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+/* ========================================
+   SMALL MOBILE
+======================================== */
+
+@media (max-width: 380px) {
+
+    .auth-card {
+        padding: 25px 16px 20px;
+    }
+
+    .brand {
+        font-size: 17px;
+    }
+
+    .title {
+        font-size: 19px;
+    }
+
+    .field input {
+        height: 43px;
+    }
+
+    .submit-btn {
+        height: 43px;
+    }
+
 }
