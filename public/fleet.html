@@ -1,1 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Fleet - HarvixPanel</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+
+      background:
+        radial-gradient(
+          circle at 15% 15%,
+          rgba(155,45,255,.22),
+          transparent 30%
+        ),
+        radial-gradient(
+          circle at 85% 80%,
+          rgba(255,40,190,.14),
+          transparent 32%
+        ),
+        #0b0712;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* =========================
+       SIDEBAR
+    ========================= */
+
+    .sidebar {
+      width: 250px;
+      min-height: 100vh;
+
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+
+      padding: 22px 15px;
+
+      background: rgba(15,10,24,.92);
+
+      border-right:
+        1px solid rgba(255,255,255,.08);
+
+      backdrop-filter: blur(18px);
+
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+
+      padding: 8px 10px 25px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 11px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #7d1cff,
+          #bd45ff
+        );
+
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .admin-label {
+      margin-top: 3px;
+
+      color: #b968ff;
+
+      font-size: 11px;
+
+      text-transform: uppercase;
+
+      letter-spacing: 1px;
+    }
+
+    .menu-title {
+      padding: 12px 11px 8px;
+
+      color:
+        rgba(255,255,255,.4);
+
+      font-size: 11px;
+
+      text-transform: uppercase;
+
+      letter-spacing: 1px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+
+      gap: 5px;
+    }
+
+    .menu a {
+      display: flex;
+      align-items: center;
+
+      gap: 11px;
+
+      padding: 12px;
+
+      border-radius: 11px;
+
+      color:
+        rgba(255,255,255,.7);
+
+      text-decoration: none;
+
+      font-size: 14px;
+
+      transition: .2s;
+    }
+
+    .menu a:hover,
+    .menu a.active {
+      color: #fff;
+
+      background:
+        rgba(157,45,255,.18);
+    }
+
+    .menu-icon {
+      width: 22px;
+
+      text-align: center;
+
+      font-size: 17px;
+    }
+
+    .logout {
+      position: absolute;
+
+      left: 15px;
+      right: 15px;
+      bottom: 20px;
+    }
+
+    .logout button {
+      width: 100%;
+
+      padding: 12px;
+
+      border:
+        1px solid rgba(255,255,255,.08);
+
+      border-radius: 11px;
+
+      background:
+        rgba(255,255,255,.04);
+
+      color:
+        rgba(255,255,255,.7);
+
+      cursor: pointer;
+
+      font-size: 14px;
+    }
+
+    .logout button:hover {
+      background:
+        rgba(255,50,80,.12);
+
+      color: #ff9daa;
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    .main {
+      width:
+        calc(100% - 250px);
+
+      margin-left: 250px;
+
+      padding: 30px;
+    }
+
+    .page-header {
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      gap: 15px;
+
+      margin-bottom: 25px;
+    }
+
+    .page-title {
+      font-size: 28px;
+
+      font-weight: 800;
+    }
+
+    .page-subtitle {
+      margin-top: 6px;
+
+      color:
+        rgba(255,255,255,.5);
+
+      font-size: 14px;
+    }
+
+    .create-btn {
+      height: 44px;
+
+      padding:
+        0 18px;
+
+      border: none;
+
+      border-radius: 10px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #8b20e8,
+          #a52cff
+        );
+
+      color: white;
+
+      font-size: 13px;
+
+      font-weight: 700;
+
+      cursor: pointer;
+
+      text-decoration: none;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 7px;
+    }
+
+    /* =========================
+       SERVER STATS
+    ========================= */
+
+    .stats {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          4,
+          minmax(0,1fr)
+        );
+
+      gap: 15px;
+
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      padding: 18px;
+
+      border-radius: 15px;
+
+      background:
+        rgba(255,255,255,.045);
+
+      border:
+        1px solid rgba(255,255,255,.08);
+    }
+
+    .stat-label {
+      color:
+        rgba(255,255,255,.45);
+
+      font-size: 12px;
+    }
+
+    .stat-value {
+      margin-top: 8px;
+
+      font-size: 25px;
+
+      font-weight: 800;
+    }
+
+    /* =========================
+       FLEET CARD
+    ========================= */
+
+    .fleet-card {
+      overflow: visible;
+
+      border-radius: 17px;
+
+      background:
+        rgba(255,255,255,.045);
+
+      border:
+        1px solid rgba(255,255,255,.08);
+    }
+
+    .fleet-header {
+      padding: 20px;
+
+      border-bottom:
+        1px solid rgba(255,255,255,.07);
+    }
+
+    .fleet-header h2 {
+      font-size: 17px;
+    }
+
+    .fleet-header p {
+      margin-top: 5px;
+
+      color:
+        rgba(255,255,255,.4);
+
+      font-size: 12px;
+    }
+
+    /* =========================
+       SERVER ROW
+    ========================= */
+
+    .server-list {
+      width: 100%;
+    }
+
+    .server-row {
+      min-height: 82px;
+
+      display: grid;
+
+      grid-template-columns:
+        2fr
+        1fr
+        1fr
+        1fr
+        1fr
+        50px;
+
+      align-items: center;
+
+      gap: 15px;
+
+      padding:
+        15px 20px;
+
+      border-bottom:
+        1px solid rgba(255,255,255,.06);
+
+      position: relative;
+    }
+
+    .server-row:last-child {
+      border-bottom: none;
+    }
+
+    .server-info {
+      display: flex;
+
+      align-items: center;
+
+      gap: 12px;
+    }
+
+    .server-icon {
+      width: 43px;
+      height: 43px;
+
+      flex-shrink: 0;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      border-radius: 11px;
+
+      background:
+        rgba(165,44,255,.14);
+
+      border:
+        1px solid rgba(165,44,255,.18);
+
+      font-size: 19px;
+    }
+
+    .server-name {
+      font-size: 14px;
+
+      font-weight: 700;
+    }
+
+    .server-owner {
+      margin-top: 4px;
+
+      color:
+        rgba(255,255,255,.4);
+
+      font-size: 11px;
+    }
+
+    .column-label {
+      color:
+        rgba(255,255,255,.38);
+
+      font-size: 11px;
+    }
+
+    .column-value {
+      margin-top: 5px;
+
+      font-size: 13px;
+
+      font-weight: 600;
+    }
+
+    /* =========================
+       STATUS
+    ========================= */
+
+    .status {
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 6px;
+
+      font-size: 12px;
+
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+
+      border-radius: 50%;
+
+      background: #4cff9b;
+
+      box-shadow:
+        0 0 8px rgba(76,255,155,.5);
+    }
+
+    .status.suspended {
+      color: #ff9da8;
+    }
+
+    .status.suspended .status-dot {
+      background: #ff5368;
+
+      box-shadow:
+        0 0 8px rgba(255,83,104,.5);
+    }
+
+    /* =========================
+       MORE BUTTON
+    ========================= */
+
+    .more-wrapper {
+      position: relative;
+
+      display: flex;
+
+      justify-content: center;
+    }
+
+    .more-btn {
+      width: 36px;
+      height: 36px;
+
+      border: none;
+
+      border-radius: 9px;
+
+      background:
+        rgba(255,255,255,.05);
+
+      color:
+        rgba(255,255,255,.7);
+
+      cursor: pointer;
+
+      font-size: 20px;
+
+      line-height: 1;
+    }
+
+    .more-btn:hover {
+      background:
+        rgba(165,44,255,.16);
+
+      color: white;
+    }
+
+    /* =========================
+       DROPDOWN
+    ========================= */
+
+    .dropdown {
+      position: absolute;
+
+      right: 0;
+
+      top: 43px;
+
+      width: 175px;
+
+      padding: 6px;
+
+      display: none;
+
+      background:
+        #17101f;
+
+      border:
+        1px solid rgba(255,255,255,.1);
+
+      border-radius: 12px;
+
+      box-shadow:
+        0 18px 45px
+        rgba(0,0,0,.45);
+
+      z-index: 50;
+    }
+
+    .dropdown.show {
+      display: block;
+    }
+
+    .dropdown button {
+      width: 100%;
+
+      padding: 10px;
+
+      border: none;
+
+      border-radius: 8px;
+
+      background: transparent;
+
+      color:
+        rgba(255,255,255,.75);
+
+      text-align: left;
+
+      cursor: pointer;
+
+      font-size: 12px;
+    }
+
+    .dropdown button:hover {
+      background:
+        rgba(255,255,255,.07);
+
+      color: white;
+    }
+
+    .dropdown .danger:hover {
+      color: #ff8795;
+
+      background:
+        rgba(255,50,80,.08);
+    }
+
+    /* =========================
+       EMPTY STATE
+    ========================= */
+
+    .empty {
+      display: none;
+
+      padding: 50px 20px;
+
+      text-align: center;
+
+      color:
+        rgba(255,255,255,.45);
+    }
+
+    .empty-icon {
+      font-size: 35px;
+
+      margin-bottom: 10px;
+    }
+
+    /* =========================
+       MODAL
+    ========================= */
+
+    .modal-overlay {
+      position: fixed;
+
+      inset: 0;
+
+      display: none;
+
+      align-items: center;
+
+      justify-content: center;
+
+      padding: 20px;
+
+      background:
+        rgba(0,0,0,.7);
+
+      backdrop-filter: blur(5px);
+
+      z-index: 100;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+
+      max-width: 430px;
+
+      padding: 23px;
+
+      border-radius: 17px;
+
+      background:
+        #15101b;
+
+      border:
+        1px solid rgba(255,255,255,.1);
+
+      box-shadow:
+        0 25px 70px
+        rgba(0,0,0,.5);
+    }
+
+    .modal h2 {
+      font-size: 19px;
+    }
+
+    .modal p {
+      margin-top: 7px;
+
+      color:
+        rgba(255,255,255,.45);
+
+      font-size: 12px;
+
+      line-height: 1.5;
+    }
+
+    .modal-field {
+      margin-top: 18px;
+    }
+
+    .modal-field label {
+      display: block;
+
+      margin-bottom: 7px;
+
+      color:
+        rgba(255,255,255,.65);
+
+      font-size: 12px;
+    }
+
+    .modal-field input {
+      width: 100%;
+
+      height: 45px;
+
+      padding: 0 12px;
+
+      border:
+        1px solid rgba(255,255,255,.1);
+
+      border-radius: 9px;
+
+      outline: none;
+
+      background:
+        rgba(0,0,0,.3);
+
+      color: white;
+    }
+
+    .modal-actions {
+      display: flex;
+
+      justify-content: flex-end;
+
+      gap: 10px;
+
+      margin-top: 22px;
+    }
+
+    .modal-actions button {
+      height: 42px;
+
+      padding:
+        0 16px;
+
+      border: none;
+
+      border-radius: 9px;
+
+      cursor: pointer;
+
+      font-size: 12px;
+
+      font-weight: 700;
+    }
+
+    .cancel-btn {
+      background:
+        rgba(255,255,255,.07);
+
+      color:
+        rgba(255,255,255,.7);
+    }
+
+    .confirm-btn {
+      background:
+        linear-gradient(
+          135deg,
+          #8b20e8,
+          #a52cff
+        );
+
+      color: white;
+    }
+
+    .danger-confirm {
+      background:
+        linear-gradient(
+          135deg,
+          #c72c4b,
+          #ff4262
+        );
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 1050px) {
+
+      .stats {
+        grid-template-columns:
+          repeat(2,1fr);
+      }
+
+      .server-row {
+        grid-template-columns:
+          2fr
+          1fr
+          1fr
+          1fr
+          50px;
+      }
+
+      .cpu-column {
+        display: none;
+      }
+    }
+
+    @media (max-width: 800px) {
+
+      .sidebar {
+        width: 70px;
+
+        padding:
+          15px 9px;
+      }
+
+      .brand {
+        justify-content: center;
+
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .brand-name,
+      .admin-label,
+      .menu-title {
+        display: none;
+      }
+
+      .menu a {
+        justify-content: center;
+
+        padding: 13px 5px;
+      }
+
+      .menu a span:not(.menu-icon) {
+        display: none;
+      }
+
+      .logout button {
+        font-size: 0;
+      }
+
+      .logout button::before {
+        content: "↪";
+
+        font-size: 18px;
+      }
+
+      .main {
+        width:
+          calc(100% - 70px);
+
+        margin-left: 70px;
+
+        padding: 20px;
+      }
+
+      .server-row {
+        grid-template-columns:
+          2fr
+          1fr
+          1fr
+          50px;
+      }
+
+      .disk-column {
+        display: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+
+      .main {
+        padding: 15px;
+      }
+
+      .page-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+      }
+
+      .create-btn {
+        width: 100%;
+
+        justify-content: center;
+      }
+
+      .stats {
+        grid-template-columns:
+          repeat(2,1fr);
+      }
+
+      .server-row {
+        grid-template-columns:
+          1fr
+          1fr
+          45px;
+
+        gap: 10px;
+      }
+
+      .node-column {
+        display: none;
+      }
+
+      .ram-column {
+        display: none;
+      }
+
+      .server-info {
+        min-width: 0;
+      }
+
+      .server-name {
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+
+        white-space: nowrap;
+      }
+
+      .dropdown {
+        right: 0;
+      }
+    }
+
+    @media (max-width: 400px) {
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- =========================
+       SIDEBAR
+  ========================= -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-logo">
+        H
+      </div>
+
+      <div>
+
+        <div class="brand-name">
+          HarvixPanel
+        </div>
+
+        <div class="admin-label">
+          Administrator
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="menu-title">
+      Management
+    </div>
+
+
+    <nav class="menu">
+
+      <a href="/admin.html">
+        <span class="menu-icon">⌂</span>
+        <span>Overview</span>
+      </a>
+
+      <a href="/settings.html">
+        <span class="menu-icon">⚙</span>
+        <span>Settings</span>
+      </a>
+
+      <a href="/sftp.html">
+        <span class="menu-icon">🔗</span>
+        <span>SFTP Connect</span>
+      </a>
+
+      <a href="/nodes.html">
+        <span class="menu-icon">🖥</span>
+        <span>Nodes</span>
+      </a>
+
+      <a href="/create-server.html">
+        <span class="menu-icon">＋</span>
+        <span>Create Server</span>
+      </a>
+
+      <a href="/themes.html">
+        <span class="menu-icon">🎨</span>
+        <span>Themes</span>
+      </a>
+
+      <a
+        href="/fleet.html"
+        class="active"
+      >
+        <span class="menu-icon">🚀</span>
+        <span>Fleet</span>
+      </a>
+
+    </nav>
+
+
+    <div class="logout">
+
+      <button id="logoutBtn">
+        Logout
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =========================
+       MAIN
+  ========================= -->
+
+  <main class="main">
+
+    <div class="page-header">
+
+      <div>
+
+        <h1 class="page-title">
+          Fleet
+        </h1>
+
+        <p class="page-subtitle">
+          Manage all servers across your nodes.
+        </p>
+
+      </div>
+
+
+      <a
+        href="/create-server.html"
+        class="create-btn"
+      >
+        ＋ Create Server
+      </a>
+
+    </div>
+
+
+    <!-- =========================
+         STATS
+    ========================= -->
+
+    <div class="stats">
+
+      <div class="stat-card">
+
+        <div class="stat-label">
+          Total Servers
+        </div>
+
+        <div
+          class="stat-value"
+          id="totalServers"
+        >
+          3
+        </div>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <div class="stat-label">
+          Running
+        </div>
+
+        <div
+          class="stat-value"
+          id="runningServers"
+        >
+          2
+        </div>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <div class="stat-label">
+          Suspended
+        </div>
+
+        <div
+          class="stat-value"
+          id="suspendedServers"
+        >
+          1
+        </div>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <div class="stat-label">
+          Nodes
+        </div>
+
+        <div
+          class="stat-value"
+          id="totalNodes"
+        >
+          2
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         FLEET
+    ========================= -->
+
+    <div class="fleet-card">
+
+      <div class="fleet-header">
+
+        <h2>
+          All Servers
+        </h2>
+
+        <p>
+          View and manage every server
+          from one place.
+        </p>
+
+      </div>
+
+
+      <div
+        class="server-list"
+        id="serverList"
+      >
+
+
+        <!-- SERVER 1 -->
+
+        <div
+          class="server-row"
+          data-server="Survival"
+        >
+
+          <div class="server-info">
+
+            <div class="server-icon">
+              🟩
+            </div>
+
+            <div>
+
+              <div class="server-name">
+                Survival
+              </div>
+
+              <div class="server-owner">
+                Owner: admin
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div>
+
+            <div class="column-label">
+              Status
+            </div>
+
+            <div class="column-value">
+
+              <span class="status">
+
+                <span class="status-dot"></span>
+
+                Running
+
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="ram-column">
+
+            <div class="column-label">
+              RAM
+            </div>
+
+            <div class="column-value">
+              4 GB
+            </div>
+
+          </div>
+
+
+          <div class="disk-column">
+
+            <div class="column-label">
+              Disk
+            </div>
+
+            <div class="column-value">
+              5 GB
+            </div>
+
+          </div>
+
+
+          <div class="cpu-column">
+
+            <div class="column-label">
+              CPU
+            </div>
+
+            <div class="column-value">
+              1 vCore
+            </div>
+
+          </div>
+
+
+          <div class="more-wrapper">
+
+            <button
+              class="more-btn"
+              type="button"
+            >
+              ⋮
+            </button>
+
+
+            <div class="dropdown">
+
+              <button
+                class="edit-resource"
+              >
+                ✏️ Edit Resources
+              </button>
+
+              <button
+                class="suspend-server"
+              >
+                ⏸️ Suspend Server
+              </button>
+
+              <button
+                class="danger delete-server"
+              >
+                🗑️ Delete Server
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- SERVER 2 -->
+
+        <div
+          class="server-row"
+          data-server="Lifesteal"
+        >
+
+          <div class="server-info">
+
+            <div class="server-icon">
+              ❤️
+            </div>
+
+            <div>
+
+              <div class="server-name">
+                Lifesteal
+              </div>
+
+              <div class="server-owner">
+                Owner: player
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div>
+
+            <div class="column-label">
+              Status
+            </div>
+
+            <div class="column-value">
+
+              <span class="status">
+
+                <span class="status-dot"></span>
+
+                Running
+
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="ram-column">
+
+            <div class="column-label">
+              RAM
+            </div>
+
+            <div class="column-value">
+              4 GB
+            </div>
+
+          </div>
+
+
+          <div class="disk-column">
+
+            <div class="column-label">
+              Disk
+            </div>
+
+            <div class="column-value">
+              5 GB
+            </div>
+
+          </div>
+
+
+          <div class="cpu-column">
+
+            <div class="column-label">
+              CPU
+            </div>
+
+            <div class="column-value">
+              1 vCore
+            </div
