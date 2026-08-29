@@ -1,1 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Themes - HarvixPanel</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+      background: #09060e;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 250px;
+      min-height: 100vh;
+
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+
+      padding: 22px 15px;
+
+      background: rgba(15,10,24,.92);
+      border-right: 1px solid rgba(255,255,255,.08);
+
+      backdrop-filter: blur(18px);
+
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+
+      padding: 8px 10px 25px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 11px;
+
+      background: linear-gradient(
+        135deg,
+        #7d1cff,
+        #bd45ff
+      );
+
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .admin-label {
+      margin-top: 3px;
+
+      color: #b968ff;
+
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .menu-title {
+      padding: 12px 11px 8px;
+
+      color: rgba(255,255,255,.4);
+
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .menu a {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+
+      padding: 12px;
+
+      border-radius: 11px;
+
+      color: rgba(255,255,255,.7);
+
+      text-decoration: none;
+
+      font-size: 14px;
+
+      transition: .2s;
+    }
+
+    .menu a:hover,
+    .menu a.active {
+      color: #fff;
+
+      background: rgba(157,45,255,.18);
+    }
+
+    .menu-icon {
+      width: 22px;
+
+      text-align: center;
+
+      font-size: 17px;
+    }
+
+    .logout {
+      position: absolute;
+
+      left: 15px;
+      right: 15px;
+      bottom: 20px;
+    }
+
+    .logout button {
+      width: 100%;
+
+      padding: 12px;
+
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 11px;
+
+      background: rgba(255,255,255,.04);
+
+      color: rgba(255,255,255,.7);
+
+      cursor: pointer;
+
+      font-size: 14px;
+    }
+
+    .logout button:hover {
+      background: rgba(255,50,80,.12);
+      color: #ff9daa;
+    }
+
+    /* MAIN */
+
+    .main {
+      width: calc(100% - 250px);
+
+      margin-left: 250px;
+
+      padding: 30px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .page-subtitle {
+      margin-top: 6px;
+
+      color: rgba(255,255,255,.5);
+
+      font-size: 14px;
+    }
+
+    /* THEME GRID */
+
+    .themes-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          auto-fit,
+          minmax(260px, 1fr)
+        );
+
+      gap: 20px;
+
+      margin-top: 28px;
+
+      max-width: 1000px;
+    }
+
+    .theme-card {
+      overflow: hidden;
+
+      border-radius: 18px;
+
+      background: rgba(255,255,255,.045);
+
+      border: 1px solid rgba(255,255,255,.08);
+
+      transition:
+        transform .2s,
+        border-color .2s;
+    }
+
+    .theme-card:hover {
+      transform: translateY(-4px);
+
+      border-color:
+        rgba(180,90,255,.4);
+    }
+
+    .theme-card.selected {
+      border-color: #a52cff;
+
+      box-shadow:
+        0 0 0 1px #a52cff,
+        0 15px 45px rgba(150,30,255,.15);
+    }
+
+    /* PREVIEW */
+
+    .preview {
+      height: 160px;
+
+      padding: 14px;
+
+      position: relative;
+
+      overflow: hidden;
+    }
+
+    .preview-sidebar {
+      position: absolute;
+
+      left: 14px;
+      top: 14px;
+      bottom: 14px;
+
+      width: 58px;
+
+      border-radius: 9px;
+
+      background: rgba(0,0,0,.25);
+    }
+
+    .preview-content {
+      position: absolute;
+
+      left: 85px;
+      right: 14px;
+      top: 14px;
+      bottom: 14px;
+
+      border-radius: 9px;
+
+      background: rgba(255,255,255,.08);
+    }
+
+    .preview-box {
+      position: absolute;
+
+      left: 100px;
+      top: 48px;
+
+      width: 70px;
+      height: 38px;
+
+      border-radius: 7px;
+
+      background: rgba(255,255,255,.13);
+    }
+
+    .preview-box.two {
+      left: 180px;
+    }
+
+    /* NEBULA */
+
+    .nebula {
+      background:
+        radial-gradient(
+          circle at 25% 30%,
+          rgba(165,40,255,.65),
+          transparent 40%
+        ),
+        radial-gradient(
+          circle at 80% 70%,
+          rgba(80,20,255,.4),
+          transparent 45%
+        ),
+        #10091c;
+    }
+
+    /* EUPHORIA */
+
+    .euphoria {
+      background:
+        radial-gradient(
+          circle at 20% 20%,
+          rgba(255,50,190,.5),
+          transparent 40%
+        ),
+        radial-gradient(
+          circle at 80% 80%,
+          rgba(40,120,255,.35),
+          transparent 45%
+        ),
+        #100914;
+    }
+
+    /* BLACK */
+
+    .black {
+      background: #050505;
+    }
+
+    .black .preview-sidebar,
+    .black .preview-content {
+      background: #111;
+    }
+
+    .black .preview-box {
+      background: #1d1d1d;
+    }
+
+    /* WHITE */
+
+    .white {
+      background: #eeeeee;
+    }
+
+    .white .preview-sidebar {
+      background: #d2d2d2;
+    }
+
+    .white .preview-content {
+      background: #ffffff;
+    }
+
+    .white .preview-box {
+      background: #dcdcdc;
+    }
+
+    /* CARD INFO */
+
+    .theme-info {
+      padding: 18px;
+    }
+
+    .theme-name {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .theme-description {
+      margin-top: 6px;
+
+      color: rgba(255,255,255,.45);
+
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .theme-actions {
+      margin-top: 15px;
+    }
+
+    .select-btn {
+      width: 100%;
+
+      height: 43px;
+
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+
+      background: rgba(255,255,255,.05);
+
+      color: white;
+
+      cursor: pointer;
+
+      font-weight: 700;
+
+      transition: .2s;
+    }
+
+    .select-btn:hover {
+      background: rgba(165,44,255,.15);
+
+      border-color:
+        rgba(165,44,255,.5);
+    }
+
+    .theme-card.selected .select-btn {
+      background:
+        linear-gradient(
+          135deg,
+          #8b20e8,
+          #a52cff
+        );
+
+      border-color: transparent;
+    }
+
+    /* MESSAGE */
+
+    .message {
+      display: none;
+
+      max-width: 1000px;
+
+      margin-top: 20px;
+
+      padding: 12px 15px;
+
+      border-radius: 10px;
+
+      background: rgba(50,255,150,.08);
+
+      border: 1px solid rgba(50,255,150,.15);
+
+      color: #a8ffd1;
+
+      font-size: 13px;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 900px) {
+
+      .sidebar {
+        width: 70px;
+
+        padding:
+          15px 9px;
+      }
+
+      .brand {
+        justify-content: center;
+
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .brand-name,
+      .admin-label,
+      .menu-title {
+        display: none;
+      }
+
+      .menu a {
+        justify-content: center;
+
+        padding: 13px 5px;
+      }
+
+      .menu a span:not(.menu-icon) {
+        display: none;
+      }
+
+      .logout button {
+        font-size: 0;
+      }
+
+      .logout button::before {
+        content: "↪";
+
+        font-size: 18px;
+      }
+
+      .main {
+        width: calc(100% - 70px);
+
+        margin-left: 70px;
+
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 550px) {
+
+      .main {
+        padding: 15px;
+      }
+
+      .page-title {
+        font-size: 23px;
+      }
+
+      .themes-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-logo">
+        H
+      </div>
+
+      <div>
+
+        <div class="brand-name">
+          HarvixPanel
+        </div>
+
+        <div class="admin-label">
+          Administrator
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="menu-title">
+      Management
+    </div>
+
+
+    <nav class="menu">
+
+      <a href="/admin.html">
+        <span class="menu-icon">⌂</span>
+        <span>Overview</span>
+      </a>
+
+      <a href="/settings.html">
+        <span class="menu-icon">⚙</span>
+        <span>Settings</span>
+      </a>
+
+      <a href="/sftp.html">
+        <span class="menu-icon">🔗</span>
+        <span>SFTP Connect</span>
+      </a>
+
+      <a href="/nodes.html">
+        <span class="menu-icon">🖥</span>
+        <span>Nodes</span>
+      </a>
+
+      <a href="/create-server.html">
+        <span class="menu-icon">＋</span>
+        <span>Create Server</span>
+      </a>
+
+      <a
+        href="/themes.html"
+        class="active"
+      >
+        <span class="menu-icon">🎨</span>
+        <span>Themes</span>
+      </a>
+
+      <a href="/fleet.html">
+        <span class="menu-icon">🚀</span>
+        <span>Fleet</span>
+      </a>
+
+    </nav>
+
+
+    <div class="logout">
+
+      <button id="logoutBtn">
+        Logout
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN -->
+
+  <main class="main">
+
+    <h1 class="page-title">
+      Themes
+    </h1>
+
+    <p class="page-subtitle">
+      Choose the appearance of your HarvixPanel.
+    </p>
+
+
+    <div
+      id="message"
+      class="message"
+    ></div>
+
+
+    <div class="themes-grid">
+
+
+      <!-- NEBULA -->
+
+      <div
+        class="theme-card selected"
+        data-theme="nebula"
+      >
+
+        <div class="preview nebula">
+
+          <div class="preview-sidebar"></div>
+
+          <div class="preview-content"></div>
+
+          <div class="preview-box"></div>
+
+          <div class="preview-box two"></div>
+
+        </div>
+
+
+        <div class="theme-info">
+
+          <div class="theme-name">
+            Nebula
+          </div>
+
+          <p class="theme-description">
+            A dark purple cosmic theme with
+            glowing accents.
+          </p>
+
+          <div class="theme-actions">
+
+            <button class="select-btn">
+              Selected
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- EUPHORIA -->
+
+      <div
+        class="theme-card"
+        data-theme="euphoria"
+      >
+
+        <div class="preview euphoria">
+
+          <div class="preview-sidebar"></div>
+
+          <div class="preview-content"></div>
+
+          <div class="preview-box"></div>
+
+          <div class="preview-box two"></div>
+
+        </div>
+
+
+        <div class="theme-info">
+
+          <div class="theme-name">
+            Euphoria
+          </div>
+
+          <p class="theme-description">
+            A colorful modern theme with
+            pink and blue accents.
+          </p>
+
+          <div class="theme-actions">
+
+            <button class="select-btn">
+              Select Theme
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- BLACK -->
+
+      <div
+        class="theme-card"
+        data-theme="black"
+      >
+
+        <div class="preview black">
+
+          <div class="preview-sidebar"></div>
+
+          <div class="preview-content"></div>
+
+          <div class="preview-box"></div>
+
+          <div class="preview-box two"></div>
+
+        </div>
+
+
+        <div class="theme-info">
+
+          <div class="theme-name">
+            Black
+          </div>
+
+          <p class="theme-description">
+            Minimal pure dark interface for
+            a clean professional look.
+          </p>
+
+          <div class="theme-actions">
+
+            <button class="select-btn">
+              Select Theme
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- WHITE -->
+
+      <div
+        class="theme-card"
+        data-theme="white"
+      >
+
+        <div class="preview white">
+
+          <div class="preview-sidebar"></div>
+
+          <div class="preview-content"></div>
+
+          <div class="preview-box"></div>
+
+          <div class="preview-box two"></div>
+
+        </div>
+
+
+        <div class="theme-info">
+
+          <div class="theme-name">
+            White
+          </div>
+
+          <p class="theme-description">
+            A bright and simple light interface.
+          </p>
+
+          <div class="theme-actions">
+
+            <button class="select-btn">
+              Select Theme
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<script>
+
+  /* ADMIN CHECK */
+
+  function checkAdmin() {
+
+    const userData =
+      localStorage.getItem(
+        "harvix_user"
+      );
+
+
+    if (!userData) {
+
+      window.location.href = "/";
+
+      return;
+
+    }
+
+
+    try {
+
+      const user =
+        JSON.parse(userData);
+
+
+      if (user.role !== "admin") {
+
+        window.location.href =
+          "/dashboard.html";
+
+      }
+
+    } catch (error) {
+
+      localStorage.removeItem(
+        "harvix_user"
+      );
+
+      localStorage.removeItem(
+        "harvix_token"
+      );
+
+      window.location.href = "/";
+
+    }
+
+  }
+
+
+  checkAdmin();
+
+
+  /* LOGOUT */
+
+  document
+    .getElementById("logoutBtn")
+    .addEventListener(
+      "click",
+      function() {
+
+        localStorage.removeItem(
+          "harvix_token"
+        );
+
+        localStorage.removeItem(
+          "harvix_user"
+        );
+
+        window.location.href = "/";
+
+      }
+    );
+
+
+  /* THEME SELECTION */
+
+  const cards =
+    document.querySelectorAll(
+      ".theme-card"
+    );
+
+  const message =
+    document.getElementById(
+      "message"
+    );
+
+
+  cards.forEach(
+    function(card) {
+
+      const button =
+        card.querySelector(
+          ".select-btn"
+        );
+
+
+      button.addEventListener(
+        "click",
+        function() {
+
+          const theme =
+            card.dataset.theme;
+
+
+          cards.forEach(
+            function(item) {
+
+              item.classList.remove(
+                "selected"
+              );
+
+              item.querySelector(
+                ".select-btn"
+              ).textContent =
+                "Select Theme";
+
+            }
+          );
+
+
+          card.classList.add(
+            "selected"
+          );
+
+          button.textContent =
+            "Selected";
+
+
+          /*
+           * Temporary local save.
+           * Backend connection will be
+           * added later.
+           */
+
+          localStorage.setItem(
+            "harvix_theme",
+            theme
+          );
+
+
+          message.textContent =
+            theme.charAt(0).toUpperCase() +
+            theme.slice(1) +
+            " theme selected.";
+
+
+          message.classList.add(
+            "show"
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+  /* LOAD SAVED THEME */
+
+  const savedTheme =
+    localStorage.getItem(
+      "harvix_theme"
+    );
+
+
+  if (savedTheme) {
+
+    cards.forEach(
+      function(card) {
+
+        if (
+          card.dataset.theme ===
+          savedTheme
+        ) {
+
+          cards.forEach(
+            function(item) {
+
+              item.classList.remove(
+                "selected"
+              );
+
+              item.querySelector(
+                ".select-btn"
+              ).textContent =
+                "Select Theme";
+
+            }
+          );
+
+
+          card.classList.add(
+            "selected"
+          );
+
+          card.querySelector(
+            ".select-btn"
+          ).textContent =
+            "Selected";
+
+        }
+
+      }
+    );
+
+  }
+
+</script>
+
+</body>
+</html>
