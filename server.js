@@ -238,7 +238,7 @@ function authenticate(
 ========================= */
 
 app.post(
-  "/api/auth/register",
+  "/api/register",
   async (req, res) => {
 
     try {
@@ -390,7 +390,7 @@ app.post(
 ========================= */
 
 app.post(
-  "/api/auth/login",
+  "/api/login",
   async (req, res) => {
 
     try {
