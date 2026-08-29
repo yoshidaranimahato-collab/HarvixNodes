@@ -1,1 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SFTP Connect - HarvixPanel</title>
 
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(155,45,255,.22), transparent 30%),
+        radial-gradient(circle at 85% 80%, rgba(255,40,190,.14), transparent 32%),
+        #0b0712;
+    }
+
+    .layout {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 250px;
+      padding: 22px 15px;
+      background: rgba(15,10,24,.94);
+      border-right: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(18px);
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 8px 10px 25px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 11px;
+      background: linear-gradient(135deg,#7d1cff,#bd45ff);
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .admin-label {
+      margin-top: 3px;
+      color: #b968ff;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .menu-title {
+      padding: 12px 11px 8px;
+      color: rgba(255,255,255,.4);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .menu a {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 12px;
+      border-radius: 11px;
+      color: rgba(255,255,255,.7);
+      text-decoration: none;
+      font-size: 14px;
+      transition: .2s;
+    }
+
+    .menu a:hover,
+    .menu a.active {
+      color: #fff;
+      background: rgba(157,45,255,.18);
+    }
+
+    .menu-icon {
+      width: 22px;
+      text-align: center;
+      font-size: 17px;
+    }
+
+    .logout {
+      position: absolute;
+      left: 15px;
+      right: 15px;
+      bottom: 20px;
+    }
+
+    .logout button {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 11px;
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.7);
+      cursor: pointer;
+    }
+
+    .logout button:hover {
+      color: #ff9daa;
+      background: rgba(255,50,80,.12);
+    }
+
+    /* MAIN */
+
+    .main {
+      width: calc(100% - 250px);
+      margin-left: 250px;
+      padding: 30px;
+    }
+
+    .page-header {
+      margin-bottom: 25px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .page-subtitle {
+      margin-top: 7px;
+      color: rgba(255,255,255,.5);
+      font-size: 14px;
+    }
+
+    /* GRID */
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 20px;
+      max-width: 1100px;
+    }
+
+    .card {
+      padding: 22px;
+      border-radius: 17px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .card-description {
+      margin-top: 6px;
+      color: rgba(255,255,255,.42);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /* FORM */
+
+    .field {
+      margin-top: 18px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      color: rgba(255,255,255,.65);
+      font-size: 12px;
+    }
+
+    select,
+    input {
+      width: 100%;
+      height: 45px;
+      padding: 0 12px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 9px;
+      outline: none;
+      background: rgba(0,0,0,.28);
+      color: #fff;
+      font-size: 13px;
+    }
+
+    select option {
+      background: #17101f;
+      color: #fff;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(176,62,255,.7);
+    }
+
+    .password-box {
+      position: relative;
+    }
+
+    .password-box input {
+      padding-right: 55px;
+    }
+
+    .show-password {
+      position: absolute;
+      right: 7px;
+      top: 7px;
+      width: 40px;
+      height: 31px;
+      border: none;
+      border-radius: 7px;
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.7);
+      cursor: pointer;
+    }
+
+    /* CONNECTION DETAILS */
+
+    .connection-box {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 12px;
+      background: rgba(0,0,0,.2);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .connection-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .connection-row:last-child {
+      border-bottom: none;
+    }
+
+    .connection-label {
+      color: rgba(255,255,255,.43);
+      font-size: 11px;
+    }
+
+    .connection-value {
+      color: #fff;
+      font-size: 12px;
+      font-family: monospace;
+      word-break: break-all;
+      text-align: right;
+    }
+
+    .copy-btn {
+      flex-shrink: 0;
+      padding: 7px 9px;
+      border: none;
+      border-radius: 7px;
+      background: rgba(164,45,255,.13);
+      color: #c982ff;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .copy-btn:hover {
+      background: rgba(164,45,255,.25);
+    }
+
+    /* CONNECT BUTTON */
+
+    .connect-btn {
+      width: 100%;
+      height: 46px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg,#8b20e8,#a52cff);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .connect-btn:hover {
+      opacity: .9;
+      transform: translateY(-1px);
+    }
+
+    /* COMMAND */
+
+    .command-box {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 11px;
+      background: #08060c;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .command-title {
+      margin-bottom: 8px;
+      color: rgba(255,255,255,.45);
+      font-size: 11px;
+    }
+
+    .command {
+      color: #d891ff;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
+    /* SECURITY */
+
+    .security {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 12px;
+      background: rgba(88,255,160,.045);
+      border: 1px solid rgba(88,255,160,.1);
+    }
+
+    .security-icon {
+      font-size: 21px;
+    }
+
+    .security-title {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .security-text {
+      margin-top: 5px;
+      color: rgba(255,255,255,.45);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* STATUS */
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 9px;
+      background: rgba(255,255,255,.035);
+      color: rgba(255,255,255,.55);
+      font-size: 12px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #777;
+    }
+
+    .status.success {
+      color: #8dffbb;
+    }
+
+    .status.success .status-dot {
+      background: #49ff91;
+      box-shadow: 0 0 8px rgba(73,255,145,.6);
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .sidebar {
+        width: 70px;
+        padding: 15px 9px;
+      }
+
+      .brand {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .brand-name,
+      .admin-label,
+      .menu-title {
+        display: none;
+      }
+
+      .menu a {
+        justify-content: center;
+        padding: 13px 5px;
+      }
+
+      .menu a span:not(.menu-icon) {
+        display: none;
+      }
+
+      .logout button {
+        font-size: 0;
+      }
+
+      .logout button::before {
+        content: "↪";
+        font-size: 18px;
+      }
+
+      .main {
+        width: calc(100% - 70px);
+        margin-left: 70px;
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .main {
+        padding: 15px;
+      }
+
+      .page-title {
+        font-size: 24px;
+      }
+
+      .card {
+        padding: 17px;
+      }
+
+      .connection-row {
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .connection-value {
+        text-align: left;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-logo">H</div>
+
+      <div>
+        <div class="brand-name">HarvixPanel</div>
+        <div class="admin-label">Administrator</div>
+      </div>
+
+    </div>
+
+    <div class="menu-title">
+      Management
+    </div>
+
+    <nav class="menu">
+
+      <a href="/admin.html">
+        <span class="menu-icon">⌂</span>
+        <span>Overview</span>
+      </a>
+
+      <a href="/settings.html">
+        <span class="menu-icon">⚙</span>
+        <span>Settings</span>
+      </a>
+
+      <a href="/sftp.html" class="active">
+        <span class="menu-icon">🔗</span>
+        <span>SFTP Connect</span>
+      </a>
+
+      <a href="/nodes.html">
+        <span class="menu-icon">🖥</span>
+        <span>Nodes</span>
+      </a>
+
+      <a href="/create-server.html">
+        <span class="menu-icon">＋</span>
+        <span>Create Server</span>
+      </a>
+
+      <a href="/themes.html">
+        <span class="menu-icon">🎨</span>
+        <span>Themes</span>
+      </a>
+
+      <a href="/fleet.html">
+        <span class="menu-icon">🚀</span>
+        <span>Fleet</span>
+      </a>
+
+    </nav>
+
+    <div class="logout">
+      <button id="logoutBtn">
+        Logout
+      </button>
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN -->
+
+  <main class="main">
+
+    <div class="page-header">
+
+      <h1 class="page-title">
+        SFTP Connect
+      </h1>
+
+      <p class="page-subtitle">
+        Securely access and manage your server files through SFTP.
+      </p>
+
+    </div>
+
+
+    <div class="grid">
+
+      <!-- CONNECTION FORM -->
+
+      <div class="card">
+
+        <div class="card-title">
+          SFTP Connection
+        </div>
+
+        <div class="card-description">
+          Select a server to view its SFTP connection information.
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Select Server
+          </label>
+
+          <select id="serverSelect">
+
+            <option value="survival">
+              Survival
+            </option>
+
+            <option value="lifesteal">
+              Lifesteal
+            </option>
+
+            <option value="bedwars">
+              Bedwars
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Host
+          </label>
+
+          <input
+            id="hostInput"
+            value="node.example.com"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Port
+          </label>
+
+          <input
+            id="portInput"
+            value="2022"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Username
+          </label>
+
+          <input
+            id="usernameInput"
+            value="admin.survival"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Password
+          </label>
+
+          <div class="password-box">
+
+            <input
+              id="passwordInput"
+              type="password"
+              value="HarvixDemoPassword"
+              readonly
+            >
+
+            <button
+              class="show-password"
+              id="showPassword"
+              type="button"
+            >
+              👁
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <button
+          class="connect-btn"
+          id="connectBtn"
+        >
+          🔗 Test SFTP Connection
+        </button>
+
+
+        <div
+          class="status"
+          id="connectionStatus"
+        >
+
+          <span class="status-dot"></span>
+
+          Connection not tested
+
+        </div>
+
+      </div>
+
+
+      <!-- DETAILS -->
+
+      <div class="card">
+
+        <div class="card-title">
+          Connection Details
+        </div>
+
+        <div class="card-description">
+          Use these details in an SFTP client such as FileZilla.
+        </div>
+
+
+        <div class="connection-box">
+
+          <div class="connection-row">
+
+            <div class="connection-label">
+              Host
+            </div>
+
+            <div class="connection-value">
+              <span id="hostValue">
+                node.example.com
+              </span>
+            </div>
+
+            <button
+              class="copy-btn"
+              data-copy="hostValue"
+            >
+              Copy
+            </button>
+
+          </div>
+
+
+          <div class="connection-row">
+
+            <div class="connection-label">
+              Port
+            </div>
+
+            <div class="connection-value">
+              <span id="portValue">
+                2022
+              </span>
+            </div>
+
+            <button
+              class="copy-btn"
+              data-copy="portValue"
+            >
+              Copy
+            </button>
+
+          </div>
+
+
+          <div class="connection-row">
+
+            <div class="connection-label">
+              Username
+            </div>
+
+            <div class="connection-value">
+              <span id="usernameValue">
+                admin.survival
+              </span>
+            </div>
+
+            <button
+              class="copy-btn"
+              data-copy="usernameValue"
+            >
+              Copy
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="command-box">
+
+          <div class="command-title">
+            SFTP Command
+          </div>
+
+          <div
+            class="command"
+            id="sftpCommand"
+          >
+            sftp -P 2022 admin.survival@node.example.com
+          </div>
+
+        </div>
+
+
+        <div class="security">
+
+          <div class="security-icon">
+            🔐
+          </div>
+
+          <div>
+
+            <div class="security-title">
+              Secure Connection
+            </div>
+
+            <div class="security-text">
+              SFTP encrypts the connection between your client
+              and the server. Never share your SFTP password with
+              anyone.
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<script>
+
+  /* =========================
+     ADMIN CHECK
+  ========================= */
+
+  function checkAdmin() {
+
+    const userData =
+      localStorage.getItem("harvix_user");
+
+    if (!userData) {
+      window.location.href = "/";
+      return;
+    }
+
+    try {
+
+      const user =
+        JSON.parse(userData);
+
+      if (user.role !== "admin") {
+        window.location.href =
+          "/dashboard.html";
+      }
+
+    } catch (error) {
+
+      localStorage.removeItem(
+        "harvix_user"
+      );
+
+      localStorage.removeItem(
+        "harvix_token"
+      );
+
+      window.location.href = "/";
+
+    }
+
+  }
+
+  checkAdmin();
+
+
+  /* =========================
+     LOGOUT
+  ========================= */
+
+  document
+    .getElementById("logoutBtn")
+    .addEventListener("click", function() {
+
+      localStorage.removeItem(
+        "harvix_user"
+      );
+
+      localStorage.removeItem(
+        "harvix_token"
+      );
+
+      window.location.href = "/";
+
+    });
+
+
+  /* =========================
+     SHOW PASSWORD
+  ========================= */
+
+  document
+    .getElementById("showPassword")
+    .addEventListener("click", function() {
+
+      const password =
+        document.getElementById(
+          "passwordInput"
+        );
+
+      if (
+        password.type === "password"
+      ) {
+
+        password.type = "text";
+
+        this.textContent = "🙈";
+
+      } else {
+
+        password.type = "password";
+
+        this.textContent = "👁";
+
+      }
+
+    });
+
+
+  /* =========================
+     SERVER DATA
+  ========================= */
+
+  const servers = {
+
+    survival: {
+      host: "node.example.com",
+      port: "2022",
+      username: "admin.survival",
+      password: "HarvixDemoPassword"
+    },
+
+    lifesteal: {
+      host: "node.example.com",
+      port: "2022",
+      username: "player.lifesteal",
+      password: "HarvixDemoPassword"
+    },
+
+    bedwars: {
+      host: "node2.example.com",
+      port: "2022",
+      username: "player.bedwars",
+      password: "HarvixDemoPassword"
+    }
+
+  };
+
+
+  /* =========================
+     SERVER SELECT
+  ========================= */
+
+  document
+    .getElementById("serverSelect")
+    .addEventListener("change", function() {
+
+      const server =
+        servers[this.value];
+
+      if (!server) return;
+
+
+      document
+        .getElementById("hostInput")
+        .value =
+        server.host;
+
+
+      document
+        .getElementById("portInput")
+        .value =
+        server.port;
+
+
+      document
+        .getElementById("usernameInput")
+        .value =
+        server.username;
+
+
+      document
+        .getElementById("passwordInput")
+        .value =
+        server.password;
+
+
+      document
+        .getElementById("hostValue")
+        .textContent =
+        server.host;
+
+
+      document
+        .getElementById("portValue")
+        .textContent =
+        server.port;
+
+
+      document
+        .getElementById("usernameValue")
+        .textContent =
+        server.username;
+
+
+      document
+        .getElementById("sftpCommand")
+        .textContent =
+        "sftp -P " +
+        server.port +
+        " " +
+        server.username +
+        "@" +
+        server.host;
+
+
+      const status =
+        document.getElementById(
+          "connectionStatus"
+        );
+
+      status.className =
+        "status";
+
+      status.innerHTML =
+        '<span class="status-dot"></span> Connection not tested';
+
+    });
+
+
+  /* =========================
+     COPY BUTTONS
+  ========================= */
+
+  document
+    .querySelectorAll(".copy-btn")
+    .forEach(function(button) {
+
+      button.addEventListener(
+        "click",
+        async function() {
+
+          const target =
+            document.getElementById(
+              this.dataset.copy
+            );
+
+          const text =
+            target.textContent.trim();
+
+
+          try {
+
+            await navigator.clipboard.writeText(
+              text
+            );
+
+            const oldText =
+              this.textContent;
+
+            this.textContent =
+              "Copied!";
+
+            setTimeout(() => {
+
+              this.textContent =
+                oldText;
+
+            }, 1200);
+
+          } catch (error) {
+
+            alert(
+              "Unable to copy. Please copy it manually."
+            );
+
+          }
+
+        }
+      );
+
+    });
+
+
+  /* =========================
+     TEST CONNECTION
+  ========================= */
+
+  document
+    .getElementById("connectBtn")
+    .addEventListener("click", function() {
+
+      const button = this;
+
+      const status =
+        document.getElementById(
+          "connectionStatus"
+        );
+
+
+      button.disabled = true;
+
+      button.textContent =
+        "⏳ Testing Connection...";
+
+
+      status.className =
+        "status";
+
+      status.innerHTML =
+        '<span class="status-dot"></span> Checking connection...';
+
+
+      /*
+       * Demo connection test.
+       *
+       * Real SFTP API will be connected
+       * later through the backend/node.
+       */
+
+      setTimeout(function() {
+
+        button.disabled = false;
+
+        button.textContent =
+          "🔗 Test SFTP Connection";
+
+
+        status.className =
+          "status success"
