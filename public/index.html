@@ -1,599 +1,619 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>HarvixPanel</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      min-height: 100vh;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #08060f;
-      overflow-x: hidden;
-    }
-
-    /* =========================
-       BACKGROUND
-    ========================= */
-
-    .page {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      background:
-        linear-gradient(
-          rgba(10, 6, 20, 0.35),
-          rgba(10, 6, 20, 0.55)
-        ),
-        url("https://images.unsplash.com/photo-1605899435973-ca2d1a8861cf?auto=format&fit=crop&w=1600&q=85");
-
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-
-      padding: 25px;
-    }
-
-    /* =========================
-       AUTH CARD
-    ========================= */
-
-    .auth-card {
-      width: 100%;
-      max-width: 520px;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-      padding: 38px 40px 30px;
+    <title>HarvixPanel - Login</title>
 
-      background: rgba(18, 15, 30, 0.94);
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-      border: 1px solid rgba(255,255,255,0.08);
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #090812;
+            color: white;
+        }
 
-      border-radius: 8px;
+        .auth-page {
+            min-height: 100vh;
 
-      box-shadow:
-        0 25px 70px rgba(0,0,0,0.55),
-        0 0 30px rgba(130,40,255,0.08);
-    }
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-    /* =========================
-       BRAND
-    ========================= */
+            padding: 25px;
 
-    .brand {
-      text-align: center;
-      margin-bottom: 28px;
-    }
+            background:
+                linear-gradient(
+                    rgba(8, 8, 18, 0.35),
+                    rgba(8, 8, 18, 0.55)
+                ),
+                url("/assets/auth-bg.jpg");
 
-    .brand-logo {
-      width: 42px;
-      height: 42px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
 
-      margin: 0 auto 12px;
+        .auth-card {
+            width: 100%;
+            max-width: 520px;
 
-      display: flex;
-      align-items: center;
-      justify-content: center;
+            padding: 34px 38px 27px;
 
-      border-radius: 50%;
+            background: rgba(13, 13, 25, 0.94);
 
-      background: linear-gradient(
-        135deg,
-        #7c19ff,
-        #b52cff
-      );
+            border: 1px solid rgba(160, 60, 255, 0.25);
 
-      color: white;
-      font-size: 17px;
-      font-weight: 900;
+            border-radius: 8px;
 
-      box-shadow:
-        0 0 20px rgba(151,43,255,0.4);
-    }
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.65),
+                0 0 35px rgba(130, 40, 255, 0.12);
+        }
 
-    .brand-name {
-      color: #ffffff;
-      font-size: 15px;
-      font-weight: 800;
-      letter-spacing: .5px;
-    }
+        /* LOGO */
 
-    /* =========================
-       FORMS
-    ========================= */
+        .logo {
+            width: 48px;
+            height: 48px;
 
-    .auth-form {
-      display: none;
-    }
+            margin: 0 auto 10px;
 
-    .auth-form.active {
-      display: block;
-    }
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-    .title {
-      text-align: center;
-      color: #ffffff;
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 26px;
-    }
+            border-radius: 12px;
 
-    .field {
-      margin-bottom: 16px;
-    }
+            background: linear-gradient(
+                135deg,
+                #741cff,
+                #bd28ff
+            );
 
-    .field label {
-      display: block;
+            font-size: 22px;
+            font-weight: 900;
 
-      margin-bottom: 7px;
+            box-shadow:
+                0 0 25px rgba(150, 40, 255, 0.45);
+        }
 
-      color: rgba(255,255,255,0.72);
+        .brand {
+            text-align: center;
+            font-size: 19px;
+            font-weight: 800;
+            margin-bottom: 30px;
+        }
 
-      font-size: 11px;
-      font-weight: 500;
-    }
+        .brand span {
+            color: #a832ff;
+        }
 
-    .field input {
-      width: 100%;
-      height: 43px;
+        /* FORM */
 
-      padding: 0 12px;
+        .auth-form {
+            display: none;
+        }
 
-      border: 1px solid #cbd0d8;
-      border-radius: 4px;
+        .auth-form.active {
+            display: block;
+        }
 
-      outline: none;
+        .title {
+            text-align: center;
 
-      background: #ffffff;
-      color: #222;
+            font-size: 23px;
+            font-weight: 700;
 
-      font-size: 13px;
+            margin-bottom: 7px;
+        }
 
-      transition: .2s;
-    }
+        .subtitle {
+            text-align: center;
 
-    .field input:focus {
-      border-color: #4388f5;
+            color: #9999aa;
 
-      box-shadow:
-        0 0 0 2px rgba(67,136,245,.15);
-    }
+            font-size: 12px;
 
-    /* REGISTER TWO COLUMNS */
+            margin-bottom: 27px;
+        }
 
-    .two-columns {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
+        /* INPUT */
 
-    /* =========================
-       BUTTON
-    ========================= */
+        .field {
+            margin-bottom: 17px;
+        }
 
-    .submit-btn {
-      width: 100%;
-      height: 44px;
+        .field label {
+            display: block;
 
-      margin-top: 6px;
+            margin-bottom: 7px;
 
-      border: none;
-      border-radius: 4px;
+            color: #b7a8ff;
 
-      background: #4388ed;
+            font-size: 10px;
+            font-weight: 600;
 
-      color: white;
+            text-transform: uppercase;
+        }
 
-      font-size: 12px;
-      font-weight: 700;
+        .field input {
+            width: 100%;
+            height: 45px;
 
-      cursor: pointer;
+            padding: 0 13px;
 
-      transition: .2s;
-    }
+            background: #11111e;
 
-    .submit-btn:hover {
-      background: #3479df;
-    }
+            border: 1px solid #333345;
 
-    .submit-btn:disabled {
-      opacity: .6;
-      cursor: not-allowed;
-    }
+            border-radius: 5px;
 
-    /* =========================
-       LINKS
-    ========================= */
+            outline: none;
 
-    .switch-text {
-      text-align: center;
+            color: white;
 
-      margin-top: 17px;
+            font-size: 13px;
 
-      color: rgba(255,255,255,.5);
+            transition: 0.2s;
+        }
 
-      font-size: 11px;
-    }
+        .field input::placeholder {
+            color: #686878;
+        }
 
-    .switch-text button {
-      border: none;
-      background: none;
+        .field input:focus {
+            border-color: #8e32ff;
 
-      color: #4388ed;
+            box-shadow:
+                0 0 0 2px rgba(142, 50, 255, 0.12);
+        }
 
-      cursor: pointer;
+        /* TWO COLUMNS */
 
-      font-size: 11px;
-      font-weight: 600;
-    }
+        .two-columns {
+            display: grid;
 
-    .switch-text button:hover {
-      text-decoration: underline;
-    }
+            grid-template-columns: 1fr 1fr;
 
-    .forgot {
-      display: block;
+            gap: 13px;
+        }
 
-      margin-top: 13px;
+        /* BUTTON */
 
-      text-align: center;
+        .submit-btn {
+            width: 100%;
+            height: 45px;
 
-      color: rgba(255,255,255,.35);
+            margin-top: 5px;
 
-      font-size: 9px;
+            border: none;
+            border-radius: 6px;
 
-      text-decoration: none;
-    }
+            background:
+                linear-gradient(
+                    90deg,
+                    #7620ff,
+                    #a82cff
+                );
 
-    /* =========================
-       MESSAGE
-    ========================= */
+            color: white;
 
-    .message {
-      display: none;
+            font-size: 13px;
+            font-weight: 700;
 
-      margin-bottom: 15px;
+            cursor: pointer;
 
-      padding: 10px 12px;
+            box-shadow:
+                0 8px 25px rgba(130, 35, 255, 0.25);
 
-      border-radius: 5px;
+            transition: 0.2s;
+        }
 
-      font-size: 11px;
-      line-height: 1.4;
-    }
+        .submit-btn:hover {
+            transform: translateY(-1px);
 
-    .message.show {
-      display: block;
-    }
+            box-shadow:
+                0 10px 30px rgba(130, 35, 255, 0.38);
+        }
 
-    .message.error {
-      background: rgba(255,60,80,.12);
-      border: 1px solid rgba(255,60,80,.25);
-      color: #ff9aa8;
-    }
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
 
-    .message.success {
-      background: rgba(50,220,130,.10);
-      border: 1px solid rgba(50,220,130,.22);
-      color: #82f0ad;
-    }
+        /* LINKS */
 
-    /* =========================
-       FOOTER
-    ========================= */
+        .forgot {
+            display: block;
 
-    .footer {
-      margin-top: 24px;
+            margin-top: 17px;
 
-      text-align: center;
+            text-align: center;
 
-      color: rgba(255,255,255,.18);
+            color: #777785;
 
-      font-size: 9px;
-    }
+            font-size: 10px;
 
-    /* =========================
-       MOBILE
-    ========================= */
+            text-decoration: none;
+        }
 
-    @media (max-width: 550px) {
+        .forgot:hover {
+            color: #a832ff;
+        }
 
-      .page {
-        padding: 15px;
-      }
+        .switch {
+            text-align: center;
 
-      .auth-card {
-        padding: 30px 20px 25px;
-      }
+            margin-top: 25px;
+            padding-top: 20px;
 
-      .two-columns {
-        grid-template-columns: 1fr;
-        gap: 0;
-      }
+            border-top: 1px solid rgba(255,255,255,0.07);
 
-    }
+            color: #9a9aa8;
 
-  </style>
+            font-size: 11px;
+        }
+
+        .switch button {
+            border: none;
+            background: none;
+
+            color: #a832ff;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+        .switch button:hover {
+            text-decoration: underline;
+        }
+
+        /* MESSAGE */
+
+        .message {
+            display: none;
+
+            padding: 11px;
+
+            margin-bottom: 17px;
+
+            border-radius: 5px;
+
+            text-align: center;
+
+            font-size: 11px;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.error {
+            background: rgba(255, 60, 80, 0.12);
+
+            border: 1px solid rgba(255, 60, 80, 0.25);
+
+            color: #ff9aa8;
+        }
+
+        .message.success {
+            background: rgba(40, 220, 130, 0.10);
+
+            border: 1px solid rgba(40, 220, 130, 0.25);
+
+            color: #7ff0a8;
+        }
+
+        /* FOOTER */
+
+        .footer {
+            text-align: center;
+
+            margin-top: 24px;
+
+            color: #4e4e5b;
+
+            font-size: 9px;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 550px) {
+
+            .auth-page {
+                padding: 15px;
+            }
+
+            .auth-card {
+                max-width: 430px;
+
+                padding: 30px 20px 24px;
+            }
+
+            .two-columns {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .title {
+                font-size: 21px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="page">
+<div class="auth-page">
 
-  <div class="auth-card">
+    <div class="auth-card">
 
-    <!-- BRAND -->
+        <div class="logo">
+            H
+        </div>
 
-    <div class="brand">
+        <div class="brand">
+            Harvix<span>Panel</span>
+        </div>
 
-      <div class="brand-logo">
-        H
-      </div>
+        <div
+            id="message"
+            class="message">
+        </div>
 
-      <div class="brand-name">
-        HarvixPanel
-      </div>
+
+        <!-- =========================
+             LOGIN
+        ========================== -->
+
+        <form
+            id="loginForm"
+            class="auth-form active">
+
+            <h1 class="title">
+                Welcome Back!
+            </h1>
+
+            <p class="subtitle">
+                Login to your account to continue
+            </p>
+
+
+            <div class="field">
+
+                <label>
+                    Username or Email
+                </label>
+
+                <input
+                    id="loginIdentifier"
+                    type="text"
+                    placeholder="Enter your username or email"
+                    autocomplete="username"
+                    required>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Password
+                </label>
+
+                <input
+                    id="loginPassword"
+                    type="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required>
+
+            </div>
+
+
+            <button
+                id="loginButton"
+                class="submit-btn"
+                type="submit">
+
+                Login →
+
+            </button>
+
+
+            <a
+                href="#"
+                class="forgot"
+                onclick="return false;">
+
+                Forgot Password?
+
+            </a>
+
+
+            <div class="switch">
+
+                Don't have an account?
+
+                <button
+                    type="button"
+                    id="showRegister">
+
+                    Register here.
+
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <!-- =========================
+             REGISTER
+        ========================== -->
+
+        <form
+            id="registerForm"
+            class="auth-form">
+
+            <h1 class="title">
+                Create Account
+            </h1>
+
+            <p class="subtitle">
+                Fill in the details below to get started
+            </p>
+
+
+            <div class="two-columns">
+
+                <div class="field">
+
+                    <label>
+                        First Name
+                    </label>
+
+                    <input
+                        id="firstName"
+                        type="text"
+                        placeholder="Enter first name"
+                        required>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Last Name
+                    </label>
+
+                    <input
+                        id="lastName"
+                        type="text"
+                        placeholder="Enter last name"
+                        required>
+
+                </div>
+
+            </div>
+
+
+            <div class="two-columns">
+
+                <div class="field">
+
+                    <label>
+                        Username
+                    </label>
+
+                    <input
+                        id="registerUsername"
+                        type="text"
+                        placeholder="Enter username"
+                        autocomplete="username"
+                        required>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        E-Mail
+                    </label>
+
+                    <input
+                        id="registerEmail"
+                        type="email"
+                        placeholder="Enter your email"
+                        autocomplete="email"
+                        required>
+
+                </div>
+
+            </div>
+
+
+            <div class="two-columns">
+
+                <div class="field">
+
+                    <label>
+                        Password
+                    </label>
+
+                    <input
+                        id="registerPassword"
+                        type="password"
+                        placeholder="Enter password"
+                        autocomplete="new-password"
+                        required>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Repeat Password
+                    </label>
+
+                    <input
+                        id="registerConfirmPassword"
+                        type="password"
+                        placeholder="Repeat password"
+                        autocomplete="new-password"
+                        required>
+
+                </div>
+
+            </div>
+
+
+            <button
+                id="registerButton"
+                class="submit-btn"
+                type="submit">
+
+                Register →
+
+            </button>
+
+
+            <div class="switch">
+
+                Already have an account?
+
+                <button
+                    type="button"
+                    id="showLogin">
+
+                    Login here.
+
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <div class="footer">
+            HarvixPanel © 2026 • All rights reserved
+        </div>
 
     </div>
-
-
-    <!-- MESSAGE -->
-
-    <div
-      id="message"
-      class="message"
-    ></div>
-
-
-    <!-- =====================
-         LOGIN
-    ====================== -->
-
-    <form
-      id="loginForm"
-      class="auth-form active"
-    >
-
-      <h1 class="title">
-        Login
-      </h1>
-
-
-      <div class="field">
-
-        <label>
-          USERNAME OR EMAIL
-        </label>
-
-        <input
-          id="loginIdentifier"
-          type="text"
-          placeholder="Username or Email"
-          autocomplete="username"
-          required
-        >
-
-      </div>
-
-
-      <div class="field">
-
-        <label>
-          PASSWORD
-        </label>
-
-        <input
-          id="loginPassword"
-          type="password"
-          placeholder="Password"
-          autocomplete="current-password"
-          required
-        >
-
-      </div>
-
-
-      <button
-        type="submit"
-        class="submit-btn"
-        id="loginButton"
-      >
-        Login
-      </button>
-
-
-      <a
-        href="#"
-        class="forgot"
-        onclick="return false;"
-      >
-        FORGOT PASSWORD?
-      </a>
-
-
-      <div class="switch-text">
-
-        Don't have an account?
-
-        <button
-          type="button"
-          id="showRegister"
-        >
-          Register here.
-        </button>
-
-      </div>
-
-    </form>
-
-
-    <!-- =====================
-         REGISTER
-    ====================== -->
-
-    <form
-      id="registerForm"
-      class="auth-form"
-    >
-
-      <h1 class="title">
-        Registration
-      </h1>
-
-
-      <div class="two-columns">
-
-        <div class="field">
-
-          <label>
-            FIRST NAME
-          </label>
-
-          <input
-            id="firstName"
-            type="text"
-            placeholder="First Name"
-            autocomplete="given-name"
-            required
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            LAST NAME
-          </label>
-
-          <input
-            id="lastName"
-            type="text"
-            placeholder="Last Name"
-            autocomplete="family-name"
-            required
-          >
-
-        </div>
-
-      </div>
-
-
-      <div class="two-columns">
-
-        <div class="field">
-
-          <label>
-            USERNAME
-          </label>
-
-          <input
-            id="registerUsername"
-            type="text"
-            placeholder="Username"
-            autocomplete="username"
-            required
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            E-MAIL
-          </label>
-
-          <input
-            id="registerEmail"
-            type="email"
-            placeholder="Email"
-            autocomplete="email"
-            required
-          >
-
-        </div>
-
-      </div>
-
-
-      <div class="two-columns">
-
-        <div class="field">
-
-          <label>
-            PASSWORD
-          </label>
-
-          <input
-            id="registerPassword"
-            type="password"
-            placeholder="Password"
-            autocomplete="new-password"
-            required
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            REPEAT PASSWORD
-          </label>
-
-          <input
-            id="registerConfirmPassword"
-            type="password"
-            placeholder="Repeat Password"
-            autocomplete="new-password"
-            required
-          >
-
-        </div>
-
-      </div>
-
-
-      <button
-        type="submit"
-        class="submit-btn"
-        id="registerButton"
-      >
-        Register
-      </button>
-
-
-      <div class="switch-text">
-
-        Already have an account?
-
-        <button
-          type="button"
-          id="showLogin"
-        >
-          Login here.
-        </button>
-
-      </div>
-
-    </form>
-
-
-    <div class="footer">
-      HarvixPanel • Minecraft Server Management
-    </div>
-
-  </div>
 
 </div>
 
