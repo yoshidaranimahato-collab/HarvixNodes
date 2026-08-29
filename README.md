@@ -37,11 +37,10 @@ Check the installation:
 ``` npm -v ```
 
 # 4️⃣ gitclone HarvixPanel
-``` git clone https://github.com/yoshidaranimahato-collab/HarvixNodes.git ```
- 
+``` https://github.com/yoshidaranimahato-collab/HarvixPanel.git ```
  enter the project:
 
- ``` cd HarvixNodes ```
+ ``` cd HarvixPanel ```
 
 # install dependencies
 ``` npm install ```
