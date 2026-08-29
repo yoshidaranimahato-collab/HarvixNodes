@@ -1,1 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Settings - HarvixPanel</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+
+      background:
+        radial-gradient(circle at 15% 15%, rgba(155,45,255,.22), transparent 30%),
+        radial-gradient(circle at 85% 80%, rgba(255,40,190,.16), transparent 32%),
+        #0b0712;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 250px;
+      min-height: 100vh;
+
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+
+      padding: 22px 15px;
+
+      background: rgba(15,10,24,.88);
+      border-right: 1px solid rgba(255,255,255,.08);
+
+      backdrop-filter: blur(18px);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+
+      padding: 8px 10px 25px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 11px;
+
+      background: linear-gradient(135deg,#7d1cff,#bd45ff);
+
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .admin-label {
+      margin-top: 3px;
+
+      color: #b968ff;
+
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .menu-title {
+      padding: 12px 11px 8px;
+
+      color: rgba(255,255,255,.4);
+
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .menu a {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+
+      padding: 12px;
+
+      border-radius: 11px;
+
+      color: rgba(255,255,255,.7);
+      text-decoration: none;
+
+      font-size: 14px;
+
+      transition: .2s;
+    }
+
+    .menu a:hover,
+    .menu a.active {
+      color: #fff;
+      background: rgba(157,45,255,.18);
+    }
+
+    .menu-icon {
+      width: 22px;
+      text-align: center;
+      font-size: 17px;
+    }
+
+    .logout {
+      position: absolute;
+
+      left: 15px;
+      right: 15px;
+      bottom: 20px;
+    }
+
+    .logout button {
+      width: 100%;
+
+      padding: 12px;
+
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 11px;
+
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.7);
+
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .logout button:hover {
+      background: rgba(255,50,80,.12);
+      color: #ff9daa;
+    }
+
+    /* MAIN */
+
+    .main {
+      width: calc(100% - 250px);
+
+      margin-left: 250px;
+
+      padding: 30px;
+    }
+
+    .topbar {
+      margin-bottom: 25px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .page-subtitle {
+      margin-top: 6px;
+
+      color: rgba(255,255,255,.52);
+
+      font-size: 14px;
+    }
+
+    /* CARD */
+
+    .settings-card {
+      width: 100%;
+      max-width: 850px;
+
+      padding: 25px;
+
+      border-radius: 18px;
+
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+
+      backdrop-filter: blur(12px);
+    }
+
+    .section-title {
+      margin-bottom: 6px;
+
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .section-description {
+      margin-bottom: 25px;
+
+      color: rgba(255,255,255,.42);
+
+      font-size: 13px;
+    }
+
+    /* FORM */
+
+    .field {
+      margin-bottom: 22px;
+    }
+
+    .field label {
+      display: block;
+
+      margin-bottom: 8px;
+
+      color: rgba(255,255,255,.72);
+
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .field input {
+      width: 100%;
+      height: 50px;
+
+      padding: 0 14px;
+
+      outline: none;
+
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 11px;
+
+      background: rgba(5,5,10,.5);
+      color: #fff;
+
+      font-size: 14px;
+    }
+
+    .field input:focus {
+      border-color: #a52cff;
+
+      box-shadow:
+        0 0 0 3px rgba(165,44,255,.12);
+    }
+
+    .hint {
+      display: block;
+
+      margin-top: 7px;
+
+      color: rgba(255,255,255,.38);
+
+      font-size: 11px;
+    }
+
+    /* IMAGE */
+
+    .image-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      margin-top: 8px;
+    }
+
+    .image-preview {
+      width: 80px;
+      height: 80px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      overflow: hidden;
+
+      border-radius: 18px;
+
+      background: linear-gradient(135deg,#7d1cff,#bd45ff);
+
+      border: 1px solid rgba(255,255,255,.1);
+
+      font-size: 30px;
+      font-weight: 800;
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+
+      object-fit: cover;
+    }
+
+    .image-input {
+      flex: 1;
+    }
+
+    /* SAVE */
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+
+      margin-top: 25px;
+      padding-top: 20px;
+
+      border-top: 1px solid rgba(255,255,255,.07);
+    }
+
+    #saveBtn {
+      display: none;
+
+      min-height: 48px;
+
+      padding: 0 22px;
+
+      border: none;
+      border-radius: 11px;
+
+      color: #fff;
+
+      background: linear-gradient(
+        135deg,
+        #8b20e8,
+        #a52cff
+      );
+
+      font-size: 14px;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+    #saveBtn.show {
+      display: block;
+    }
+
+    #saveBtn:hover {
+      filter: brightness(1.08);
+    }
+
+    /* MESSAGE */
+
+    .message {
+      display: none;
+
+      margin-bottom: 18px;
+      padding: 12px 14px;
+
+      border-radius: 10px;
+
+      font-size: 13px;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.success {
+      color: #a8ffd1;
+      background: rgba(50,255,150,.08);
+
+      border: 1px solid rgba(50,255,150,.18);
+    }
+
+    .message.error {
+      color: #ffb4bd;
+      background: rgba(255,50,80,.08);
+
+      border: 1px solid rgba(255,50,80,.18);
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 900px) {
+
+      .sidebar {
+        width: 70px;
+        padding: 15px 9px;
+      }
+
+      .brand {
+        justify-content: center;
+
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .brand-name,
+      .admin-label,
+      .menu-title {
+        display: none;
+      }
+
+      .menu a {
+        justify-content: center;
+
+        padding: 13px 5px;
+      }
+
+      .menu a span:not(.menu-icon) {
+        display: none;
+      }
+
+      .logout button {
+        font-size: 0;
+      }
+
+      .logout button::before {
+        content: "↪";
+
+        font-size: 18px;
+      }
+
+      .main {
+        width: calc(100% - 70px);
+
+        margin-left: 70px;
+
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 550px) {
+
+      .main {
+        padding: 15px;
+      }
+
+      .page-title {
+        font-size: 23px;
+      }
+
+      .settings-card {
+        padding: 18px;
+      }
+
+      .image-section {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .image-input {
+        width: 100%;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      #saveBtn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-logo">
+        H
+      </div>
+
+      <div>
+
+        <div class="brand-name">
+          HarvixPanel
+        </div>
+
+        <div class="admin-label">
+          Administrator
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="menu-title">
+      Management
+    </div>
+
+
+    <nav class="menu">
+
+      <a href="/admin.html">
+        <span class="menu-icon">⌂</span>
+        <span>Overview</span>
+      </a>
+
+      <a
+        href="/settings.html"
+        class="active"
+      >
+        <span class="menu-icon">⚙</span>
+        <span>Settings</span>
+      </a>
+
+      <a href="/sftp.html">
+        <span class="menu-icon">🔗</span>
+        <span>SFTP Connect</span>
+      </a>
+
+      <a href="/nodes.html">
+        <span class="menu-icon">🖥</span>
+        <span>Nodes</span>
+      </a>
+
+      <a href="/create-server.html">
+        <span class="menu-icon">＋</span>
+        <span>Create Server</span>
+      </a>
+
+      <a href="/themes.html">
+        <span class="menu-icon">🎨</span>
+        <span>Themes</span>
+      </a>
+
+      <a href="/fleet.html">
+        <span class="menu-icon">🚀</span>
+        <span>Fleet</span>
+      </a>
+
+    </nav>
+
+
+    <div class="logout">
+
+      <button id="logoutBtn">
+        Logout
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN -->
+
+  <main class="main">
+
+    <div class="topbar">
+
+      <h1 class="page-title">
+        Settings
+      </h1>
+
+      <p class="page-subtitle">
+        Configure your HarvixPanel installation.
+      </p>
+
+    </div>
+
+
+    <div class="settings-card">
+
+      <div
+        id="message"
+        class="message"
+      ></div>
+
+
+      <h2 class="section-title">
+        Panel Settings
+      </h2>
+
+      <p class="section-description">
+        Customize the name and appearance of your
+        HarvixPanel installation.
+      </p>
+
+
+      <form id="settingsForm">
+
+
+        <!-- PANEL NAME -->
+
+        <div class="field">
+
+          <label for="panelName">
+            Panel Name
+          </label>
+
+          <input
+            id="panelName"
+            type="text"
+            value="HarvixPanel"
+            placeholder="Enter panel name"
+            required
+          >
+
+          <span class="hint">
+            This name will be shown across the panel.
+          </span>
+
+        </div>
+
+
+        <!-- PANEL IMAGE -->
+
+        <div class="field">
+
+          <label>
+            Panel Image / Logo
+          </label>
+
+
+          <div class="image-section">
+
+            <div
+              class="image-preview"
+              id="imagePreview"
+            >
+              H
+            </div>
+
+
+            <div class="image-input">
+
+              <input
+                id="panelImage"
+                type="url"
+                placeholder="https://example.com/logo.png"
+              >
+
+              <span class="hint">
+                Enter an image URL for your panel logo.
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- SAVE -->
+
+        <div class="actions">
+
+          <button
+            type="submit"
+            id="saveBtn"
+          >
+            Save Changes
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<script>
+
+  /* =============================
+     ADMIN CHECK
+  ============================= */
+
+  function checkAdmin() {
+
+    const userData =
+      localStorage.getItem(
+        "harvix_user"
+      );
+
+
+    if (!userData) {
+
+      window.location.href = "/";
+
+      return;
+
+    }
+
+
+    try {
+
+      const user =
+        JSON.parse(userData);
+
+
+      if (user.role !== "admin") {
+
+        window.location.href =
+          "/dashboard.html";
+
+      }
+
+    } catch (error) {
+
+      localStorage.removeItem(
+        "harvix_user"
+      );
+
+      localStorage.removeItem(
+        "harvix_token"
+      );
+
+      window.location.href = "/";
+
+    }
+
+  }
+
+
+  checkAdmin();
+
+
+  /* =============================
+     LOGOUT
+  ============================= */
+
+  document
+    .getElementById("logoutBtn")
+    .addEventListener(
+      "click",
+      function() {
+
+        localStorage.removeItem(
+          "harvix_token"
+        );
+
+        localStorage.removeItem(
+          "harvix_user"
+        );
+
+        window.location.href = "/";
+
+      }
+    );
+
+
+  /* =============================
+     SETTINGS
+  ============================= */
+
+  const panelName =
+    document.getElementById(
+      "panelName"
+    );
+
+  const panelImage =
+    document.getElementById(
+      "panelImage"
+    );
+
+  const imagePreview =
+    document.getElementById(
+      "imagePreview"
+    );
+
+  const saveBtn =
+    document.getElementById(
+      "saveBtn"
+    );
+
+  const form =
+    document.getElementById(
+      "settingsForm"
+    );
+
+  const message =
+    document.getElementById(
+      "message"
+    );
+
+
+  let originalName =
+    panelName.value;
+
+  let originalImage =
+    panelImage.value;
+
+
+  /* =============================
+     CHANGE DETECTION
+  ============================= */
+
+  function checkChanges() {
+
+    const changed =
+      panelName.value !== originalName ||
+      panelImage.value !== originalImage;
+
+
+    if (changed) {
+
+      saveBtn.classList.add(
+        "show"
+      );
+
+    } else {
+
+      saveBtn.classList.remove(
+        "show"
+      );
+
+    }
+
+  }
+
+
+  panelName.addEventListener(
+    "input",
+    checkChanges
+  );
+
+
+  panelImage.addEventListener(
+    "input",
+    function() {
+
+      checkChanges();
+
+      updateImage();
+
+    }
+  );
+
+
+  /* =============================
+     IMAGE PREVIEW
+  ============================= */
+
+  function updateImage() {
+
+    const url =
+      panelImage.value.trim();
+
+
+    if (!url) {
+
+      imagePreview.innerHTML =
+        "H";
+
+      return;
+
+    }
+
+
+    imagePreview.innerHTML = "";
+
+
+    const img =
+      document.createElement(
+        "img"
+      );
+
+
+    img.src = url;
+
+
+    img.onload =
+      function() {
+
+        imagePreview.innerHTML =
+          "";
+
+        imagePreview.appendChild(
+          img
+        );
+
+      };
+
+
+    img.onerror =
+      function() {
+
+        imagePreview.innerHTML =
+          "H";
+
+      };
+
+  }
+
+
+  /* =============================
+     SAVE SETTINGS
+  ============================= */
+
+  form.addEventListener(
+    "submit",
+    async function(event) {
+
+      event.preventDefault();
+
+
+      if (
+        !saveBtn.classList.contains(
+          "show"
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      const settings = {
+
+        name:
+          panelName.value.trim(),
+
+        image:
+          panelImage.value.trim()
+
+      };
+
+
+      try {
+
+        const token =
+          localStorage.getItem(
+            "harvix_token"
+          );
+
+
+        const response =
+          await fetch(
+            "/api/admin/settings",
+            {
+
+              method: "POST",
+
+              headers: {
+
+                "Content-Type":
+                  "application/json",
+
+                "Authorization":
+                  "Bearer " + token
+
+              },
+
+              body:
+                JSON.stringify(
+                  settings
+                )
+
+            }
+          );
+
+
+        const contentType =
+          response.headers.get(
+            "content-type"
+          ) || "";
+
+
+        if (
+          !contentType.includes(
+            "application/json"
+          )
+        ) {
+
+          throw new Error(
+            "Settings API is not connected yet."
+          );
+
+        }
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.message ||
+            "Failed to save settings."
+          );
+
+        }
+
+
+        originalName =
+          settings.name;
+
+        originalImage =
+          settings.image;
+
+
+        saveBtn.classList.remove(
+          "show"
+        );
+
+
+        message.className =
+          "message show success";
+
+        message.textContent =
+          "Settings saved successfully.";
+
+
+      } catch (error) {
+
+        message.className =
+          "message show error";
+
+        message.textContent =
+          error.message;
+
+      }
+
+    }
+  );
+
+</script>
+
+</body>
+</html>
