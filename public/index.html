@@ -16,214 +16,119 @@
     body {
       min-height: 100vh;
       font-family: Arial, Helvetica, sans-serif;
-      color: #fff;
-      background:
-        radial-gradient(circle at 15% 20%, rgba(150, 40, 255, .25), transparent 30%),
-        radial-gradient(circle at 85% 80%, rgba(255, 40, 190, .18), transparent 30%),
-        #09060e;
+      background: #08060f;
+      overflow-x: hidden;
     }
 
-    .container {
-      width: 100%;
-      max-width: 1100px;
-      margin: auto;
+    /* =========================
+       BACKGROUND
+    ========================= */
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background:
+        linear-gradient(
+          rgba(10, 6, 20, 0.35),
+          rgba(10, 6, 20, 0.55)
+        ),
+        url("https://images.unsplash.com/photo-1605899435973-ca2d1a8861cf?auto=format&fit=crop&w=1600&q=85");
+
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+
       padding: 25px;
     }
 
-    /* NAVBAR */
+    /* =========================
+       AUTH CARD
+    ========================= */
 
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      padding: 10px 0;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      font-size: 21px;
-      font-weight: 800;
-    }
-
-    .logo-box {
-      width: 40px;
-      height: 40px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 11px;
-
-      background: linear-gradient(135deg, #7d1cff, #bd45ff);
-    }
-
-    .nav-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .nav-buttons button {
-      padding: 10px 17px;
-
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,.1);
-
-      background: rgba(255,255,255,.05);
-      color: white;
-
-      cursor: pointer;
-    }
-
-    .nav-buttons .register {
-      border: none;
-      background: linear-gradient(135deg,#8b20e8,#a52cff);
-    }
-
-    /* HERO */
-
-    .hero {
-      min-height: 75vh;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      text-align: center;
-    }
-
-    .hero-content {
-      max-width: 700px;
-    }
-
-    .badge {
-      display: inline-block;
-
-      padding: 8px 13px;
-      margin-bottom: 20px;
-
-      border-radius: 99px;
-
-      color: #d49aff;
-      background: rgba(160,50,255,.1);
-      border: 1px solid rgba(160,50,255,.2);
-
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    h1 {
-      font-size: clamp(42px, 8vw, 72px);
-      line-height: 1;
-
-      background: linear-gradient(90deg,#fff,#c36cff);
-      -webkit-background-clip: text;
-      color: transparent;
-    }
-
-    .subtitle {
-      margin-top: 20px;
-
-      color: rgba(255,255,255,.55);
-
-      font-size: 16px;
-      line-height: 1.6;
-    }
-
-    .hero-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-
-      margin-top: 30px;
-    }
-
-    .hero-buttons button {
-      padding: 14px 22px;
-
-      border-radius: 12px;
-      border: none;
-
-      color: white;
-      background: linear-gradient(135deg,#8b20e8,#a52cff);
-
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .hero-buttons .login-btn {
-      border: 1px solid rgba(255,255,255,.1);
-      background: rgba(255,255,255,.05);
-    }
-
-    /* AUTH MODAL */
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-
-      display: none;
-      align-items: center;
-      justify-content: center;
-
-      padding: 20px;
-
-      background: rgba(0,0,0,.72);
-      backdrop-filter: blur(8px);
-
-      z-index: 100;
-    }
-
-    .overlay.show {
-      display: flex;
-    }
-
-    .auth-box {
+    .auth-card {
       width: 100%;
-      max-width: 410px;
+      max-width: 520px;
 
-      padding: 28px;
+      padding: 38px 40px 30px;
 
-      border-radius: 20px;
+      background: rgba(18, 15, 30, 0.94);
 
-      background: #120d1a;
-      border: 1px solid rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,0.08);
 
-      box-shadow: 0 25px 80px rgba(0,0,0,.5);
+      border-radius: 8px;
+
+      box-shadow:
+        0 25px 70px rgba(0,0,0,0.55),
+        0 0 30px rgba(130,40,255,0.08);
     }
 
-    .auth-header {
+    /* =========================
+       BRAND
+    ========================= */
+
+    .brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+
+      margin: 0 auto 12px;
+
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: center;
 
-      margin-bottom: 22px;
-    }
+      border-radius: 50%;
 
-    .auth-header h2 {
-      font-size: 23px;
-    }
+      background: linear-gradient(
+        135deg,
+        #7c19ff,
+        #b52cff
+      );
 
-    .close {
-      width: 35px;
-      height: 35px;
-
-      border: none;
-      border-radius: 9px;
-
-      background: rgba(255,255,255,.06);
       color: white;
+      font-size: 17px;
+      font-weight: 900;
 
-      cursor: pointer;
-      font-size: 18px;
+      box-shadow:
+        0 0 20px rgba(151,43,255,0.4);
+    }
+
+    .brand-name {
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: .5px;
+    }
+
+    /* =========================
+       FORMS
+    ========================= */
+
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+    }
+
+    .title {
+      text-align: center;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 26px;
     }
 
     .field {
-      margin-bottom: 15px;
+      margin-bottom: 16px;
     }
 
     .field label {
@@ -231,74 +136,139 @@
 
       margin-bottom: 7px;
 
-      color: rgba(255,255,255,.65);
-      font-size: 13px;
+      color: rgba(255,255,255,0.72);
+
+      font-size: 11px;
+      font-weight: 500;
     }
 
     .field input {
       width: 100%;
-      height: 48px;
+      height: 43px;
 
-      padding: 0 14px;
+      padding: 0 12px;
 
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 10px;
+      border: 1px solid #cbd0d8;
+      border-radius: 4px;
 
       outline: none;
 
-      background: rgba(255,255,255,.04);
-      color: white;
+      background: #ffffff;
+      color: #222;
 
-      font-size: 14px;
+      font-size: 13px;
+
+      transition: .2s;
     }
 
     .field input:focus {
-      border-color: #a52cff;
-      box-shadow: 0 0 0 3px rgba(165,44,255,.12);
+      border-color: #4388f5;
+
+      box-shadow:
+        0 0 0 2px rgba(67,136,245,.15);
     }
 
-    .auth-submit {
-      width: 100%;
-      height: 48px;
+    /* REGISTER TWO COLUMNS */
 
-      margin-top: 5px;
+    .two-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* =========================
+       BUTTON
+    ========================= */
+
+    .submit-btn {
+      width: 100%;
+      height: 44px;
+
+      margin-top: 6px;
 
       border: none;
-      border-radius: 10px;
+      border-radius: 4px;
 
-      background: linear-gradient(135deg,#8b20e8,#a52cff);
+      background: #4388ed;
 
       color: white;
+
+      font-size: 12px;
       font-weight: 700;
 
       cursor: pointer;
+
+      transition: .2s;
     }
 
-    .switch {
+    .submit-btn:hover {
+      background: #3479df;
+    }
+
+    .submit-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    /* =========================
+       LINKS
+    ========================= */
+
+    .switch-text {
+      text-align: center;
+
       margin-top: 17px;
+
+      color: rgba(255,255,255,.5);
+
+      font-size: 11px;
+    }
+
+    .switch-text button {
+      border: none;
+      background: none;
+
+      color: #4388ed;
+
+      cursor: pointer;
+
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .switch-text button:hover {
+      text-decoration: underline;
+    }
+
+    .forgot {
+      display: block;
+
+      margin-top: 13px;
 
       text-align: center;
 
-      color: rgba(255,255,255,.45);
-      font-size: 13px;
+      color: rgba(255,255,255,.35);
+
+      font-size: 9px;
+
+      text-decoration: none;
     }
 
-    .switch button {
-      border: none;
-      background: none;
-      color: #bd66ff;
-      cursor: pointer;
-    }
+    /* =========================
+       MESSAGE
+    ========================= */
 
     .message {
       display: none;
 
-      margin-bottom: 14px;
-      padding: 11px;
+      margin-bottom: 15px;
 
-      border-radius: 9px;
+      padding: 10px 12px;
 
-      font-size: 13px;
+      border-radius: 5px;
+
+      font-size: 11px;
+      line-height: 1.4;
     }
 
     .message.show {
@@ -306,137 +276,77 @@
     }
 
     .message.error {
-      color: #ffadb8;
-      background: rgba(255,50,80,.1);
+      background: rgba(255,60,80,.12);
+      border: 1px solid rgba(255,60,80,.25);
+      color: #ff9aa8;
     }
 
     .message.success {
-      color: #a8ffd1;
-      background: rgba(50,255,150,.1);
+      background: rgba(50,220,130,.10);
+      border: 1px solid rgba(50,220,130,.22);
+      color: #82f0ad;
     }
 
-    @media (max-width: 600px) {
+    /* =========================
+       FOOTER
+    ========================= */
 
-      .container {
-        padding: 18px;
-      }
+    .footer {
+      margin-top: 24px;
 
-      .nav-buttons button {
-        padding: 9px 12px;
-      }
+      text-align: center;
 
-      .hero-buttons {
-        flex-direction: column;
-      }
+      color: rgba(255,255,255,.18);
 
-      .hero-buttons button {
-        width: 100%;
-      }
-
-      .auth-box {
-        padding: 22px;
-      }
+      font-size: 9px;
     }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 550px) {
+
+      .page {
+        padding: 15px;
+      }
+
+      .auth-card {
+        padding: 30px 20px 25px;
+      }
+
+      .two-columns {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+    }
+
   </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="page">
 
-  <nav>
+  <div class="auth-card">
 
-    <div class="logo">
+    <!-- BRAND -->
 
-      <div class="logo-box">
+    <div class="brand">
+
+      <div class="brand-logo">
         H
       </div>
 
-      HarvixPanel
-
-    </div>
-
-    <div class="nav-buttons">
-
-      <button onclick="openLogin()">
-        Login
-      </button>
-
-      <button
-        class="register"
-        onclick="openRegister()"
-      >
-        Register
-      </button>
-
-    </div>
-
-  </nav>
-
-
-  <section class="hero">
-
-    <div class="hero-content">
-
-      <div class="badge">
-        MINECRAFT HOSTING PANEL
-      </div>
-
-      <h1>
+      <div class="brand-name">
         HarvixPanel
-      </h1>
-
-      <p class="subtitle">
-        Simple, fast and powerful Minecraft server
-        management from one panel.
-      </p>
-
-      <div class="hero-buttons">
-
-        <button onclick="openRegister()">
-          Create Account
-        </button>
-
-        <button
-          class="login-btn"
-          onclick="openLogin()"
-        >
-          Login
-        </button>
-
       </div>
 
     </div>
 
-  </section>
 
-</div>
-
-
-<!-- AUTH MODAL -->
-
-<div
-  class="overlay"
-  id="authOverlay"
->
-
-  <div class="auth-box">
-
-    <div class="auth-header">
-
-      <h2 id="authTitle">
-        Login
-      </h2>
-
-      <button
-        class="close"
-        onclick="closeAuth()"
-      >
-        ×
-      </button>
-
-    </div>
-
+    <!-- MESSAGE -->
 
     <div
       id="message"
@@ -444,20 +354,31 @@
     ></div>
 
 
-    <!-- LOGIN -->
+    <!-- =====================
+         LOGIN
+    ====================== -->
 
-    <form id="loginForm">
+    <form
+      id="loginForm"
+      class="auth-form active"
+    >
+
+      <h1 class="title">
+        Login
+      </h1>
+
 
       <div class="field">
 
         <label>
-          Username
+          USERNAME OR EMAIL
         </label>
 
         <input
-          id="loginUsername"
+          id="loginIdentifier"
           type="text"
-          placeholder="Enter username"
+          placeholder="Username or Email"
+          autocomplete="username"
           required
         >
 
@@ -467,13 +388,14 @@
       <div class="field">
 
         <label>
-          Password
+          PASSWORD
         </label>
 
         <input
           id="loginPassword"
           type="password"
-          placeholder="Enter password"
+          placeholder="Password"
+          autocomplete="current-password"
           required
         >
 
@@ -481,95 +403,194 @@
 
 
       <button
-        class="auth-submit"
         type="submit"
+        class="submit-btn"
+        id="loginButton"
       >
         Login
       </button>
 
+
+      <a
+        href="#"
+        class="forgot"
+        onclick="return false;"
+      >
+        FORGOT PASSWORD?
+      </a>
+
+
+      <div class="switch-text">
+
+        Don't have an account?
+
+        <button
+          type="button"
+          id="showRegister"
+        >
+          Register here.
+        </button>
+
+      </div>
+
     </form>
 
 
-    <!-- REGISTER -->
+    <!-- =====================
+         REGISTER
+    ====================== -->
 
     <form
       id="registerForm"
-      style="display:none;"
+      class="auth-form"
     >
 
-      <div class="field">
+      <h1 class="title">
+        Registration
+      </h1>
 
-        <label>
-          Username
-        </label>
 
-        <input
-          id="registerUsername"
-          type="text"
-          placeholder="Choose username"
-          minlength="3"
-          required
-        >
+      <div class="two-columns">
+
+        <div class="field">
+
+          <label>
+            FIRST NAME
+          </label>
+
+          <input
+            id="firstName"
+            type="text"
+            placeholder="First Name"
+            autocomplete="given-name"
+            required
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            LAST NAME
+          </label>
+
+          <input
+            id="lastName"
+            type="text"
+            placeholder="Last Name"
+            autocomplete="family-name"
+            required
+          >
+
+        </div>
 
       </div>
 
 
-      <div class="field">
+      <div class="two-columns">
 
-        <label>
-          Email
-        </label>
+        <div class="field">
 
-        <input
-          id="registerEmail"
-          type="email"
-          placeholder="Enter email"
-          required
-        >
+          <label>
+            USERNAME
+          </label>
+
+          <input
+            id="registerUsername"
+            type="text"
+            placeholder="Username"
+            autocomplete="username"
+            required
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            E-MAIL
+          </label>
+
+          <input
+            id="registerEmail"
+            type="email"
+            placeholder="Email"
+            autocomplete="email"
+            required
+          >
+
+        </div>
 
       </div>
 
 
-      <div class="field">
+      <div class="two-columns">
 
-        <label>
-          Password
-        </label>
+        <div class="field">
 
-        <input
-          id="registerPassword"
-          type="password"
-          placeholder="Create password"
-          minlength="6"
-          required
-        >
+          <label>
+            PASSWORD
+          </label>
+
+          <input
+            id="registerPassword"
+            type="password"
+            placeholder="Password"
+            autocomplete="new-password"
+            required
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            REPEAT PASSWORD
+          </label>
+
+          <input
+            id="registerConfirmPassword"
+            type="password"
+            placeholder="Repeat Password"
+            autocomplete="new-password"
+            required
+          >
+
+        </div>
 
       </div>
 
 
       <button
-        class="auth-submit"
         type="submit"
-      >
-        Create Account
-      </button>
-
-    </form>
-
-
-    <div class="switch">
-
-      <span id="switchText">
-        Don't have an account?
-      </span>
-
-      <button
-        id="switchButton"
-        onclick="toggleAuth()"
+        class="submit-btn"
+        id="registerButton"
       >
         Register
       </button>
 
+
+      <div class="switch-text">
+
+        Already have an account?
+
+        <button
+          type="button"
+          id="showLogin"
+        >
+          Login here.
+        </button>
+
+      </div>
+
+    </form>
+
+
+    <div class="footer">
+      HarvixPanel • Minecraft Server Management
     </div>
 
   </div>
@@ -577,433 +598,7 @@
 </div>
 
 
-<script>
-
-  let loginMode = true;
-
-
-  function openLogin() {
-
-    loginMode = true;
-
-    document
-      .getElementById("authOverlay")
-      .classList.add("show");
-
-    updateAuth();
-
-  }
-
-
-  function openRegister() {
-
-    loginMode = false;
-
-    document
-      .getElementById("authOverlay")
-      .classList.add("show");
-
-    updateAuth();
-
-  }
-
-
-  function closeAuth() {
-
-    document
-      .getElementById("authOverlay")
-      .classList.remove("show");
-
-    clearMessage();
-
-  }
-
-
-  function toggleAuth() {
-
-    loginMode = !loginMode;
-
-    updateAuth();
-
-  }
-
-
-  function updateAuth() {
-
-    const title =
-      document.getElementById("authTitle");
-
-    const login =
-      document.getElementById("loginForm");
-
-    const register =
-      document.getElementById("registerForm");
-
-    const text =
-      document.getElementById("switchText");
-
-    const button =
-      document.getElementById("switchButton");
-
-
-    if (loginMode) {
-
-      title.textContent = "Login";
-
-      login.style.display = "block";
-
-      register.style.display = "none";
-
-      text.textContent =
-        "Don't have an account?";
-
-      button.textContent =
-        "Register";
-
-    } else {
-
-      title.textContent = "Create Account";
-
-      login.style.display = "none";
-
-      register.style.display = "block";
-
-      text.textContent =
-        "Already have an account?";
-
-      button.textContent =
-        "Login";
-
-    }
-
-    clearMessage();
-
-  }
-
-
-  function showMessage(
-    message,
-    type
-  ) {
-
-    const box =
-      document.getElementById("message");
-
-    box.textContent = message;
-
-    box.className =
-      "message show " + type;
-
-  }
-
-
-  function clearMessage() {
-
-    const box =
-      document.getElementById("message");
-
-    box.textContent = "";
-
-    box.className = "message";
-
-  }
-
-
-  /* LOGIN */
-
-  document
-    .getElementById("loginForm")
-    .addEventListener(
-      "submit",
-      async function(event) {
-
-        event.preventDefault();
-
-        clearMessage();
-
-
-        const username =
-          document
-            .getElementById("loginUsername")
-            .value
-            .trim();
-
-        const password =
-          document
-            .getElementById("loginPassword")
-            .value;
-
-
-        try {
-
-          const response =
-            await fetch(
-              "/api/login",
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
-
-                body: JSON.stringify({
-                  username,
-                  password
-                })
-              }
-            );
-
-
-          const contentType =
-            response.headers
-              .get("content-type") || "";
-
-
-          /*
-           * Prevent the
-           * "Unexpected token <"
-           * error when server returns HTML.
-           */
-
-          if (
-            !contentType.includes(
-              "application/json"
-            )
-          ) {
-
-            throw new Error(
-              "Login API is not available. Check server.js."
-            );
-
-          }
-
-
-          const data =
-            await response.json();
-
-
-          if (!response.ok) {
-
-            throw new Error(
-              data.message ||
-              "Login failed."
-            );
-
-          }
-
-
-          if (data.token) {
-
-            localStorage.setItem(
-              "harvix_token",
-              data.token
-            );
-
-          }
-
-
-          if (data.user) {
-
-            localStorage.setItem(
-              "harvix_user",
-              JSON.stringify(
-                data.user
-              )
-            );
-
-          }
-
-
-          showMessage(
-            "Login successful!",
-            "success"
-          );
-
-
-          setTimeout(
-            function() {
-
-              if (
-                data.user &&
-                data.user.role === "admin"
-              ) {
-
-                window.location.href =
-                  "/admin.html";
-
-              } else {
-
-                window.location.href =
-                  "/dashboard.html";
-
-              }
-
-            },
-            600
-          );
-
-
-        } catch(error) {
-
-          showMessage(
-            error.message,
-            "error"
-          );
-
-        }
-
-      }
-    );
-
-
-  /* REGISTER */
-
-  document
-    .getElementById("registerForm")
-    .addEventListener(
-      "submit",
-      async function(event) {
-
-        event.preventDefault();
-
-        clearMessage();
-
-
-        const username =
-          document
-            .getElementById(
-              "registerUsername"
-            )
-            .value
-            .trim();
-
-        const email =
-          document
-            .getElementById(
-              "registerEmail"
-            )
-            .value
-            .trim();
-
-        const password =
-          document
-            .getElementById(
-              "registerPassword"
-            )
-            .value;
-
-
-        try {
-
-          const response =
-            await fetch(
-              "/api/register",
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
-
-                body: JSON.stringify({
-                  username,
-                  email,
-                  password
-                })
-              }
-            );
-
-
-          const contentType =
-            response.headers
-              .get("content-type") || "";
-
-
-          if (
-            !contentType.includes(
-              "application/json"
-            )
-          ) {
-
-            throw new Error(
-              "Register API is not available. Check server.js."
-            );
-
-          }
-
-
-          const data =
-            await response.json();
-
-
-          if (!response.ok) {
-
-            throw new Error(
-              data.message ||
-              "Registration failed."
-            );
-
-          }
-
-
-          showMessage(
-            "Account created successfully! You can now login.",
-            "success"
-          );
-
-
-          document
-            .getElementById(
-              "registerForm"
-            )
-            .reset();
-
-
-          setTimeout(
-            function() {
-
-              openLogin();
-
-            },
-            1000
-          );
-
-
-        } catch(error) {
-
-          showMessage(
-            error.message,
-            "error"
-          );
-
-        }
-
-      }
-    );
-
-
-  /* CLOSE WHEN CLICKING OUTSIDE */
-
-  document
-    .getElementById("authOverlay")
-    .addEventListener(
-      "click",
-      function(event) {
-
-        if (
-          event.target === this
-        ) {
-
-          closeAuth();
-
-        }
-
-      }
-    );
-
-</script>
+<script src="/js/auth.js"></script>
 
 </body>
 </html>
