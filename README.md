@@ -1,4 +1,4 @@
-# HarvixPanel v0.2.0
+# HarvixPanel v0.5.0
 Minecraft hosting panel starter.
 
 Added server dashboard modules:
