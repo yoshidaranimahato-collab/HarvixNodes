@@ -54,9 +54,9 @@ user: admin
 password: admin
 
 # Export admin user to panel
-``` export HARVIX_ADMIN_USERNAME="$ADMIN_USERNAME```
-   ``` export HARVIX_ADMIN_PASSWORD="$ADMIN_PASSWORD```
-    ```export HARVIX_DATABASE_FILE="$APP_DIR/data/harvix.json```
+``` export HARVIX_ADMIN_USERNAME="$ADMIN_USERNAME ```
+   ```  export HARVIX_ADMIN_PASSWORD="$ADMIN_PASSWORD ```
+    ``` export HARVIX_DATABASE_FILE="$APP_DIR/data/harvix.json ```
 
 # Manual Install has some problems so use one click command installer
 
