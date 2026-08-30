@@ -1,385 +1,172 @@
-document.addEventListener("DOMContentLoaded", () => {
+"use strict";
 
-    const username = document.getElementById("adminUsername");
-    const logout = document.getElementById("logout");
+const TOKEN_KEY = "harvix_token";
+const USER_KEY = "harvix_user";
 
-    const panelName = document.getElementById("panelName");
-    const panelImage = document.getElementById("panelImage");
-    const saveSettings = document.getElementById("saveSettings");
-    const message = document.getElementById("settingsMessage");
+function getToken() {
+    return localStorage.getItem(TOKEN_KEY);
+}
 
-    const mobileMenu = document.getElementById("mobileMenu");
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("sidebarOverlay");
+function authHeaders() {
+    const token = getToken();
 
+    return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+    };
+}
 
-    // =========================
-    // MOBILE SIDEBAR
-    // =========================
+async function getCurrentUser() {
 
-    if (mobileMenu && sidebar) {
-        mobileMenu.addEventListener("click", () => {
-            sidebar.classList.toggle("open");
+    const token = getToken();
 
-            if (overlay) {
-                overlay.classList.toggle("active");
-            }
+    if (!token) {
+        window.location.href = "/index.html";
+        return null;
+    }
+
+    try {
+
+        const response = await fetch("/api/auth/me", {
+            method: "GET",
+            headers: authHeaders()
         });
-    }
 
-    if (overlay) {
-        overlay.addEventListener("click", () => {
-            sidebar.classList.remove("open");
-            overlay.classList.remove("active");
-        });
-    }
+        const data = await response.json();
 
-
-    // =========================
-    // MESSAGE
-    // =========================
-
-    function showMessage(text, type = "success") {
-
-        if (!message) return;
-
-        message.textContent = text;
-
-        message.className =
-            "message show " + type;
-
-    }
-
-
-    // =========================
-    // ADMIN CHECK
-    // =========================
-
-    async function checkAdmin() {
-
-        try {
-
-            const response = await fetch(
-                "/api/auth/me",
-                {
-                    method: "GET",
-                    credentials: "include",
-                    headers: {
-                        "Accept": "application/json"
-                    }
-                }
-            );
-
-
-            if (!response.ok) {
-
-                window.location.href =
-                    "/index.html";
-
-                return null;
-            }
-
-
-            const user =
-                await response.json();
-
-
-            const role =
-                String(
-                    user.role ||
-                    user.type ||
-                    ""
-                ).toLowerCase();
-
-
-            const isAdmin =
-                role === "admin" ||
-                user.isAdmin === true;
-
-
-            if (!isAdmin) {
-
-                alert(
-                    "You do not have permission to access the Admin Panel."
-                );
-
-                window.location.href =
-                    "/dashboard.html";
-
-                return null;
-            }
-
-
-            if (username) {
-
-                username.textContent =
-                    user.username ||
-                    user.name ||
-                    "Admin";
-
-            }
-
-
-            return user;
-
-
-        } catch (error) {
-
-            console.error(
-                "Admin verification error:",
-                error
-            );
-
-            window.location.href =
-                "/index.html";
-
-            return null;
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "Authentication failed");
         }
-    }
 
-
-    // =========================
-    // LOAD SETTINGS
-    // =========================
-
-    async function loadSettings() {
-
-        try {
-
-            const response = await fetch(
-                "/api/settings",
-                {
-                    method: "GET",
-                    credentials: "include",
-                    headers: {
-                        "Accept": "application/json"
-                    }
-                }
-            );
-
-
-            if (!response.ok) {
-                return;
-            }
-
-
-            const settings =
-                await response.json();
-
-
-            if (panelName) {
-
-                panelName.value =
-                    settings.panelName ||
-                    settings.name ||
-                    "HarvixPanel";
-
-            }
-
-
-            if (panelImage) {
-
-                panelImage.value =
-                    settings.panelImage ||
-                    settings.image ||
-                    "";
-
-            }
-
-
-        } catch (error) {
-
-            console.error(
-                "Settings loading error:",
-                error
-            );
-
-        }
-    }
-
-
-    // =========================
-    // SAVE SETTINGS
-    // =========================
-
-    if (saveSettings) {
-
-        saveSettings.addEventListener(
-            "click",
-            async () => {
-
-                const name =
-                    panelName
-                        ? panelName.value.trim()
-                        : "";
-
-                const image =
-                    panelImage
-                        ? panelImage.value.trim()
-                        : "";
-
-
-                if (!name) {
-
-                    showMessage(
-                        "Panel name is required.",
-                        "error"
-                    );
-
-                    return;
-                }
-
-
-                saveSettings.disabled = true;
-
-                saveSettings.textContent =
-                    "Saving...";
-
-
-                try {
-
-                    const response =
-                        await fetch(
-                            "/api/settings",
-                            {
-                                method: "PUT",
-
-                                credentials:
-                                    "include",
-
-                                headers: {
-                                    "Content-Type":
-                                        "application/json",
-
-                                    "Accept":
-                                        "application/json"
-                                },
-
-                                body:
-                                    JSON.stringify({
-                                        panelName: name,
-                                        panelImage: image
-                                    })
-                            }
-                        );
-
-
-                    let data = {};
-
-                    try {
-                        data =
-                            await response.json();
-                    } catch (_) {
-                        data = {};
-                    }
-
-
-                    if (!response.ok) {
-
-                        throw new Error(
-                            data.message ||
-                            "Unable to save settings."
-                        );
-
-                    }
-
-
-                    showMessage(
-                        "Settings saved successfully.",
-                        "success"
-                    );
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Save settings error:",
-                        error
-                    );
-
-
-                    showMessage(
-                        error.message ||
-                        "Failed to save settings.",
-                        "error"
-                    );
-
-
-                } finally {
-
-                    saveSettings.disabled =
-                        false;
-
-                    saveSettings.textContent =
-                        "Save Changes";
-
-                }
-
-            }
+        localStorage.setItem(
+            USER_KEY,
+            JSON.stringify(data.user)
         );
 
+        return data.user;
+
+    } catch (error) {
+
+        console.error("Auth error:", error);
+
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+
+        window.location.href = "/index.html";
+
+        return null;
+    }
+}
+
+
+async function checkAdmin() {
+
+    const user = await getCurrentUser();
+
+    if (!user) return;
+
+    if (user.role !== "admin") {
+
+        window.location.href = "/dashboard.html";
+
+        return;
     }
 
-
-    // =========================
-    // LOGOUT
-    // =========================
-
-    if (logout) {
-
-        logout.addEventListener(
-            "click",
-            async () => {
-
-                try {
-
-                    await fetch(
-                        "/api/auth/logout",
-                        {
-                            method: "POST",
-                            credentials: "include"
-                        }
-                    );
-
-                } catch (error) {
-
-                    console.error(
-                        "Logout error:",
-                        error
-                    );
-
-                }
+    showAdminUser(user);
+}
 
 
-                window.location.href =
-                    "/index.html";
+function showAdminUser(user) {
 
-            }
-        );
+    const username =
+        document.getElementById("username");
 
+    const role =
+        document.getElementById("role");
+
+    if (username) {
+        username.textContent =
+            user.username;
     }
 
+    if (role) {
+        role.textContent =
+            "Administrator";
+    }
 
-    // =========================
-    // INITIALIZE
-    // =========================
+    const avatar =
+        document.querySelector(".user-avatar");
 
-    async function init() {
+    if (avatar) {
+        avatar.textContent =
+            user.username
+                .charAt(0)
+                .toUpperCase();
+    }
+}
 
-        const admin =
-            await checkAdmin();
+
+async function apiFetch(url, options = {}) {
+
+    const token = getToken();
+
+    if (!token) {
+        window.location.href = "/index.html";
+        return null;
+    }
+
+    options.headers = {
+        ...(options.headers || {}),
+        "Authorization":
+            `Bearer ${token}`,
+        "Content-Type":
+            "application/json"
+    };
+
+    const response =
+        await fetch(url, options);
+
+    if (response.status === 401) {
+
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+
+        window.location.href =
+            "/index.html";
+
+        return null;
+    }
+
+    return response;
+}
 
 
-        if (!admin) {
-            return;
+function logout() {
+
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+
+    window.location.href =
+        "/index.html";
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        checkAdmin();
+
+        const logoutButton =
+            document.getElementById("logout");
+
+        if (logoutButton) {
+
+            logoutButton.addEventListener(
+                "click",
+                logout
+            );
         }
 
-
-        await loadSettings();
-
     }
-
-
-    init();
-
-});
+);
