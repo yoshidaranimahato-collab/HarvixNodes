@@ -1,1 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Console - HarvixPanel</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/server/console.css"
+    >
+</head>
+
+<body>
+
+    <div class="console-page">
+
+        <!-- TOP BAR -->
+        <header class="console-header">
+
+            <div class="server-heading">
+
+                <a
+                    href="/dashboard.html"
+                    class="back-button"
+                >
+                    ←
+                </a>
+
+                <div>
+                    <h1 id="serverName">
+                        Loading...
+                    </h1>
+
+                    <span
+                        id="serverStatus"
+                        class="status offline"
+                    >
+                        ● Offline
+                    </span>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- SERVER CONTROLS -->
+        <section class="server-controls">
+
+            <!-- START -->
+            <button
+                type="button"
+                id="startButton"
+                class="control-button start-button"
+            >
+                <span class="control-icon">▶</span>
+                <span>Start</span>
+            </button>
+
+
+            <!-- RESTART -->
+            <button
+                type="button"
+                id="restartButton"
+                class="control-button restart-button"
+            >
+                <span class="control-icon">↻</span>
+                <span>Restart</span>
+            </button>
+
+
+            <!-- STOP -->
+            <button
+                type="button"
+                id="stopButton"
+                class="control-button stop-button"
+            >
+                <span class="control-icon">■</span>
+                <span>Stop</span>
+            </button>
+
+        </section>
+
+
+        <!-- SERVER INFORMATION -->
+        <section class="server-stats">
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    RAM
+                </span>
+
+                <strong id="ramUsage">
+                    0 MB / 4150 MB
+                </strong>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    CPU
+                </span>
+
+                <strong id="cpuUsage">
+                    0% / 1 vCore
+                </strong>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    Disk
+                </span>
+
+                <strong id="diskUsage">
+                    0 MB / 5180 MB
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- CONSOLE -->
+        <section class="console-container">
+
+            <div class="console-header-bar">
+
+                <div class="console-title">
+                    Console
+                </div>
+
+                <button
+                    type="button"
+                    id="clearConsole"
+                    class="clear-button"
+                >
+                    Clear
+                </button>
+
+            </div>
+
+
+            <div
+                id="consoleOutput"
+                class="console-output"
+            >
+
+                <div class="console-line system">
+                    [HarvixPanel] Connecting to server...
+                </div>
+
+                <div class="console-line system">
+                    [HarvixPanel] Console ready.
+                </div>
+
+            </div>
+
+
+            <!-- COMMAND INPUT -->
+            <form
+                id="commandForm"
+                class="command-form"
+            >
+
+                <span class="command-symbol">
+                    &gt;
+                </span>
+
+                <input
+                    type="text"
+                    id="commandInput"
+                    placeholder="Type a command..."
+                    autocomplete="off"
+                >
+
+                <button
+                    type="submit"
+                    id="sendCommand"
+                >
+                    Send
+                </button>
+
+            </form>
+
+        </section>
+
+
+        <!-- SERVER NAVIGATION -->
+        <nav class="server-navigation">
+
+            <a href="console.html" class="active">
+                Console
+            </a>
+
+            <a href="files.html">
+                File Manager
+            </a>
+
+            <a href="sftp.html">
+                SFTP
+            </a>
+
+            <a href="plugins.html">
+                Plugins
+            </a>
+
+            <a href="mods.html">
+                Mods
+            </a>
+
+            <a href="votifier.html">
+                Votifier
+            </a>
+
+            <a href="splitter.html">
+                Server Splitter
+            </a>
+
+            <a href="domain.html">
+                Subdomain
+            </a>
+
+            <a href="worlds.html">
+                Worlds
+            </a>
+
+            <a href="players.html">
+                Players
+            </a>
+
+            <a href="backups.html">
+                Backups
+            </a>
+
+            <a href="settings.html">
+                Settings
+            </a>
+
+        </nav>
+
+    </div>
+
+
+    <!-- CONSOLE JAVASCRIPT -->
+    <script src="/js/server/console.js"></script>
+
+</body>
+
+</html>
