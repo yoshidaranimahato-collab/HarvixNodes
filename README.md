@@ -69,18 +69,8 @@ npm run create-user
 
 # example
 user: admin
-password: admin
 
-# Export admin user to panel
-```bash
-export HARVIX_ADMIN_USERNAME="$ADMIN_USERNAME
-```
-   ```bash
-export HARVIX_ADMIN_PASSWORD="$ADMIN_PASSWORD
-```
-```bash
-export HARVIX_DATABASE_FILE="$APP_DIR/data/harvix.json
-```
+password: admin
 
 # Manual Install has some problems so use one click command installer
 
