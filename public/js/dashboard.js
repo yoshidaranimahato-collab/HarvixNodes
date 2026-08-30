@@ -1,169 +1,424 @@
+"use strict";
+
+/*
+========================================
+HARVIXPANEL DASHBOARD
+========================================
+*/
+
 document.addEventListener("DOMContentLoaded", () => {
 
-    // ==============================
-    // ELEMENTS
-    // ==============================
+    /*
+    ========================================
+    ELEMENTS
+    ========================================
+    */
 
-    const serverList = document.getElementById("serverList");
-    const usernameElement = document.getElementById("username");
-    const roleElement = document.getElementById("role");
+    const serverList =
+        document.getElementById("serverList");
 
-    const mobileMenu = document.getElementById("mobileMenu");
-    const sidebar = document.getElementById("sidebar");
-    const sidebarOverlay = document.getElementById("sidebarOverlay");
+    const usernameElement =
+        document.getElementById("username");
 
-    const logoutButton = document.getElementById("logout");
+    const roleElement =
+        document.getElementById("role");
+
+    const mobileMenu =
+        document.getElementById("mobileMenu");
+
+    const sidebar =
+        document.getElementById("sidebar");
+
+    const sidebarOverlay =
+        document.getElementById("sidebarOverlay");
+
+    const logoutButton =
+        document.getElementById("logout");
 
 
-    // ==============================
-    // MOBILE SIDEBAR
-    // ==============================
+    /*
+    ========================================
+    TOKEN
+    ========================================
+    */
+
+    function getToken() {
+
+        return localStorage.getItem(
+            "harvix_token"
+        );
+
+    }
+
+
+    /*
+    ========================================
+    AUTH HEADERS
+    ========================================
+    */
+
+    function getAuthHeaders() {
+
+        const token =
+            getToken();
+
+        return {
+            "Accept": "application/json",
+            "Authorization":
+                "Bearer " + token
+        };
+
+    }
+
+
+    /*
+    ========================================
+    MOBILE SIDEBAR
+    ========================================
+    */
 
     if (mobileMenu && sidebar) {
-        mobileMenu.addEventListener("click", () => {
-            sidebar.classList.toggle("open");
 
-            if (sidebarOverlay) {
-                sidebarOverlay.classList.toggle("active");
+        mobileMenu.addEventListener(
+            "click",
+            () => {
+
+                sidebar.classList.toggle(
+                    "open"
+                );
+
+                if (sidebarOverlay) {
+
+                    sidebarOverlay.classList.toggle(
+                        "active"
+                    );
+
+                }
+
             }
-        });
+        );
+
     }
 
 
     if (sidebarOverlay) {
-        sidebarOverlay.addEventListener("click", () => {
 
-            sidebar.classList.remove("open");
-            sidebarOverlay.classList.remove("active");
+        sidebarOverlay.addEventListener(
+            "click",
+            () => {
 
-        });
+                sidebar.classList.remove(
+                    "open"
+                );
+
+                sidebarOverlay.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
     }
 
 
-    // ==============================
-    // GET USER
-    // ==============================
+    /*
+    ========================================
+    SHOW ADMIN MENU
+    ========================================
+    */
+
+    function showAdminMenu() {
+
+        document
+            .querySelectorAll(
+                "[data-admin-only]"
+            )
+            .forEach(element => {
+
+                element.style.display = "";
+
+            });
+
+    }
+
+
+    /*
+    ========================================
+    LOAD LOGGED-IN USER
+    ========================================
+    */
 
     async function loadUser() {
 
+        const token =
+            getToken();
+
+
+        if (!token) {
+
+            window.location.href =
+                "/index.html";
+
+            return null;
+
+        }
+
+
         try {
 
-            const response = await fetch("/api/auth/me", {
-                method: "GET",
-                credentials: "include",
-                headers: {
-                    "Accept": "application/json"
-                }
-            });
+            const response =
+                await fetch(
+                    "/api/auth/me",
+                    {
+                        method: "GET",
+
+                        headers:
+                            getAuthHeaders()
+                    }
+                );
+
+
+            /*
+            ========================================
+            TOKEN INVALID / EXPIRED
+            ========================================
+            */
+
+            if (response.status === 401) {
+
+                localStorage.removeItem(
+                    "harvix_token"
+                );
+
+                localStorage.removeItem(
+                    "harvix_user"
+                );
+
+                window.location.href =
+                    "/index.html";
+
+                return null;
+
+            }
 
 
             if (!response.ok) {
 
-                if (response.status === 401) {
-                    window.location.href = "/index.html";
-                }
+                console.error(
+                    "Auth API error:",
+                    response.status
+                );
 
                 return null;
+
             }
 
 
-            const user = await response.json();
+            /*
+            ========================================
+            RESPONSE
+            ========================================
+            */
 
+            const data =
+                await response.json();
+
+
+            if (
+                !data ||
+                !data.success ||
+                !data.user
+            ) {
+
+                console.error(
+                    "Invalid /api/auth/me response:",
+                    data
+                );
+
+                return null;
+
+            }
+
+
+            const user =
+                data.user;
+
+
+            /*
+            ========================================
+            SAVE USER
+            ========================================
+            */
+
+            localStorage.setItem(
+                "harvix_user",
+                JSON.stringify(user)
+            );
+
+
+            /*
+            ========================================
+            USERNAME
+            ========================================
+            */
 
             if (usernameElement) {
+
                 usernameElement.textContent =
                     user.username ||
-                    user.name ||
                     "User";
+
             }
 
+
+            /*
+            ========================================
+            ROLE
+            ========================================
+            */
 
             if (roleElement) {
 
-                const role =
-                    user.role ||
-                    user.type ||
-                    "user";
+                if (
+                    user.role === "admin"
+                ) {
 
-                roleElement.textContent =
-                    role === "admin"
-                        ? "Administrator"
-                        : "User";
+                    roleElement.textContent =
+                        "Administrator";
+
+                } else {
+
+                    roleElement.textContent =
+                        "User";
+
+                }
+
             }
 
 
-            // ==============================
-            // ADMIN MENU
-            // ==============================
+            /*
+            ========================================
+            ADMIN MENU
+            ========================================
+            */
 
             if (
-                user.role === "admin" ||
-                user.type === "admin" ||
-                user.isAdmin === true
+                user.role === "admin"
             ) {
 
-                document
-                    .querySelectorAll("[data-admin-only]")
-                    .forEach(element => {
-
-                        element.style.display = "";
-
-                    });
+                showAdminMenu();
 
             }
 
 
             return user;
 
+
         } catch (error) {
 
             console.error(
-                "User API error:",
+                "User loading error:",
                 error
             );
 
             return null;
+
         }
+
     }
 
 
-    // ==============================
-    // LOAD SERVERS
-    // ==============================
+    /*
+    ========================================
+    LOAD SERVERS
+    ========================================
+    */
 
     async function loadServers() {
 
-        if (!serverList) return;
+        if (!serverList) {
+            return;
+        }
+
+
+        const token =
+            getToken();
+
+
+        if (!token) {
+
+            window.location.href =
+                "/index.html";
+
+            return;
+
+        }
+
+
+        /*
+        Loading state
+        */
+
+        serverList.innerHTML = `
+
+            <div class="loading-server">
+
+                <div class="loader"></div>
+
+                <span>
+                    Loading servers...
+                </span>
+
+            </div>
+
+        `;
 
 
         try {
 
-            const response = await fetch(
-                "/api/servers",
-                {
-                    method: "GET",
-                    credentials: "include",
-                    headers: {
-                        "Accept": "application/json"
+            const response =
+                await fetch(
+                    "/api/servers",
+                    {
+                        method: "GET",
+
+                        headers:
+                            getAuthHeaders()
                     }
-                }
-            );
+                );
+
+
+            /*
+            ========================================
+            UNAUTHORIZED
+            ========================================
+            */
+
+            if (response.status === 401) {
+
+                localStorage.removeItem(
+                    "harvix_token"
+                );
+
+                localStorage.removeItem(
+                    "harvix_user"
+                );
+
+                window.location.href =
+                    "/index.html";
+
+                return;
+
+            }
 
 
             if (!response.ok) {
-
-                if (response.status === 401) {
-                    window.location.href =
-                        "/index.html";
-
-                    return;
-                }
-
 
                 throw new Error(
                     "Server API returned " +
                     response.status
                 );
+
             }
 
 
@@ -171,23 +426,36 @@ document.addEventListener("DOMContentLoaded", () => {
                 await response.json();
 
 
+            /*
+            ========================================
+            SERVER DATA
+            ========================================
+            */
+
             let servers = [];
 
 
             if (Array.isArray(data)) {
 
-                servers = data;
+                servers =
+                    data;
 
             } else if (
-                Array.isArray(data.servers)
+                data &&
+                Array.isArray(
+                    data.servers
+                )
             ) {
 
-                servers = data.servers;
+                servers =
+                    data.servers;
 
             }
 
 
-            renderServers(servers);
+            renderServers(
+                servers
+            );
 
 
         } catch (error) {
@@ -199,6 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             serverList.innerHTML = `
+
                 <div class="empty-servers">
 
                     <div class="empty-icon">
@@ -222,128 +491,160 @@ document.addEventListener("DOMContentLoaded", () => {
                     </button>
 
                 </div>
+
             `;
 
 
-            const retry =
+            const retryButton =
                 document.getElementById(
                     "retryServers"
                 );
 
 
-            if (retry) {
+            if (retryButton) {
 
-                retry.addEventListener(
+                retryButton.addEventListener(
                     "click",
                     loadServers
                 );
 
             }
+
         }
+
     }
 
 
-    // ==============================
-    // RENDER SERVERS
-    // ==============================
+    /*
+    ========================================
+    RENDER SERVERS
+    ========================================
+    */
 
-    function renderServers(servers) {
+    function renderServers(
+        servers
+    ) {
 
-        if (!serverList) return;
-
-
-        if (!servers.length) {
-
-            serverList.innerHTML = `
-                <div class="empty-servers">
-
-                    <div class="empty-icon">
-                        +
-                    </div>
-
-                    <h3>
-                        No servers yet
-                    </h3>
-
-                    <p>
-                        Create your first Minecraft
-                        server to get started.
-                    </p>
-
-                    <button
-                        type="button"
-                        id="emptyCreateServer">
-
-                        Create Server
-
-                    </button>
-
-                </div>
-            `;
-
-
-            const button =
-                document.getElementById(
-                    "emptyCreateServer"
-                );
-
-
-            if (button) {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-                        window.location.href =
-                            "/create-server.html";
-                    }
-                );
-
-            }
-
-
+        if (!serverList) {
             return;
         }
 
 
+        /*
+        ========================================
+        NO SERVER
+        ========================================
+        */
+
+        if (
+            !Array.isArray(servers) ||
+            servers.length === 0
+        ) {
+
+            serverList.innerHTML = `
+
+                <div class="empty-servers">
+
+                    <div class="empty-icon">
+                        ◈
+                    </div>
+
+                    <h3>
+                        There are no servers associated with your account
+                    </h3>
+
+                    <p>
+                        No Minecraft server has been assigned to your account yet.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        /*
+        ========================================
+        SERVERS EXIST
+        ========================================
+        */
+
         serverList.innerHTML = "";
 
 
-        servers.forEach(server => {
+        servers.forEach(
+            server => {
 
-            const card =
-                createServerCard(server);
+                const card =
+                    createServerCard(
+                        server
+                    );
 
-            serverList.appendChild(card);
+                serverList.appendChild(
+                    card
+                );
 
-        });
+            }
+        );
+
     }
 
 
-    // ==============================
-    // SERVER CARD
-    // ==============================
+    /*
+    ========================================
+    CREATE SERVER CARD
+    ========================================
+    */
 
-    function createServerCard(server) {
+    function createServerCard(
+        server
+    ) {
 
         const card =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
+
 
         card.className =
             "server-card";
 
 
+        /*
+        ========================================
+        SERVER NAME
+        ========================================
+        */
+
+        const serverName =
+            server.name ||
+            server.serverName ||
+            "Minecraft Server";
+
+
         const name =
             escapeHTML(
-                server.name ||
-                server.serverName ||
-                "Minecraft Server"
+                serverName
             );
+
+
+        /*
+        ========================================
+        STATUS
+        ========================================
+        */
+
+        const rawStatus =
+            server.status ||
+            "offline";
 
 
         const status =
             String(
-                server.status ||
-                "offline"
+                rawStatus
             ).toLowerCase();
 
 
@@ -352,6 +653,12 @@ document.addEventListener("DOMContentLoaded", () => {
             status === "running" ||
             status === "active";
 
+
+        /*
+        ========================================
+        RESOURCES
+        ========================================
+        */
 
         const ram =
             server.ram ??
@@ -368,10 +675,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const cpu =
             server.cpu ??
             server.cpus ??
-            0;
+            1;
 
 
-        const id =
+        /*
+        ========================================
+        SERVER ID
+        ========================================
+        */
+
+        const serverId =
             server.id ||
             server.serverId ||
             server.uuid ||
@@ -386,11 +699,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     ◈
                 </div>
 
+
                 <div class="server-info">
 
                     <h3>
                         ${name}
                     </h3>
+
 
                     <div class="
                         server-status
@@ -401,9 +716,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         <i></i>
 
-                        ${online
-                            ? "Online"
-                            : "Offline"}
+                        ${
+                            online
+                                ? "Online"
+                                : "Offline"
+                        }
 
                     </div>
 
@@ -416,10 +733,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <div>
 
-                    <span>RAM</span>
+                    <span>
+                        RAM
+                    </span>
 
                     <strong>
-                        ${formatResource(ram)}
+                        ${formatRAM(ram)}
                     </strong>
 
                 </div>
@@ -427,10 +746,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <div>
 
-                    <span>DISK</span>
+                    <span>
+                        DISK
+                    </span>
 
                     <strong>
-                        ${formatStorage(disk)}
+                        ${formatDisk(disk)}
                     </strong>
 
                 </div>
@@ -438,7 +759,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <div>
 
-                    <span>CPU</span>
+                    <span>
+                        CPU
+                    </span>
 
                     <strong>
                         ${formatCPU(cpu)}
@@ -451,16 +774,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <button
                 class="server-open-btn"
-                type="button"
-                data-server-id="${escapeHTML(
-                    String(id)
-                )}">
+                type="button">
 
                 Manage Server
 
             </button>
+
         `;
 
+
+        /*
+        ========================================
+        MANAGE BUTTON
+        ========================================
+        */
 
         const manageButton =
             card.querySelector(
@@ -468,18 +795,20 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-        if (manageButton) {
+        if (
+            manageButton &&
+            serverId
+        ) {
 
             manageButton.addEventListener(
                 "click",
                 () => {
 
-                    if (!id) return;
-
-
                     window.location.href =
                         "/server.html?id=" +
-                        encodeURIComponent(id);
+                        encodeURIComponent(
+                            serverId
+                        );
 
                 }
             );
@@ -488,100 +817,192 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         return card;
+
     }
 
 
-    // ==============================
-    // RESOURCE FORMAT
-    // ==============================
+    /*
+    ========================================
+    RAM FORMAT
+    ========================================
+    */
 
-    function formatResource(value) {
+    function formatRAM(
+        value
+    ) {
 
         const number =
             Number(value);
 
 
-        if (!Number.isFinite(number)) {
+        if (
+            !Number.isFinite(
+                number
+            )
+        ) {
+
             return "0 MB";
+
         }
 
 
-        if (number >= 1024) {
+        /*
+        If value is already GB
+        */
+
+        if (
+            number > 0 &&
+            number < 16
+        ) {
 
             return (
-                (number / 1024)
-                    .toFixed(2)
-                    .replace(/\.00$/, "")
-                + " GB"
+                number +
+                " GB"
             );
 
         }
 
 
-        return number + " MB";
+        if (
+            number >= 1024
+        ) {
+
+            const gb =
+                number / 1024;
+
+
+            return (
+                gb
+                    .toFixed(2)
+                    .replace(
+                        /\.00$/,
+                        ""
+                    ) +
+                " GB"
+            );
+
+        }
+
+
+        return (
+            number +
+            " MB"
+        );
+
     }
 
 
-    function formatStorage(value) {
+    /*
+    ========================================
+    DISK FORMAT
+    ========================================
+    */
+
+    function formatDisk(
+        value
+    ) {
 
         const number =
             Number(value);
 
 
-        if (!Number.isFinite(number)) {
+        if (
+            !Number.isFinite(
+                number
+            )
+        ) {
+
             return "0 GB";
-        }
-
-
-        if (number >= 1024) {
-
-            return (
-                (number / 1024)
-                    .toFixed(2)
-                    .replace(/\.00$/, "")
-                + " GB"
-            );
 
         }
 
 
-        return number + " GB";
+        return (
+            number +
+            " GB"
+        );
+
     }
 
 
-    function formatCPU(value) {
+    /*
+    ========================================
+    CPU FORMAT
+    ========================================
+    */
+
+    function formatCPU(
+        value
+    ) {
 
         const number =
             Number(value);
 
 
-        if (!Number.isFinite(number)) {
+        if (
+            !Number.isFinite(
+                number
+            )
+        ) {
+
             return "1 vCore";
+
         }
 
 
-        return number + " vCore";
+        return (
+            number +
+            " vCore"
+        );
+
     }
 
 
-    // ==============================
-    // HTML ESCAPE
-    // ==============================
+    /*
+    ========================================
+    ESCAPE HTML
+    ========================================
+    */
 
-    function escapeHTML(value) {
+    function escapeHTML(
+        value
+    ) {
 
         return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
+
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
+
     }
 
 
-    // ==============================
-    // LOGOUT
-    // ==============================
+    /*
+    ========================================
+    LOGOUT
+    ========================================
+    */
 
     if (logoutButton) {
 
@@ -591,14 +1012,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 try {
 
+                    const token =
+                        getToken();
+
+
                     await fetch(
                         "/api/auth/logout",
                         {
                             method: "POST",
-                            credentials: "include",
+
                             headers: {
                                 "Accept":
-                                    "application/json"
+                                    "application/json",
+
+                                "Authorization":
+                                    "Bearer " +
+                                    token
                             }
                         }
                     );
@@ -613,17 +1042,33 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
 
+                /*
+                Clear local session
+                */
+
+                localStorage.removeItem(
+                    "harvix_token"
+                );
+
+                localStorage.removeItem(
+                    "harvix_user"
+                );
+
+
                 window.location.href =
                     "/index.html";
+
             }
         );
 
     }
 
 
-    // ==============================
-    // START
-    // ==============================
+    /*
+    ========================================
+    INITIALIZE DASHBOARD
+    ========================================
+    */
 
     async function init() {
 
@@ -640,6 +1085,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+
+    /*
+    START
+    */
 
     init();
 
