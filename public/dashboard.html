@@ -1,13 +1,350 @@
-<div id="serverList"></div>
-<div class="free-specs">
-    <h1>HarvixPanel</h1>
-    <p class="spec-title">Free Specs</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<strong id="ramSpec">4150 MB</strong>
-<strong id="diskSpec">5180 MB</strong>
-<strong id="coreSpec">1 vCore</strong>
-        
-    </div>
-    <script src="/js/dashboard.js"></script>
+    <title>HarvixPanel</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<div class="panel">
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+            <div class="logo-box">H</div>
+
+            <div class="logo-text">
+                Harvix<span>Panel</span>
+            </div>
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <div class="nav-section">
+                <span>GENERAL</span>
+            </div>
+
+            <a href="/dashboard.html" class="nav-item active">
+                <span class="nav-icon">▣</span>
+                <span>Servers</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <span class="nav-icon">◉</span>
+                <span>Account</span>
+            </a>
+
+
+            <!-- ADMIN -->
+
+            <div
+                class="nav-section admin-only"
+                data-admin-only>
+
+                <span>ADMINISTRATION</span>
+
+            </div>
+
+            <a
+                href="/admin.html"
+                class="nav-item admin-only"
+                data-admin-only>
+
+                <span class="nav-icon">⚙</span>
+                <span>Admin Panel</span>
+
+            </a>
+
+            <a
+                href="/nodes.html"
+                class="nav-item admin-only"
+                data-admin-only>
+
+                <span class="nav-icon">◇</span>
+                <span>Nodes</span>
+
+            </a>
+
+            <a
+                href="/create-server.html"
+                class="nav-item admin-only"
+                data-admin-only>
+
+                <span class="nav-icon">＋</span>
+                <span>Create Server</span>
+
+            </a>
+
+            <a
+                href="/fleet.html"
+                class="nav-item admin-only"
+                data-admin-only>
+
+                <span class="nav-icon">▤</span>
+                <span>Fleet</span>
+
+            </a>
+
+        </nav>
+
+
+        <!-- SIDEBAR BOTTOM -->
+
+        <div class="sidebar-bottom">
+
+            <a href="/themes.html" class="nav-item">
+                <span class="nav-icon">◐</span>
+                <span>Theme</span>
+            </a>
+
+            <button
+                class="nav-item logout"
+                id="logout"
+                type="button">
+
+                <span class="nav-icon">↪</span>
+                <span>Logout</span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <button
+                class="mobile-menu"
+                id="mobileMenu"
+                type="button">
+
+                ☰
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h2>Servers</h2>
+
+                <p>
+                    Manage your Minecraft servers
+                </p>
+
+            </div>
+
+
+            <div class="topbar-user">
+
+                <div class="user-info">
+
+                    <strong
+                        id="username"
+                        data-username>
+
+                        User
+
+                    </strong>
+
+                    <span
+                        id="role"
+                        data-role>
+
+                        User
+
+                    </span>
+
+                </div>
+
+                <div class="user-avatar">
+                    U
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE -->
+
+        <section class="page-content">
+
+
+            <!-- =========================
+                 FREE SPECS
+            ========================== -->
+
+            <div class="free-specs">
+
+                <div class="free-specs-header">
+
+                    <div>
+                        <h1>HarvixPanel</h1>
+
+                        <p>
+                            Free Hosting Resources
+                        </p>
+                    </div>
+
+                    <span class="free-badge">
+                        FREE
+                    </span>
+
+                </div>
+
+
+                <div class="spec-grid">
+
+                    <div class="spec">
+
+                        <span>RAM</span>
+
+                        <strong
+                            id="ramSpec"
+                            data-spec="ram">
+
+                            4150 MB
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="spec">
+
+                        <span>DISK</span>
+
+                        <strong
+                            id="diskSpec"
+                            data-spec="disk">
+
+                            5180 MB
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="spec">
+
+                        <span>CPU</span>
+
+                        <strong
+                            id="coreSpec"
+                            data-spec="core">
+
+                            1 vCore
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 SERVER HEADER
+            ========================== -->
+
+            <div class="section-header">
+
+                <div>
+
+                    <h3>Your Servers</h3>
+
+                    <p>
+                        Manage and monitor your servers
+                    </p>
+
+                </div>
+
+
+                <a
+                    href="/create-server.html"
+                    class="create-server-btn">
+
+                    + Create Server
+
+                </a>
+
+            </div>
+
+
+            <!-- =========================
+                 SERVER LIST
+            ========================== -->
+
+            <div
+                id="serverList"
+                class="server-list">
+
+                <div class="loading-server">
+
+                    <div class="loader"></div>
+
+                    <span>
+                        Loading servers...
+                    </span>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- FOOTER -->
+
+        <footer class="panel-footer">
+
+            <span>
+                HarvixPanel © 2026
+            </span>
+
+            <span>
+                Minecraft Hosting Panel
+            </span>
+
+        </footer>
+
+    </main>
+
 </div>
 
+
+<!-- =========================
+     MOBILE OVERLAY
+========================== -->
+
+<div
+    class="sidebar-overlay"
+    id="sidebarOverlay">
+</div>
+
+
+<script src="/js/dashboard.js"></script>
+
+</body>
+</html>
