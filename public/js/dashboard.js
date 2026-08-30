@@ -1,464 +1,389 @@
-"use strict";
+document.addEventListener("DOMContentLoaded", () => {
 
-/*
-========================================
-HARVIXPANEL DASHBOARD
-========================================
-*/
+    // ==============================
+    // ELEMENTS
+    // ==============================
 
-const TOKEN_KEY = "harvix_token";
-const USER_KEY = "harvix_user";
+    const serverList = document.getElementById("serverList");
+    const usernameElement = document.getElementById("username");
+    const roleElement = document.getElementById("role");
 
-const token = localStorage.getItem(TOKEN_KEY);
+    const mobileMenu = document.getElementById("mobileMenu");
+    const sidebar = document.getElementById("sidebar");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
 
-if (!token) {
-    window.location.href = "/index.html";
-}
+    const logoutButton = document.getElementById("logout");
 
 
-/*
-========================================
-API HELPER
-========================================
-*/
+    // ==============================
+    // MOBILE SIDEBAR
+    // ==============================
 
-async function apiRequest(url, options = {}) {
+    if (mobileMenu && sidebar) {
+        mobileMenu.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
 
-    const headers = {
-        "Content-Type": "application/json",
-        ...(options.headers || {})
-    };
-
-    if (token) {
-        headers.Authorization = `Bearer ${token}`;
+            if (sidebarOverlay) {
+                sidebarOverlay.classList.toggle("active");
+            }
+        });
     }
 
-    const response = await fetch(url, {
-        ...options,
-        headers
-    });
 
-    const text = await response.text();
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener("click", () => {
 
-    let data;
+            sidebar.classList.remove("open");
+            sidebarOverlay.classList.remove("active");
 
-    try {
-        data = JSON.parse(text);
-    } catch {
-        throw new Error(
-            "Server returned an invalid response."
-        );
+        });
     }
 
-    if (!response.ok) {
-        throw new Error(
-            data.message ||
-            data.error ||
-            "Request failed."
-        );
+
+    // ==============================
+    // GET USER
+    // ==============================
+
+    async function loadUser() {
+
+        try {
+
+            const response = await fetch("/api/auth/me", {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
+
+
+            if (!response.ok) {
+
+                if (response.status === 401) {
+                    window.location.href = "/index.html";
+                }
+
+                return null;
+            }
+
+
+            const user = await response.json();
+
+
+            if (usernameElement) {
+                usernameElement.textContent =
+                    user.username ||
+                    user.name ||
+                    "User";
+            }
+
+
+            if (roleElement) {
+
+                const role =
+                    user.role ||
+                    user.type ||
+                    "user";
+
+                roleElement.textContent =
+                    role === "admin"
+                        ? "Administrator"
+                        : "User";
+            }
+
+
+            // ==============================
+            // ADMIN MENU
+            // ==============================
+
+            if (
+                user.role === "admin" ||
+                user.type === "admin" ||
+                user.isAdmin === true
+            ) {
+
+                document
+                    .querySelectorAll("[data-admin-only]")
+                    .forEach(element => {
+
+                        element.style.display = "";
+
+                    });
+
+            }
+
+
+            return user;
+
+        } catch (error) {
+
+            console.error(
+                "User API error:",
+                error
+            );
+
+            return null;
+        }
     }
 
-    return data;
-}
+
+    // ==============================
+    // LOAD SERVERS
+    // ==============================
+
+    async function loadServers() {
+
+        if (!serverList) return;
 
 
-/*
-========================================
-LOAD CURRENT USER
-========================================
-*/
+        try {
 
-async function loadUser() {
-
-    try {
-
-        const data =
-            await apiRequest(
-                "/api/auth/me"
-            );
-
-        if (!data.user) {
-            throw new Error(
-                "User information not found."
-            );
-        }
-
-        localStorage.setItem(
-            USER_KEY,
-            JSON.stringify(data.user)
-        );
-
-        updateUserUI(data.user);
-
-    } catch (error) {
-
-        console.error(
-            "User loading error:",
-            error
-        );
-
-        /*
-        Token invalid/expired
-        */
-
-        if (
-            error.message.includes(
-                "Authentication"
-            ) ||
-            error.message.includes(
-                "expired"
-            ) ||
-            error.message.includes(
-                "Invalid"
-            )
-        ) {
-
-            localStorage.removeItem(
-                TOKEN_KEY
-            );
-
-            localStorage.removeItem(
-                USER_KEY
-            );
-
-            window.location.href =
-                "/index.html";
-
-        }
-
-    }
-}
-
-
-/*
-========================================
-UPDATE USER UI
-========================================
-*/
-
-function updateUserUI(user) {
-
-    const usernameElements =
-        document.querySelectorAll(
-            "[data-username], #username, .username"
-        );
-
-    usernameElements.forEach(
-        element => {
-            element.textContent =
-                user.username || "User";
-        }
-    );
-
-
-    const roleElements =
-        document.querySelectorAll(
-            "[data-role], #role, .role"
-        );
-
-    roleElements.forEach(
-        element => {
-            element.textContent =
-                user.role === "admin"
-                    ? "Administrator"
-                    : "User";
-        }
-    );
-
-
-    /*
-    Admin-only navigation
-    */
-
-    if (user.role === "admin") {
-
-        document
-            .querySelectorAll(
-                ".admin-only, [data-admin-only]"
-            )
-            .forEach(
-                element => {
-                    element.style.display = "";
+            const response = await fetch(
+                "/api/servers",
+                {
+                    method: "GET",
+                    credentials: "include",
+                    headers: {
+                        "Accept": "application/json"
+                    }
                 }
             );
 
-    } else {
 
-        document
-            .querySelectorAll(
-                ".admin-only, [data-admin-only]"
-            )
-            .forEach(
-                element => {
-                    element.style.display = "none";
+            if (!response.ok) {
+
+                if (response.status === 401) {
+                    window.location.href =
+                        "/index.html";
+
+                    return;
                 }
+
+
+                throw new Error(
+                    "Server API returned " +
+                    response.status
+                );
+            }
+
+
+            const data =
+                await response.json();
+
+
+            let servers = [];
+
+
+            if (Array.isArray(data)) {
+
+                servers = data;
+
+            } else if (
+                Array.isArray(data.servers)
+            ) {
+
+                servers = data.servers;
+
+            }
+
+
+            renderServers(servers);
+
+
+        } catch (error) {
+
+            console.error(
+                "Server loading error:",
+                error
             );
 
+
+            serverList.innerHTML = `
+                <div class="empty-servers">
+
+                    <div class="empty-icon">
+                        ⚠
+                    </div>
+
+                    <h3>
+                        Unable to load servers
+                    </h3>
+
+                    <p>
+                        Please try again later.
+                    </p>
+
+                    <button
+                        type="button"
+                        id="retryServers">
+
+                        Retry
+
+                    </button>
+
+                </div>
+            `;
+
+
+            const retry =
+                document.getElementById(
+                    "retryServers"
+                );
+
+
+            if (retry) {
+
+                retry.addEventListener(
+                    "click",
+                    loadServers
+                );
+
+            }
+        }
     }
-}
 
 
-/*
-========================================
-FREE SPECS
-========================================
-*/
+    // ==============================
+    // RENDER SERVERS
+    // ==============================
 
-function updateFreeSpecs() {
+    function renderServers(servers) {
 
-    const specs = {
-        ram: "4150 MB",
-        disk: "5180 MB",
-        core: "1 vCore"
-    };
+        if (!serverList) return;
 
 
-    /*
-    RAM
-    */
+        if (!servers.length) {
 
-    document
-        .querySelectorAll(
-            "[data-spec='ram'], #ramSpec, .ram-spec"
-        )
-        .forEach(
-            element => {
-                element.textContent =
-                    specs.ram;
+            serverList.innerHTML = `
+                <div class="empty-servers">
+
+                    <div class="empty-icon">
+                        +
+                    </div>
+
+                    <h3>
+                        No servers yet
+                    </h3>
+
+                    <p>
+                        Create your first Minecraft
+                        server to get started.
+                    </p>
+
+                    <button
+                        type="button"
+                        id="emptyCreateServer">
+
+                        Create Server
+
+                    </button>
+
+                </div>
+            `;
+
+
+            const button =
+                document.getElementById(
+                    "emptyCreateServer"
+                );
+
+
+            if (button) {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+                        window.location.href =
+                            "/create-server.html";
+                    }
+                );
+
             }
-        );
 
 
-    /*
-    DISK
-    */
-
-    document
-        .querySelectorAll(
-            "[data-spec='disk'], #diskSpec, .disk-spec"
-        )
-        .forEach(
-            element => {
-                element.textContent =
-                    specs.disk;
-            }
-        );
+            return;
+        }
 
 
-    /*
-    CORE
-    */
-
-    document
-        .querySelectorAll(
-            "[data-spec='core'], #coreSpec, .core-spec"
-        )
-        .forEach(
-            element => {
-                element.textContent =
-                    specs.core;
-            }
-        );
-}
+        serverList.innerHTML = "";
 
 
-/*
-========================================
-LOAD SERVERS
-========================================
-*/
+        servers.forEach(server => {
 
-async function loadServers() {
+            const card =
+                createServerCard(server);
 
-    try {
+            serverList.appendChild(card);
 
-        const data =
-            await apiRequest(
-                "/api/servers"
+        });
+    }
+
+
+    // ==============================
+    // SERVER CARD
+    // ==============================
+
+    function createServerCard(server) {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "server-card";
+
+
+        const name =
+            escapeHTML(
+                server.name ||
+                server.serverName ||
+                "Minecraft Server"
             );
 
-        const servers =
-            Array.isArray(data.servers)
-                ? data.servers
-                : [];
 
-        renderServers(servers);
-
-    } catch (error) {
-
-        console.error(
-            "Server loading error:",
-            error
-        );
-
-        showServerMessage(
-            error.message
-        );
-
-    }
-}
+        const status =
+            String(
+                server.status ||
+                "offline"
+            ).toLowerCase();
 
 
-/*
-========================================
-SERVER CONTAINER
-========================================
-*/
-
-function getServerContainer() {
-
-    return (
-        document.getElementById(
-            "serverList"
-        ) ||
-
-        document.getElementById(
-            "serversList"
-        ) ||
-
-        document.getElementById(
-            "servers"
-        ) ||
-
-        document.querySelector(
-            ".server-list"
-        ) ||
-
-        document.querySelector(
-            ".servers-list"
-        )
-    );
-}
+        const online =
+            status === "online" ||
+            status === "running" ||
+            status === "active";
 
 
-/*
-========================================
-RENDER SERVERS
-========================================
-*/
-
-function renderServers(servers) {
-
-    const container =
-        getServerContainer();
-
-    if (!container) {
-        return;
-    }
+        const ram =
+            server.ram ??
+            server.memory ??
+            0;
 
 
-    /*
-    No servers
-    */
-
-    if (!servers.length) {
-
-        container.innerHTML = `
-            <div class="empty-servers">
-                <div class="empty-icon">☁</div>
-
-                <h3>No servers yet</h3>
-
-                <p>
-                    You don't have any servers.
-                </p>
-
-                <button
-                    type="button"
-                    onclick="window.location.href='/create-server.html'"
-                >
-                    Create Server
-                </button>
-            </div>
-        `;
-
-        return;
-    }
+        const disk =
+            server.disk ??
+            server.storage ??
+            0;
 
 
-    /*
-    Server cards
-    */
-
-    container.innerHTML =
-        servers
-            .map(
-                server =>
-                    createServerCard(
-                        server
-                    )
-            )
-            .join("");
-}
+        const cpu =
+            server.cpu ??
+            server.cpus ??
+            0;
 
 
-/*
-========================================
-SERVER CARD
-========================================
-*/
-
-function createServerCard(server) {
-
-    const id =
-        server.id ?? "";
-
-    const name =
-        escapeHTML(
-            server.name ||
-            server.server_name ||
-            "Unnamed Server"
-        );
-
-    const status =
-        String(
-            server.status ||
-            "offline"
-        ).toLowerCase();
+        const id =
+            server.id ||
+            server.serverId ||
+            server.uuid ||
+            "";
 
 
-    let statusText =
-        "Offline";
-
-    if (
-        status === "online" ||
-        status === "running"
-    ) {
-        statusText = "Online";
-    }
-
-
-    const statusClass =
-        statusText === "Online"
-            ? "online"
-            : "offline";
-
-
-    const ram =
-        server.ram ||
-        server.memory ||
-        "—";
-
-    const disk =
-        server.storage ||
-        server.disk ||
-        "—";
-
-    const cpu =
-        server.cpu ||
-        "1 vCore";
-
-
-    return `
-        <div
-            class="server-card"
-            data-server-id="${id}"
-        >
+        card.innerHTML = `
 
             <div class="server-card-header">
 
                 <div class="server-icon">
-                    ⛏
+                    ◈
                 </div>
 
                 <div class="server-info">
@@ -467,12 +392,20 @@ function createServerCard(server) {
                         ${name}
                     </h3>
 
-                    <span
-                        class="server-status ${statusClass}"
-                    >
+                    <div class="
+                        server-status
+                        ${online
+                            ? "online"
+                            : "offline"}
+                    ">
+
                         <i></i>
-                        ${statusText}
-                    </span>
+
+                        ${online
+                            ? "Online"
+                            : "Offline"}
+
+                    </div>
 
                 </div>
 
@@ -482,18 +415,35 @@ function createServerCard(server) {
             <div class="server-resources">
 
                 <div>
+
                     <span>RAM</span>
-                    <strong>${escapeHTML(String(ram))}</strong>
+
+                    <strong>
+                        ${formatResource(ram)}
+                    </strong>
+
                 </div>
 
+
                 <div>
+
                     <span>DISK</span>
-                    <strong>${escapeHTML(String(disk))}</strong>
+
+                    <strong>
+                        ${formatStorage(disk)}
+                    </strong>
+
                 </div>
 
+
                 <div>
+
                     <span>CPU</span>
-                    <strong>${escapeHTML(String(cpu))}</strong>
+
+                    <strong>
+                        ${formatCPU(cpu)}
+                    </strong>
+
                 </div>
 
             </div>
@@ -502,176 +452,195 @@ function createServerCard(server) {
             <button
                 class="server-open-btn"
                 type="button"
-                onclick="openServer('${id}')"
-            >
+                data-server-id="${escapeHTML(
+                    String(id)
+                )}">
+
                 Manage Server
+
             </button>
-
-        </div>
-    `;
-}
+        `;
 
 
-/*
-========================================
-OPEN SERVER
-========================================
-*/
+        const manageButton =
+            card.querySelector(
+                ".server-open-btn"
+            );
 
-function openServer(id) {
 
-    if (!id) {
-        return;
+        if (manageButton) {
+
+            manageButton.addEventListener(
+                "click",
+                () => {
+
+                    if (!id) return;
+
+
+                    window.location.href =
+                        "/server.html?id=" +
+                        encodeURIComponent(id);
+
+                }
+            );
+
+        }
+
+
+        return card;
     }
 
-    window.location.href =
-        `/server.html?id=${encodeURIComponent(id)}`;
-}
+
+    // ==============================
+    // RESOURCE FORMAT
+    // ==============================
+
+    function formatResource(value) {
+
+        const number =
+            Number(value);
 
 
-/*
-========================================
-SERVER MESSAGE
-========================================
-*/
+        if (!Number.isFinite(number)) {
+            return "0 MB";
+        }
 
-function showServerMessage(text) {
 
-    const container =
-        getServerContainer();
+        if (number >= 1024) {
 
-    if (!container) {
-        return;
+            return (
+                (number / 1024)
+                    .toFixed(2)
+                    .replace(/\.00$/, "")
+                + " GB"
+            );
+
+        }
+
+
+        return number + " MB";
     }
 
-    container.innerHTML = `
-        <div class="empty-servers">
-            <p>
-                ${escapeHTML(text)}
-            </p>
-        </div>
-    `;
-}
+
+    function formatStorage(value) {
+
+        const number =
+            Number(value);
 
 
-/*
-========================================
-LOGOUT
-========================================
-*/
+        if (!Number.isFinite(number)) {
+            return "0 GB";
+        }
 
-async function logout() {
 
-    try {
+        if (number >= 1024) {
 
-        await apiRequest(
-            "/api/auth/logout",
-            {
-                method: "POST"
+            return (
+                (number / 1024)
+                    .toFixed(2)
+                    .replace(/\.00$/, "")
+                + " GB"
+            );
+
+        }
+
+
+        return number + " GB";
+    }
+
+
+    function formatCPU(value) {
+
+        const number =
+            Number(value);
+
+
+        if (!Number.isFinite(number)) {
+            return "1 vCore";
+        }
+
+
+        return number + " vCore";
+    }
+
+
+    // ==============================
+    // HTML ESCAPE
+    // ==============================
+
+    function escapeHTML(value) {
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+
+    // ==============================
+    // LOGOUT
+    // ==============================
+
+    if (logoutButton) {
+
+        logoutButton.addEventListener(
+            "click",
+            async () => {
+
+                try {
+
+                    await fetch(
+                        "/api/auth/logout",
+                        {
+                            method: "POST",
+                            credentials: "include",
+                            headers: {
+                                "Accept":
+                                    "application/json"
+                            }
+                        }
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "Logout error:",
+                        error
+                    );
+
+                }
+
+
+                window.location.href =
+                    "/index.html";
             }
         );
 
-    } catch (error) {
-
-        console.warn(
-            "Logout API error:",
-            error
-        );
-
-    } finally {
-
-        localStorage.removeItem(
-            TOKEN_KEY
-        );
-
-        localStorage.removeItem(
-            USER_KEY
-        );
-
-        window.location.href =
-            "/index.html";
     }
-}
 
 
-/*
-========================================
-LOGOUT BUTTONS
-========================================
-*/
+    // ==============================
+    // START
+    // ==============================
 
-function setupLogoutButtons() {
+    async function init() {
 
-    document
-        .querySelectorAll(
-            "#logout, .logout, [data-logout]"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    function(event) {
-
-                        event.preventDefault();
-
-                        logout();
-
-                    }
-                );
-
-            }
-        );
-}
+        const user =
+            await loadUser();
 
 
-/*
-========================================
-HTML ESCAPE
-========================================
-*/
+        if (!user) {
+            return;
+        }
 
-function escapeHTML(value) {
-
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-
-/*
-========================================
-INITIALIZE
-========================================
-*/
-
-document.addEventListener(
-    "DOMContentLoaded",
-    async function() {
-
-        updateFreeSpecs();
-
-        setupLogoutButtons();
-
-        await loadUser();
 
         await loadServers();
 
     }
-);
 
 
-/*
-========================================
-GLOBAL FUNCTIONS
-========================================
-*/
+    init();
 
-window.logout =
-    logout;
-
-window.openServer =
-    openServer;
+});
