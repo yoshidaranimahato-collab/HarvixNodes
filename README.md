@@ -1,7 +1,7 @@
 # HarvixPanel v1.0.0
 Minecraft hosting panel starter.
 
-Added server dashboard modules:
+Added server panel modules:
 1. Console
 2. File Manager
 3. SFTP
@@ -9,11 +9,12 @@ Added server dashboard modules:
 5. Mod Manager
 6. Votifier Test
 7. Server Splitter
-8. Settings
-   - Reinstall Server
-   - Change Version Type
-   - Change Software
-   - Admin-only IP Alias
+8. subdomain manager
+9. world manager
+10. player manager
+11. backup
+12. Settings
+   
 
 IP Alias is deliberately only a stored/displayed alias. It does not pretend to make a fake IP real and does not provide DNS, tunneling, or networking by itself. A Playit/MineKube address can be entered if you already have that address.
 
