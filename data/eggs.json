@@ -1,1 +1,126 @@
-
+{
+  "eggs": [
+    {
+      "id": "paper",
+      "name": "Paper",
+      "type": "minecraft-java",
+      "software": "Paper",
+      "description": "High-performance Minecraft Java server software.",
+      "versions": [
+        "1.21.11",
+        "1.21.10",
+        "1.21.9",
+        "1.21.8",
+        "1.21.7",
+        "1.21.6",
+        "1.21.5",
+        "1.21.4"
+      ]
+    },
+    {
+      "id": "purpur",
+      "name": "Purpur",
+      "type": "minecraft-java",
+      "software": "Purpur",
+      "description": "Configurable Paper-based Minecraft server software.",
+      "versions": [
+        "1.21.11",
+        "1.21.10",
+        "1.21.9",
+        "1.21.8",
+        "1.21.7",
+        "1.21.6",
+        "1.21.5",
+        "1.21.4"
+      ]
+    },
+    {
+      "id": "forge",
+      "name": "Forge",
+      "type": "minecraft-java",
+      "software": "Forge",
+      "description": "Minecraft modded server software.",
+      "versions": [
+        "1.21.11",
+        "1.21.10",
+        "1.21.9",
+        "1.21.8",
+        "1.21.7",
+        "1.21.6",
+        "1.21.5",
+        "1.21.4"
+      ]
+    },
+    {
+      "id": "velocity",
+      "name": "Velocity",
+      "type": "proxy",
+      "software": "Velocity",
+      "description": "Modern Minecraft proxy server.",
+      "versions": [
+        "latest"
+      ]
+    },
+    {
+      "id": "bungeecord",
+      "name": "BungeeCord",
+      "type": "proxy",
+      "software": "BungeeCord",
+      "description": "Minecraft proxy server.",
+      "versions": [
+        "latest"
+      ]
+    },
+    {
+      "id": "vanilla",
+      "name": "Vanilla",
+      "type": "minecraft-java",
+      "software": "Vanilla",
+      "description": "Official Minecraft Java server.",
+      "versions": [
+        "1.21.11",
+        "1.21.10",
+        "1.21.9",
+        "1.21.8",
+        "1.21.7",
+        "1.21.6",
+        "1.21.5",
+        "1.21.4"
+      ]
+    },
+    {
+      "id": "vanilla-bedrock",
+      "name": "Vanilla Bedrock",
+      "type": "minecraft-bedrock",
+      "software": "Vanilla Bedrock",
+      "description": "Minecraft Bedrock dedicated server.",
+      "versions": [
+        "1.21.11",
+        "1.21.10",
+        "1.21.9",
+        "1.21.8",
+        "1.21.7",
+        "1.21.6",
+        "1.21.5",
+        "1.21.4"
+      ]
+    },
+    {
+      "id": "bedrock",
+      "name": "Bedrock",
+      "type": "minecraft-bedrock",
+      "software": "Bedrock",
+      "description": "Bedrock server software.",
+      "versions": [
+        "1.21.11",
+        "1.21.10",
+        "1.21.9",
+        "1.21.8",
+        "1.21.7",
+        "1.21.6",
+        "1.21.5",
+        "1.21.4"
+      ]
+    }
+  ]
+}
