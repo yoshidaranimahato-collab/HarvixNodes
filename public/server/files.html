@@ -1,1 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>File Manager - HarvixPanel</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/server/files.css"
+    >
+</head>
+
+<body>
+
+<div class="file-manager">
+
+    <!-- =========================
+         TOP BAR
+    ========================== -->
+
+    <header class="file-header">
+
+        <div class="header-left">
+
+            <a
+                href="/dashboard.html"
+                class="back-button"
+            >
+                ←
+            </a>
+
+            <div>
+
+                <h1 id="serverName">
+                    Server Files
+                </h1>
+
+                <span id="serverStatus">
+                    ● Offline
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="header-actions">
+
+            <button
+                type="button"
+                id="refreshFiles"
+                class="header-button"
+            >
+                ↻ Refresh
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================
+         TOOLBAR
+    ========================== -->
+
+    <section class="file-toolbar">
+
+        <button
+            type="button"
+            id="uploadButton"
+            class="toolbar-button primary"
+        >
+            ↑ Upload
+        </button>
+
+        <input
+            type="file"
+            id="fileInput"
+            hidden
+            multiple
+        >
+
+
+        <button
+            type="button"
+            id="newFileButton"
+            class="toolbar-button"
+        >
+            + New File
+        </button>
+
+
+        <button
+            type="button"
+            id="newFolderButton"
+            class="toolbar-button"
+        >
+            + New Folder
+        </button>
+
+
+        <button
+            type="button"
+            id="deleteSelected"
+            class="toolbar-button danger"
+        >
+            Delete
+        </button>
+
+    </section>
+
+
+    <!-- =========================
+         BREADCRUMB
+    ========================== -->
+
+    <div class="breadcrumb">
+
+        <button
+            type="button"
+            class="breadcrumb-item"
+            data-path=""
+        >
+            Server
+        </button>
+
+        <span>/</span>
+
+        <span id="currentPath">
+            /
+        </span>
+
+    </div>
+
+
+    <!-- =========================
+         FILE TABLE
+    ========================== -->
+
+    <main class="file-content">
+
+        <div class="file-table">
+
+            <!-- TABLE HEADER -->
+
+            <div class="file-row file-head">
+
+                <div class="file-checkbox">
+                    <input
+                        type="checkbox"
+                        id="selectAll"
+                    >
+                </div>
+
+                <div class="file-name">
+                    Name
+                </div>
+
+                <div class="file-size">
+                    Size
+                </div>
+
+                <div class="file-modified">
+                    Modified
+                </div>
+
+                <div class="file-actions">
+                    Actions
+                </div>
+
+            </div>
+
+
+            <!-- FILE LIST -->
+
+            <div
+                id="fileList"
+                class="file-list"
+            >
+
+                <div class="loading">
+
+                    <div class="loader"></div>
+
+                    <span>
+                        Loading files...
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================
+         EMPTY STATE
+    ========================== -->
+
+    <div
+        id="emptyState"
+        class="empty-state"
+        hidden
+    >
+
+        <div class="empty-icon">
+            📁
+        </div>
+
+        <h2>
+            No files found
+        </h2>
+
+        <p>
+            This server does not have any files yet.
+        </p>
+
+    </div>
+
+
+    <!-- =========================
+         EULA NOTICE
+    ========================== -->
+
+    <div
+        id="eulaNotice"
+        class="eula-notice"
+        hidden
+    >
+
+        <div class="eula-icon">
+            !
+        </div>
+
+        <div class="eula-text">
+
+            <strong>
+                Minecraft EULA required
+            </strong>
+
+            <p>
+                Your server has not accepted the Minecraft
+                EULA yet. Open <b>eula.txt</b> and set
+                <b>eula=true</b> before starting the server.
+            </p>
+
+        </div>
+
+
+        <button
+            type="button"
+            id="openEula"
+            class="eula-button"
+        >
+            Open eula.txt
+        </button>
+
+    </div>
+
+
+    <!-- =========================
+         NEW FILE MODAL
+    ========================== -->
+
+    <div
+        id="fileModal"
+        class="modal"
+        hidden
+    >
+
+        <div class="modal-box">
+
+            <button
+                type="button"
+                class="modal-close"
+                data-close="fileModal"
+            >
+                ×
+            </button>
+
+            <h2>
+                Create New File
+            </h2>
+
+            <p>
+                Enter the name of the new file.
+            </p>
+
+
+            <input
+                type="text"
+                id="newFileName"
+                placeholder="example.txt"
+            >
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="modal-cancel"
+                    data-close="fileModal"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    id="createFile"
+                    class="modal-confirm"
+                >
+                    Create File
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         NEW FOLDER MODAL
+    ========================== -->
+
+    <div
+        id="folderModal"
+        class="modal"
+        hidden
+    >
+
+        <div class="modal-box">
+
+            <button
+                type="button"
+                class="modal-close"
+                data-close="folderModal"
+            >
+                ×
+            </button>
+
+            <h2>
+                Create New Folder
+            </h2>
+
+            <p>
+                Enter the folder name.
+            </p>
+
+
+            <input
+                type="text"
+                id="newFolderName"
+                placeholder="plugins"
+            >
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="modal-cancel"
+                    data-close="folderModal"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    id="createFolder"
+                    class="modal-confirm"
+                >
+                    Create Folder
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         FILE EDITOR MODAL
+    ========================== -->
+
+    <div
+        id="editorModal"
+        class="editor-modal"
+        hidden
+    >
+
+        <div class="editor-box">
+
+            <header class="editor-header">
+
+                <div>
+
+                    <h2 id="editorFileName">
+                        File Editor
+                    </h2>
+
+                    <span id="editorPath">
+                        /
+                    </span>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    data-close="editorModal"
+                >
+                    ×
+                </button>
+
+            </header>
+
+
+            <textarea
+                id="fileEditor"
+                spellcheck="false"
+                placeholder="File content..."
+            ></textarea>
+
+
+            <div class="editor-actions">
+
+                <button
+                    type="button"
+                    class="modal-cancel"
+                    data-close="editorModal"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    id="saveFile"
+                    class="modal-confirm"
+                >
+                    Save File
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         SERVER NAVIGATION
+    ========================== -->
+
+    <nav class="server-navigation">
+
+        <a href="console.html">
+            Console
+        </a>
+
+        <a
+            href="files.html"
+            class="active"
+        >
+            File Manager
+        </a>
+
+        <a href="sftp.html">
+            SFTP
+        </a>
+
+        <a href="plugins.html">
+            Plugins
+        </a>
+
+        <a href="mods.html">
+            Mods
+        </a>
+
+        <a href="votifier.html">
+            Votifier
+        </a>
+
+        <a href="splitter.html">
+            Server Splitter
+        </a>
+
+        <a href="domain.html">
+            Subdomain
+        </a>
+
+        <a href="worlds.html">
+            Worlds
+        </a>
+
+        <a href="players.html">
+            Players
+        </a>
+
+        <a href="backups.html">
+            Backups
+        </a>
+
+        <a href="settings.html">
+            Settings
+        </a>
+
+    </nav>
+
+</div>
+
+
+<!-- =========================
+     FILE MANAGER JAVASCRIPT
+========================== -->
+
+<script src="/js/server/files.js"></script>
+
+</body>
+
+  </html>
