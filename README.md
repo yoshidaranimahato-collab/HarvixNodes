@@ -78,9 +78,9 @@ export HARVIX_ADMIN_USERNAME="$ADMIN_USERNAME
    ```bash
 export HARVIX_ADMIN_PASSWORD="$ADMIN_PASSWORD
 ```
-    ```bash
-    export HARVIX_DATABASE_FILE="$APP_DIR/data/harvix.json
-    ```
+```bash
+export HARVIX_DATABASE_FILE="$APP_DIR/data/harvix.json
+```
 
 # Manual Install has some problems so use one click command installer
 
