@@ -20,18 +20,18 @@ IP Alias is deliberately only a stored/displayed alias. It does not pretend to m
 
 The real Console/File Manager/SFTP/plugin/mod operations require the node agent and Docker integration, which is the next implementation phase.
 
-# 🛠️ Manual Installation
+#  Manual Installation
 
 This section contains the complete manual installation process.
 
 You do NOT need the one-click installer if you follow these steps.
 
-# 1️⃣ Install Required Packages
+#  Install Required Packages
 ```bash
 sudo apt install -y curl git ca-certificates
 ```
 
-# 3️⃣ Install Node.js
+#  Install Node.js
 ``` bash
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
  ```
@@ -39,7 +39,7 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
 ```
 
-Check the installation:
+# Check the installation:
 ``` bash
 node -v
 ```
@@ -51,7 +51,7 @@ node -v
 ```bash
 https://github.com/yoshidaranimahato-collab/HarvixPanel.git
 ```
- enter the project:
+ # enter the project:
 
  ```bash
  cd HarvixPanel
@@ -67,7 +67,7 @@ npm install
 npm run create-user
 ```
 
-example
+# example
 user: admin
 password: admin
 
