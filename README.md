@@ -27,39 +27,65 @@ This section contains the complete manual installation process.
 You do NOT need the one-click installer if you follow these steps.
 
 # 1️⃣ Install Required Packages
-``` sudo apt install -y curl git ca-certificates ```
+```bash
+sudo apt install -y curl git ca-certificates
+```
 
 # 3️⃣ Install Node.js
-``` curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - ```
-``` sudo apt install -y nodejs ```
+``` bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+ ```
+``` bash
+sudo apt install -y nodejs
+```
 
 Check the installation:
-``` node -v ```
-``` npm -v ```
+``` bash
+node -v
+```
+```bash
+ npm -v 
+```
 
 # 4️⃣ gitclone HarvixPanel
-``` https://github.com/yoshidaranimahato-collab/HarvixPanel.git ```
+```bash
+https://github.com/yoshidaranimahato-collab/HarvixPanel.git
+```
  enter the project:
 
- ``` cd HarvixPanel ```
+ ```bash
+ cd HarvixPanel
+```
 
 # install dependencies
-``` npm install ```
+```bash
+npm install
+ ```
 
 # configure admin panel
-``` npm run create-user ```
+```bash
+npm run create-user
+```
 
 example
 user: admin
 password: admin
 
 # Export admin user to panel
-``` export HARVIX_ADMIN_USERNAME="$ADMIN_USERNAME ```
-   ```  export HARVIX_ADMIN_PASSWORD="$ADMIN_PASSWORD ```
-    ``` export HARVIX_DATABASE_FILE="$APP_DIR/data/harvix.json ```
+```bash
+export HARVIX_ADMIN_USERNAME="$ADMIN_USERNAME
+```
+   ```bash
+export HARVIX_ADMIN_PASSWORD="$ADMIN_PASSWORD
+```
+    ```bash
+    export HARVIX_DATABASE_FILE="$APP_DIR/data/harvix.json
+    ```
 
 # Manual Install has some problems so use one click command installer
 
 # one click command installer 
-``` bash <(curl -fsSL https://raw.githubusercontent.com/yoshidaranimahato-collab/HarvixNodes/main/installer/harvixpanel.sh) ```
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/yoshidaranimahato-collab/HarvixNodes/main/installer/harvixpanel.sh)
+```
  
