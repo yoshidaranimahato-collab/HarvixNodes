@@ -1310,3 +1310,18 @@ body.auth-page {
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
+   body.auth-page {
+    min-height: 100vh;
+
+    background-image:
+        linear-gradient(
+            rgba(5, 5, 12, 0.60),
+            rgba(5, 5, 12, 0.78)
+        ),
+        url("https://cdn.discordapp.com/attachments/1525395710919577711/1543212815773339669/f543191bef69dd4a3e07ae7a53d25ca8.jpg?ex=6a940c6e&is=6a92baee&hm=047926b0f7f2d25442a3b5d7aba8cecfad7b3c12d1846b671891ebf072327352&");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+   }
