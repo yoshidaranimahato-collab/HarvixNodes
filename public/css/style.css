@@ -1295,4 +1295,18 @@ body.light-theme .create-card {
 }
 
 body.light-theme .sidebar {
-    b
+body.auth-page {
+    min-height: 100vh;
+
+    background-image:
+        linear-gradient(
+            rgba(5, 5, 12, 0.60),
+            rgba(5, 5, 12, 0.78)
+        ),
+        url("/auth-bg.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
