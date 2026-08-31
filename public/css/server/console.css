@@ -1,1 +1,16 @@
-
+/* Server Console */
+.console-container { display:flex; flex-direction:column; gap:12px; }
+.console-output {
+    min-height:420px;
+    max-height:65vh;
+    overflow:auto;
+    background:#08090d;
+    color:#d1d5db;
+    border:1px solid #252833;
+    border-radius:10px;
+    padding:14px;
+    font-family:monospace;
+    white-space:pre-wrap;
+}
+.console-input { display:flex; gap:8px; }
+.console-input input { flex:1; }

@@ -1,1 +1,8 @@
-
+/* Server Splitter */
+.splitter-card {
+    max-width:700px;
+    padding:20px;
+    border:1px solid #252833;
+    border-radius:10px;
+    background:#11131a;
+}

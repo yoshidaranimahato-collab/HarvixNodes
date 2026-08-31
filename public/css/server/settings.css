@@ -1,1 +1,15 @@
-
+/* Server Settings */
+.settings-card {
+    max-width:800px;
+    padding:20px;
+    border:1px solid #252833;
+    border-radius:10px;
+    background:#11131a;
+}
+.settings-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+.danger-zone {
+    margin-top:20px;
+    padding:16px;
+    border:1px solid #7f1d1d;
+    border-radius:10px;
+}

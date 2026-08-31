@@ -1,6 +1,6 @@
-/* Backups */
-.backup-list { display:flex; flex-direction:column; gap:8px; }
-.backup-row {
+/* Subdomain Manager */
+.subdomain-list { display:flex; flex-direction:column; gap:8px; }
+.subdomain-row {
     display:flex;
     justify-content:space-between;
     gap:10px;

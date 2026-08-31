@@ -1,1 +1,8 @@
-
+/* World Manager */
+.world-list { display:flex; flex-direction:column; gap:8px; }
+.world-row {
+    padding:12px;
+    border:1px solid #252833;
+    border-radius:8px;
+    background:#11131a;
+}

@@ -1,0 +1,8 @@
+/* SFTP */
+.sftp-card {
+    padding:18px;
+    border:1px solid #252833;
+    border-radius:10px;
+    background:#11131a;
+}
+.sftp-info { white-space:pre-wrap; font-family:monospace; line-height:1.7; }

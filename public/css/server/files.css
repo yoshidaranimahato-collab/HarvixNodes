@@ -1,1 +1,12 @@
-
+/* File Manager */
+.file-manager { display:flex; flex-direction:column; gap:8px; }
+.file-row {
+    display:flex;
+    align-items:center;
+    min-height:44px;
+    padding:10px 12px;
+    border:1px solid #252833;
+    border-radius:8px;
+    background:#11131a;
+}
+.file-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

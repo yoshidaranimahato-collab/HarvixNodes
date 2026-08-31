@@ -1,1 +1,8 @@
-
+/* Votifier Test */
+.votifier-card {
+    max-width:600px;
+    padding:20px;
+    border:1px solid #252833;
+    border-radius:10px;
+    background:#11131a;
+}
