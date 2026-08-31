@@ -1,34 +1,30 @@
-/* HarvixPanel World Manager */
+/* HarvixPanel Votifier Test */
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
     const id = new URLSearchParams(location.search).get("id");
-    const button = document.getElementById("createWorld");
+    const button = document.getElementById("testVotifier");
     if (!id || !button) return;
 
     button.addEventListener("click", async () => {
-        const name = document.getElementById("worldName")?.value.trim();
-        if (!name) return alert("Enter a world name.");
-
         const token = localStorage.getItem("harvix_token");
 
         try {
-            const response = await fetch(`/api/servers/${encodeURIComponent(id)}/worlds`, {
+            const response = await fetch(`/api/servers/${encodeURIComponent(id)}/votifier/test`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     ...(token ? { Authorization: `Bearer ${token}` } : {})
-                },
-                body: JSON.stringify({ name })
+                }
             });
 
             const text = await response.text();
             let data;
             try { data = JSON.parse(text); }
-            catch { throw new Error("World API returned HTML instead of JSON."); }
+            catch { throw new Error("Votifier API returned HTML instead of JSON."); }
 
-            if (!response.ok) throw new Error(data.message || "World creation failed.");
-            alert(data.message || "World created.");
+            if (!response.ok) throw new Error(data.message || "Votifier test failed.");
+            alert(data.message || "Votifier test completed.");
         } catch (error) {
             alert(error.message);
         }

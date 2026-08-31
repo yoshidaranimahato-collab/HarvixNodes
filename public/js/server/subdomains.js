@@ -1,9 +1,9 @@
-/* HarvixPanel Mod Manager */
+/* HarvixPanel Subdomain Manager */
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
     const id = new URLSearchParams(location.search).get("id");
-    const form = document.getElementById("modForm");
+    const form = document.getElementById("subdomainForm");
     if (!id || !form) return;
 
     const token = localStorage.getItem("harvix_token");
@@ -11,26 +11,26 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", async e => {
         e.preventDefault();
 
-        const name = document.getElementById("modName")?.value.trim();
-        if (!name) return alert("Enter a mod name.");
+        const subdomain = document.getElementById("subdomain")?.value.trim();
+        if (!subdomain) return alert("Enter a subdomain.");
 
         try {
-            const response = await fetch(`/api/servers/${encodeURIComponent(id)}/mods/install`, {
+            const response = await fetch(`/api/servers/${encodeURIComponent(id)}/subdomains`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     ...(token ? { Authorization: `Bearer ${token}` } : {})
                 },
-                body: JSON.stringify({ mod: name })
+                body: JSON.stringify({ subdomain })
             });
 
             const text = await response.text();
             let data;
             try { data = JSON.parse(text); }
-            catch { throw new Error("Mod API returned HTML instead of JSON."); }
+            catch { throw new Error("Subdomain API returned HTML instead of JSON."); }
 
-            if (!response.ok) throw new Error(data.message || data.error || "Mod installation failed.");
-            alert(data.message || "Mod installation started.");
+            if (!response.ok) throw new Error(data.message || data.error || "Subdomain creation failed.");
+            alert(data.message || "Subdomain saved.");
         } catch (error) {
             alert(error.message);
         }
