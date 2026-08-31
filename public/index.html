@@ -11,6 +11,25 @@
     <title>HarvixPanel - Login</title>
 
     <link rel="stylesheet" href="/css/style.css">
+
+    <!-- AUTH BACKGROUND -->
+    <style>
+        body.auth-page {
+            min-height: 100vh;
+
+            background-image:
+                linear-gradient(
+                    rgba(5, 5, 12, 0.60),
+                    rgba(5, 5, 12, 0.78)
+                ),
+                url("https://cdn.discordapp.com/attachments/1525395710919577711/1543212815773339669/f543191bef69dd4a3e07ae7a53d25ca8.jpg?ex=6a940c6e&is=6a92baee&hm=047926b0f7f2d25442a3b5d7aba8cecfad7b3c12d1846b671891ebf072327352&");
+
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+    </style>
 </head>
 
 <body class="auth-page">
@@ -22,7 +41,10 @@
             <!-- LOGO -->
             <div class="auth-logo">
                 <h1>Harvix<span>Panel</span></h1>
-                <p>Minecraft Server Management Panel</p>
+
+                <p>
+                    Minecraft Server Management Panel
+                </p>
             </div>
 
 
@@ -33,9 +55,9 @@
             ></div>
 
 
-            <!-- ==============================
-                 LOGIN
-                 ============================== -->
+            <!-- =================================
+                 LOGIN FORM
+                 ================================= -->
 
             <form
                 id="loginForm"
@@ -96,9 +118,9 @@
             </form>
 
 
-            <!-- ==============================
-                 REGISTER
-                 ============================== -->
+            <!-- =================================
+                 REGISTER FORM
+                 ================================= -->
 
             <form
                 id="registerForm"
@@ -111,6 +133,8 @@
                     Create your HarvixPanel account.
                 </p>
 
+
+                <!-- FIRST + LAST NAME -->
 
                 <div class="form-row">
 
@@ -125,6 +149,7 @@
                             id="firstName"
                             name="firstName"
                             placeholder="First name"
+                            autocomplete="given-name"
                             required
                         >
 
@@ -142,6 +167,7 @@
                             id="lastName"
                             name="lastName"
                             placeholder="Last name"
+                            autocomplete="family-name"
                             required
                         >
 
@@ -149,6 +175,8 @@
 
                 </div>
 
+
+                <!-- USERNAME -->
 
                 <div class="form-group">
 
@@ -168,6 +196,8 @@
                 </div>
 
 
+                <!-- EMAIL -->
+
                 <div class="form-group">
 
                     <label for="registerEmail">
@@ -185,6 +215,8 @@
 
                 </div>
 
+
+                <!-- PASSWORD -->
 
                 <div class="form-group">
 
@@ -205,6 +237,8 @@
                 </div>
 
 
+                <!-- CONFIRM PASSWORD -->
+
                 <div class="form-group">
 
                     <label for="registerConfirmPassword">
@@ -224,6 +258,8 @@
                 </div>
 
 
+                <!-- REGISTER BUTTON -->
+
                 <button
                     type="submit"
                     id="registerButton"
@@ -235,13 +271,16 @@
             </form>
 
 
-            <!-- ==============================
-                 SWITCH
-                 ============================== -->
+            <!-- =================================
+                 LOGIN / REGISTER SWITCH
+                 ================================= -->
 
-            <div class="auth-switch">
+            <div
+                class="auth-switch"
+                id="loginSwitch"
+            >
 
-                <span id="loginSwitchText">
+                <span>
                     Don't have an account?
                 </span>
 
