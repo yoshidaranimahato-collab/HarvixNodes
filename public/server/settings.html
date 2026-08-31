@@ -1,1 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HarvixPanel - Server Settings</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/server/settings.css">
+</head>
+<body class="server-page">
+  <main class="server-container">
+    
+<div class="settings-card">
+  <h2>Server Settings</h2>
+  <form id="serverSettingsForm">
+    <div class="settings-grid">
+      <input id="serverNameInput" type="text" placeholder="Server name">
+      <input id="serverRam" type="number" placeholder="RAM (MB)">
+      <input id="serverDisk" type="number" placeholder="Disk (MB)">
+      <input id="serverCpu" type="number" step="0.1" placeholder="CPU">
+    </div>
+    <button type="submit">Save Settings</button>
+  </form>
+</div>
 
+  </main>
+  <script src="/js/server/settings.js"></script>
+</body>
+</html>
