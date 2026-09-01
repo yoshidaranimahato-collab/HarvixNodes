@@ -6,7 +6,6 @@ const {
     updateNodeHeartbeat,
     getNodeStatus
 } = require("./services/heartbeat-service");
-"use strict";
 
 /*
 ========================================================
