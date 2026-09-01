@@ -1,3 +1,10 @@
+const nodeAuth =
+    require("./middleware/node-auth");
+
+const {
+    updateNodeHeartbeat,
+    getNodeStatus
+} = require("./services/heartbeat-service");
 "use strict";
 
 /*
