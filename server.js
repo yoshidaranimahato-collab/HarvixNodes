@@ -1142,28 +1142,113 @@ app.get(
     authenticate,
     (req, res) => {
 
-        const database =
-            readDatabase();
+        try {
+
+            const database =
+                readDatabase();
+
+            const allServers =
+                Array.isArray(database.servers)
+                    ? database.servers
+                    : [];
+
+            let servers;
+
+            /*
+            ADMIN
+            */
+
+            if (
+                req.user.role === "admin"
+            ) {
+
+                servers =
+                    allServers;
+
+            }
+
+            /*
+            NORMAL USER
+            */
+
+            else {
+
+                servers =
+                    allServers.filter(
+                        server => {
+
+                            /*
+                            Owner ID check
+                            */
+
+                            if (
+                                String(
+                                    server.ownerId
+                                ) ===
+                                String(
+                                    req.user.id
+                                )
+                            ) {
+
+                                return true;
+
+                            }
 
 
-        let servers;
+                            /*
+                            User server list check
+                            */
+
+                            const userServers =
+                                Array.isArray(
+                                    req.user.servers
+                                )
+                                    ? req.user.servers
+                                    : [];
 
 
-        if (
-            req.user.role === "admin"
-        ) {
+                            return userServers.some(
+                                serverId =>
+                                    String(
+                                        serverId
+                                    ) ===
+                                    String(
+                                        server.id
+                                    )
+                            );
 
-            servers =
-                database.servers;
+                        }
+                    );
 
-        } else {
+            }
 
-            servers =
-                database.servers.filter(
-                    server =>
-                        server.ownerId ===
-                        req.user.id
-                        ||
-                        (
-                            Array.isArray(
-                              
+
+            return res.json({
+
+                success: true,
+
+                servers
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                "Get servers error:",
+                error
+            );
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Unable to load servers."
+
+            });
+
+        }
+
+    }
+);
