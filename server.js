@@ -1257,6 +1257,13 @@ app.get(
 START SERVER
 ========================================================
 */
+app.use(express.static(PUBLIC_DIR));
+
+app.get("/", (req, res) => {
+    res.sendFile(
+        path.join(PUBLIC_DIR, "index.html")
+    );
+});
 
 app.listen(
     PORT,
