@@ -1152,7 +1152,7 @@ app.get(
                     ? database.servers
                     : [];
 
-            let servers;
+            let servers = [];
 
             /*
             ADMIN
@@ -1173,12 +1173,19 @@ app.get(
 
             else {
 
+                const userServers =
+                    Array.isArray(
+                        req.user.servers
+                    )
+                        ? req.user.servers
+                        : [];
+
                 servers =
                     allServers.filter(
                         server => {
 
                             /*
-                            Owner ID check
+                            Owner ID
                             */
 
                             if (
@@ -1194,18 +1201,9 @@ app.get(
 
                             }
 
-
                             /*
-                            User server list check
+                            User server list
                             */
-
-                            const userServers =
-                                Array.isArray(
-                                    req.user.servers
-                                )
-                                    ? req.user.servers
-                                    : [];
-
 
                             return userServers.some(
                                 serverId =>
@@ -1249,6 +1247,46 @@ app.get(
             });
 
         }
+
+    }
+);
+
+
+/*
+========================================================
+START SERVER
+========================================================
+*/
+
+app.listen(
+    PORT,
+    HOST,
+    () => {
+
+        console.log("");
+        console.log(
+            "========================================"
+        );
+
+        console.log(
+            "       HARVIXPANEL"
+        );
+
+        console.log(
+            "========================================"
+        );
+
+        console.log(
+            `Server running on http://${HOST}:${PORT}`
+        );
+
+        console.log(
+            `Port: ${PORT}`
+        );
+
+        console.log(
+            "========================================"
+        );
 
     }
 );
