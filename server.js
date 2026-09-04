@@ -1,25 +1,4 @@
 "use strict";
-const nodeAuth =
-    require("./middleware/node-auth");
-
-const {
-    updateNodeHeartbeat,
-    getNodeStatus
-} = require("./services/heartbeat-service");
-
-/*
-========================================================
-HARVIXPANEL SERVER
-========================================================
-Node.js + Express
-Authentication
-Admin Authentication
-Users
-Servers
-Nodes
-Static Frontend
-========================================================
-*/
 
 const express = require("express");
 const path = require("path");
@@ -28,34 +7,26 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-
-/*
-========================================================
-APP
-========================================================
-*/
-
 const app = express();
 
-const PORT =
-    Number(process.env.PORT) || 6969;
+/* =========================================================
+   CONFIG
+========================================================= */
 
-const HOST =
-    process.env.HOST || "0.0.0.0";
+const PORT = Number(process.env.PORT) || 6969;
+const HOST = process.env.HOST || "0.0.0.0";
 
 const JWT_SECRET =
-    process.env.JWT_SECRET ||
-    "CHANGE_THIS_HARVIXPANEL_SECRET";
+    String(
+        process.env.JWT_SECRET ||
+        "CHANGE_THIS_HARVIXPANEL_SECRET"
+    ).trim();
 
+/* =========================================================
+   PATHS
+========================================================= */
 
-/*
-========================================================
-PATHS
-========================================================
-*/
-
-const ROOT_DIR =
-    __dirname;
+const ROOT_DIR = __dirname;
 
 const PUBLIC_DIR =
     path.join(ROOT_DIR, "public");
@@ -69,98 +40,51 @@ const DATABASE_FILE =
 const SERVERS_DIR =
     path.join(ROOT_DIR, "servers");
 
-
-/*
-========================================================
-CREATE REQUIRED DIRECTORIES
-========================================================
-*/
+/* =========================================================
+   DIRECTORIES
+========================================================= */
 
 function createDirectories() {
+    fs.mkdirSync(DATA_DIR, {
+        recursive: true
+    });
 
-    if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(
-            DATA_DIR,
-            { recursive: true }
-        );
-    }
+    fs.mkdirSync(SERVERS_DIR, {
+        recursive: true
+    });
 
-    if (!fs.existsSync(SERVERS_DIR)) {
-        fs.mkdirSync(
-            SERVERS_DIR,
-            { recursive: true }
-        );
-    }
-
-    if (!fs.existsSync(PUBLIC_DIR)) {
-        fs.mkdirSync(
-            PUBLIC_DIR,
-            { recursive: true }
-        );
-    }
+    fs.mkdirSync(PUBLIC_DIR, {
+        recursive: true
+    });
 }
 
 createDirectories();
 
-
-/*
-========================================================
-DEFAULT DATABASE
-========================================================
-*/
+/* =========================================================
+   DEFAULT DATABASE
+========================================================= */
 
 const DEFAULT_DATABASE = {
-
     users: [],
-
     servers: [],
-
-    nodes: [
-
-        {
-            id: "local-node",
-            name: "Local Node",
-            host: "127.0.0.1",
-            port: 6969,
-            status: "online",
-            ram: 0,
-            disk: 0,
-            cpu: 0
-        }
-
-    ],
-
+    nodes: [],
     settings: {
-
         panelName: "HarvixPanel",
-
         panelImage: "",
-
         theme: "black"
-
     }
-
 };
 
-
-/*
-========================================================
-READ DATABASE
-========================================================
-*/
+/* =========================================================
+   DATABASE READ
+========================================================= */
 
 function readDatabase() {
-
     try {
-
         if (!fs.existsSync(DATABASE_FILE)) {
-
-            fs.writeFileSync(
-                DATABASE_FILE,
-                JSON.stringify(
-                    DEFAULT_DATABASE,
-                    null,
-                    2
+            saveDatabase(
+                JSON.parse(
+                    JSON.stringify(DEFAULT_DATABASE)
                 )
             );
 
@@ -169,26 +93,20 @@ function readDatabase() {
             );
         }
 
-
         const raw =
             fs.readFileSync(
                 DATABASE_FILE,
                 "utf8"
             );
 
-
         if (!raw.trim()) {
-
             return JSON.parse(
                 JSON.stringify(DEFAULT_DATABASE)
             );
-
         }
-
 
         const database =
             JSON.parse(raw);
-
 
         if (!Array.isArray(database.users)) {
             database.users = [];
@@ -203,20 +121,23 @@ function readDatabase() {
         }
 
         if (!database.settings) {
-
-            database.settings = {
-                panelName: "HarvixPanel",
-                panelImage: "",
-                theme: "black"
-            };
-
+            database.settings = {};
         }
 
+        database.settings.panelName =
+            database.settings.panelName ||
+            "HarvixPanel";
+
+        database.settings.panelImage =
+            database.settings.panelImage || "";
+
+        database.settings.theme =
+            database.settings.theme ||
+            "black";
 
         return database;
 
     } catch (error) {
-
         console.error(
             "Database read error:",
             error
@@ -228,146 +149,184 @@ function readDatabase() {
     }
 }
 
-
-/*
-========================================================
-SAVE DATABASE
-========================================================
-*/
+/* =========================================================
+   DATABASE SAVE
+========================================================= */
 
 function saveDatabase(database) {
-
     fs.writeFileSync(
         DATABASE_FILE,
         JSON.stringify(
             database,
             null,
             2
-        )
+        ),
+        "utf8"
     );
-
 }
 
-
-/*
-========================================================
-MIDDLEWARE
-========================================================
-*/
+/* =========================================================
+   MIDDLEWARE
+========================================================= */
 
 app.use(
     express.json({
-        limit: "5mb"
+        limit: "10mb"
     })
 );
 
 app.use(
     express.urlencoded({
-        extended: true
+        extended: true,
+        limit: "10mb"
     })
 );
 
+/* =========================================================
+   LOGGER
+========================================================= */
 
-/*
-========================================================
-REQUEST LOGGER
-========================================================
-*/
+app.use((req, res, next) => {
+    console.log(
+        `${new Date().toISOString()} ${req.method} ${req.url}`
+    );
 
-app.use(
-    (req, res, next) => {
+    next();
+});
 
-        console.log(
-            `${new Date().toISOString()} ${req.method} ${req.url}`
-        );
+/* =========================================================
+   PASSWORD HELPERS
+========================================================= */
 
-        next();
-
+async function verifyPassword(
+    password,
+    user
+) {
+    if (!user) {
+        return false;
     }
-);
 
+    /*
+     * New database format
+     */
+    if (
+        typeof user.passwordHash === "string" &&
+        user.passwordHash.length > 0
+    ) {
+        try {
+            return await bcrypt.compare(
+                password,
+                user.passwordHash
+            );
+        } catch (error) {
+            console.error(
+                "bcrypt verification error:",
+                error.message
+            );
 
-/*
-========================================================
-JWT CREATE
-========================================================
-*/
+            return false;
+        }
+    }
+
+    /*
+     * Other possible format
+     */
+    if (
+        typeof user.password_hash === "string" &&
+        user.password_hash.length > 0
+    ) {
+        try {
+            return await bcrypt.compare(
+                password,
+                user.password_hash
+            );
+        } catch (error) {
+            return false;
+        }
+    }
+
+    /*
+     * Old plaintext database
+     *
+     * If the old database contains password,
+     * verify it and automatically migrate it.
+     */
+    if (
+        typeof user.password === "string"
+    ) {
+        if (
+            user.password === password
+        ) {
+            user.passwordHash =
+                await bcrypt.hash(
+                    password,
+                    12
+                );
+
+            delete user.password;
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/* =========================================================
+   JWT
+========================================================= */
 
 function createToken(user) {
-
     return jwt.sign(
-
         {
             id: user.id,
             username: user.username,
             role: user.role
-
         },
-
         JWT_SECRET,
-
         {
             expiresIn: "7d"
         }
-
     );
-
 }
 
+/* =========================================================
+   AUTHENTICATION
+========================================================= */
 
-/*
-========================================================
-AUTHENTICATE
-========================================================
-*/
-
-function authenticate(req, res, next) {
-
+function authenticate(
+    req,
+    res,
+    next
+) {
     try {
-
-        const authHeader =
+        const header =
             req.headers.authorization;
 
-
-        if (!authHeader) {
-
+        if (!header) {
             return res.status(401).json({
-
                 success: false,
-
                 message:
                     "Authentication required."
-
             });
-
         }
 
-
         const parts =
-            authHeader.split(" ");
-
+            header.trim().split(/\s+/);
 
         if (
             parts.length !== 2 ||
-            parts[0] !== "Bearer" ||
-            !parts[1]
+            parts[0].toLowerCase() !==
+                "bearer"
         ) {
-
             return res.status(401).json({
-
                 success: false,
-
                 message:
                     "Invalid authorization format."
-
             });
-
         }
 
-
-        const token =
-            parts[1];
-
+        const token = parts[1];
 
         const decoded =
             jwt.verify(
@@ -375,207 +334,159 @@ function authenticate(req, res, next) {
                 JWT_SECRET
             );
 
-
-        req.user =
-            decoded;
-
+        req.user = decoded;
 
         next();
 
-
     } catch (error) {
-
         console.error(
             "Authentication error:",
             error.message
         );
 
-
         return res.status(401).json({
-
             success: false,
-
             message:
                 "Invalid or expired token."
-
         });
-
     }
-
 }
 
+/* =========================================================
+   ADMIN AUTH
+========================================================= */
 
-/*
-========================================================
-ADMIN AUTHENTICATE
-========================================================
-*/
-
-function requireAdmin(req, res, next) {
-
+function requireAdmin(
+    req,
+    res,
+    next
+) {
     if (
         !req.user ||
         req.user.role !== "admin"
     ) {
-
         return res.status(403).json({
-
             success: false,
-
             message:
                 "Administrator access required."
-
         });
-
     }
 
     next();
-
 }
 
-
-/*
-========================================================
-HEALTH
-========================================================
-*/
+/* =========================================================
+   HEALTH
+========================================================= */
 
 app.get(
     "/api/health",
     (req, res) => {
-
         res.json({
-
             success: true,
-
             panel: "HarvixPanel",
-
             status: "online",
-
-            time: new Date().toISOString()
-
+            time:
+                new Date().toISOString()
         });
-
     }
 );
 
-
-/*
-========================================================
-REGISTER
-========================================================
-*/
+/* =========================================================
+   REGISTER
+========================================================= */
 
 app.post(
     "/api/auth/register",
     async (req, res) => {
-
         try {
-
             const database =
                 readDatabase();
 
+            const firstName =
+                String(
+                    req.body.firstName || ""
+                ).trim();
 
-            const {
-                firstName,
-                lastName,
-                username,
-                email,
-                password
-            } = req.body;
+            const lastName =
+                String(
+                    req.body.lastName || ""
+                ).trim();
 
+            const username =
+                String(
+                    req.body.username || ""
+                ).trim();
+
+            const email =
+                String(
+                    req.body.email || ""
+                )
+                .trim()
+                .toLowerCase();
+
+            const password =
+                String(
+                    req.body.password || ""
+                );
 
             if (
                 !username ||
                 !email ||
                 !password
             ) {
-
                 return res.status(400).json({
-
                     success: false,
-
                     message:
                         "Username, email and password are required."
-
                 });
-
             }
-
 
             if (
-                typeof password !== "string" ||
                 password.length < 6
             ) {
-
                 return res.status(400).json({
-
                     success: false,
-
                     message:
                         "Password must be at least 6 characters."
-
                 });
-
             }
 
-
-            const cleanUsername =
-                String(username)
-                    .trim();
-
-
-            const cleanEmail =
-                String(email)
-                    .trim()
-                    .toLowerCase();
-
-
-            const existingUsername =
-                database.users.find(
+            const usernameExists =
+                database.users.some(
                     user =>
-                        String(user.username)
-                            .toLowerCase() ===
-                        cleanUsername.toLowerCase()
+                        String(
+                            user.username || ""
+                        )
+                        .toLowerCase() ===
+                        username.toLowerCase()
                 );
 
-
-            if (existingUsername) {
-
+            if (usernameExists) {
                 return res.status(409).json({
-
                     success: false,
-
                     message:
                         "Username is already registered."
-
                 });
-
             }
 
-
-            const existingEmail =
-                database.users.find(
+            const emailExists =
+                database.users.some(
                     user =>
-                        String(user.email)
-                            .toLowerCase() ===
-                        cleanEmail
+                        String(
+                            user.email || ""
+                        )
+                        .toLowerCase() ===
+                        email
                 );
 
-
-            if (existingEmail) {
-
+            if (emailExists) {
                 return res.status(409).json({
-
                     success: false,
-
                     message:
                         "Email is already registered."
-
                 });
-
             }
-
 
             const passwordHash =
                 await bcrypt.hash(
@@ -583,164 +494,206 @@ app.post(
                     12
                 );
 
-
             const user = {
-
                 id:
                     "user_" +
                     Date.now() +
                     "_" +
                     Math.random()
                         .toString(36)
-                        .slice(2, 8),
+                        .slice(2, 10),
 
-                firstName:
-                    String(firstName || "")
-                        .trim(),
-
-                lastName:
-                    String(lastName || "")
-                        .trim(),
-
-                username:
-                    cleanUsername,
-
-                email:
-                    cleanEmail,
+                firstName,
+                lastName,
+                username,
+                email,
 
                 passwordHash,
 
-                role:
-                    "user",
+                role: "user",
 
                 servers: [],
 
                 createdAt:
                     new Date().toISOString()
-
             };
-
 
             database.users.push(user);
 
             saveDatabase(database);
 
-
             return res.status(201).json({
-
                 success: true,
-
                 message:
                     "Account created successfully! You can now login."
-
             });
 
-
         } catch (error) {
-
             console.error(
                 "Register error:",
                 error
             );
 
-
             return res.status(500).json({
-
                 success: false,
-
                 message:
                     "Registration failed."
-
             });
-
         }
-
     }
 );
 
-
-/*
-========================================================
-LOGIN
-========================================================
-*/
+/* =========================================================
+   LOGIN - FIXED
+========================================================= */
 
 app.post(
     "/api/auth/login",
     async (req, res) => {
-
         try {
-
             const database =
                 readDatabase();
 
-
+            /*
+             * Accept all common frontend names:
+             *
+             * identifier
+             * username
+             * email
+             */
             const identifier =
                 String(
-                    req.body.identifier ||
-                    req.body.username ||
-                    req.body.email ||
+                    req.body.identifier ??
+                    req.body.username ??
+                    req.body.email ??
                     ""
-                )
-                .trim();
-
+                ).trim();
 
             const password =
                 String(
-                    req.body.password ||
+                    req.body.password ??
                     ""
                 );
-
 
             if (
                 !identifier ||
                 !password
             ) {
-
                 return res.status(400).json({
-
                     success: false,
-
                     message:
                         "Username/email and password are required."
-
                 });
-
             }
-
 
             const identifierLower =
                 identifier.toLowerCase();
 
-
+            /*
+             * Find user by username OR email
+             */
             const user =
                 database.users.find(
-                    account =>
+                    account => {
 
-                        String(account.username)
-                            .toLowerCase() ===
-                        identifierLower
+                        const username =
+                            String(
+                                account.username ||
+                                ""
+                            )
+                            .trim()
+                            .toLowerCase();
 
-                        ||
+                        const email =
+                            String(
+                                account.email ||
+                                ""
+                            )
+                            .trim()
+                            .toLowerCase();
 
-                        String(account.email)
-                            .toLowerCase() ===
-                        identifierLower
+                        return (
+                            username ===
+                                identifierLower ||
+                            email ===
+                                identifierLower
+                        );
+                    }
                 );
 
-
             if (!user) {
-
                 return res.status(401).json({
-
                     success: false,
-
                     message:
                         "Invalid username/email or password."
-
                 });
-
             }
+
+            const passwordCorrect =
+                await verifyPassword(
+                    password,
+                    user
+                );
+
+            if (!passwordCorrect) {
+                return res.status(401).json({
+                    success: false,
+                    message:
+                        "Invalid username/email or password."
+                });
+            }
+
+            /*
+             * Save automatic password migration
+             */
+            saveDatabase(database);
+
+            const token =
+                createToken(user);
+
+            return res.json({
+                success: true,
+
+                message:
+                    "Login successful.",
+
+                token,
+
+                user: {
+                    id: user.id,
+                    firstName:
+                        user.firstName || "",
+                    lastName:
+                        user.lastName || "",
+                    username:
+                        user.username,
+                    email:
+                        user.email,
+                    role:
+                        user.role || "user",
+                    servers:
+                        Array.isArray(
+                            user.servers
+                        )
+                            ? user.servers
+                            : []
+                }
+            });
+
+        } catch (error) {
+            console.error(
+                "Login error:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Login failed."
+            });
+        }
+    }
+);
 
 
             /*
@@ -865,61 +818,542 @@ app.post(
 );
 
 
-/*
-========================================================
-AUTH ME
-========================================================
-*/
+/* ========================================================
+   AUTH ME
+======================================================== */
 
 app.get(
     "/api/auth/me",
     authenticate,
     (req, res) => {
 
-        const database =
-            readDatabase();
+        try {
 
+            const database =
+                readDatabase();
 
-        const user =
-            database.users.find(
-                account =>
-                    account.id ===
-                    req.user.id
+            const user =
+                database.users.find(
+                    account =>
+                        String(account.id) ===
+                        String(req.user.id)
+                );
+
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message: "User not found."
+                });
+            }
+
+            return res.json({
+                success: true,
+
+                user: {
+                    id: user.id,
+
+                    firstName:
+                        user.firstName || "",
+
+                    lastName:
+                        user.lastName || "",
+
+                    username:
+                        user.username,
+
+                    email:
+                        user.email,
+
+                    role:
+                        user.role || "user",
+
+                    servers:
+                        Array.isArray(user.servers)
+                            ? user.servers
+                            : [],
+
+                    createdAt:
+                        user.createdAt
+                }
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Auth me error:",
+                error
             );
 
-
-        if (!user) {
-
-            return res.status(404).json({
-
+            return res.status(500).json({
                 success: false,
-
                 message:
-                    "User not found."
+                    "Unable to load user."
+            });
+        }
+    }
+);
+
+
+/* ========================================================
+   LOGOUT
+======================================================== */
+
+app.post(
+    "/api/auth/logout",
+    authenticate,
+    (req, res) => {
+
+        return res.json({
+            success: true,
+            message:
+                "Logged out successfully."
+        });
+
+    }
+);
+
+
+/* ========================================================
+   CURRENT USER
+======================================================== */
+
+app.get(
+    "/api/user",
+    authenticate,
+    (req, res) => {
+
+        try {
+
+            const database =
+                readDatabase();
+
+            const user =
+                database.users.find(
+                    account =>
+                        String(account.id) ===
+                        String(req.user.id)
+                );
+
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "User not found."
+                });
+            }
+
+            return res.json({
+                success: true,
+
+                user: {
+                    id: user.id,
+
+                    firstName:
+                        user.firstName || "",
+
+                    lastName:
+                        user.lastName || "",
+
+                    username:
+                        user.username,
+
+                    email:
+                        user.email,
+
+                    role:
+                        user.role || "user",
+
+                    servers:
+                        Array.isArray(user.servers)
+                            ? user.servers
+                            : [],
+
+                    createdAt:
+                        user.createdAt
+                }
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Get user error:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to load user."
+            });
+        }
+    }
+);
+
+
+/* ========================================================
+   ADMIN INFORMATION
+======================================================== */
+
+app.get(
+    "/api/admin",
+    authenticate,
+    requireAdmin,
+    (req, res) => {
+
+        try {
+
+            const database =
+                readDatabase();
+
+            return res.json({
+
+                success: true,
+
+                admin: {
+                    id: req.user.id,
+
+                    username:
+                        req.user.username,
+
+                    role:
+                        req.user.role
+                },
+
+                users:
+                    database.users.length,
+
+                servers:
+                    database.servers.length,
+
+                nodes:
+                    database.nodes.length
 
             });
 
+        } catch (error) {
+
+            console.error(
+                "Admin info error:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to load admin information."
+            });
         }
+    }
+);
 
 
-        return res.json({
+/* ========================================================
+   ADMIN - ALL USERS
+======================================================== */
 
-            success: true,
+app.get(
+    "/api/admin/users",
+    authenticate,
+    requireAdmin,
+    (req, res) => {
 
-            user: {
+        try {
 
-                id:
-                    user.id,
+            const database =
+                readDatabase();
 
-                username:
-                    user.username,
+            const users =
+                database.users.map(
+                    user => ({
 
-                role:
-                    user.role
+                        id: user.id,
+
+                        firstName:
+                            user.firstName || "",
+
+                        lastName:
+                            user.lastName || "",
+
+                        username:
+                            user.username,
+
+                        email:
+                            user.email,
+
+                        role:
+                            user.role || "user",
+
+                        servers:
+                            Array.isArray(
+                                user.servers
+                            )
+                                ? user.servers
+                                : [],
+
+                        createdAt:
+                            user.createdAt
+
+                    })
+                );
+
+            return res.json({
+                success: true,
+                users
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Get admin users error:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to load users."
+            });
+        }
+    }
+);
+
+
+/* ========================================================
+   GET SERVERS
+======================================================== */
+
+app.get(
+    "/api/servers",
+    authenticate,
+    (req, res) => {
+
+        try {
+
+            const database =
+                readDatabase();
+
+            const allServers =
+                Array.isArray(
+                    database.servers
+                )
+                    ? database.servers
+                    : [];
+
+            let servers = [];
+
+            /*
+             * ADMIN
+             */
+
+            if (
+                req.user.role === "admin"
+            ) {
+
+                servers =
+                    allServers;
 
             }
 
+            /*
+             * NORMAL USER
+             */
+
+            else {
+
+                const userServers =
+                    Array.isArray(
+                        req.user.servers
+                    )
+                        ? req.user.servers
+                        : [];
+
+                servers =
+                    allServers.filter(
+                        server => {
+
+                            /*
+                             * Owner
+                             */
+
+                            if (
+                                String(
+                                    server.ownerId
+                                ) ===
+                                String(
+                                    req.user.id
+                                )
+                            ) {
+                                return true;
+                            }
+
+                            /*
+                             * Assigned server
+                             */
+
+                            return userServers.some(
+                                serverId =>
+                                    String(
+                                        serverId
+                                    ) ===
+                                    String(
+                                        server.id
+                                    )
+                            );
+
+                        }
+                    );
+
+            }
+
+            return res.json({
+                success: true,
+                servers
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Get servers error:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to load servers."
+            });
+        }
+    }
+);
+
+
+/* ========================================================
+   STATIC FRONTEND
+======================================================== */
+
+app.use(
+    express.static(
+        PUBLIC_DIR
+    )
+);
+
+
+/* ========================================================
+   ROOT PAGE
+======================================================== */
+
+app.get(
+    "/",
+    (req, res) => {
+
+        const indexFile =
+            path.join(
+                PUBLIC_DIR,
+                "index.html"
+            );
+
+        if (
+            !fs.existsSync(indexFile)
+        ) {
+
+            return res.status(404).send(
+                "HarvixPanel frontend not found. Make sure public/index.html exists."
+            );
+
+        }
+
+        return res.sendFile(
+            indexFile
+        );
+    }
+);
+
+
+/* ========================================================
+   404 API HANDLER
+======================================================== */
+
+app.use(
+    "/api",
+    (req, res) => {
+
+        return res.status(404).json({
+            success: false,
+            message:
+                "API endpoint not found.",
+            path: req.path
         });
+
+    }
+);
+
+
+/* ========================================================
+   GLOBAL ERROR HANDLER
+======================================================== */
+
+app.use(
+    (error, req, res, next) => {
+
+        console.error(
+            "Unhandled server error:",
+            error
+        );
+
+        if (res.headersSent) {
+            return next(error);
+        }
+
+        return res.status(500).json({
+            success: false,
+            message:
+                "Internal server error."
+        });
+    }
+);
+
+
+/* ========================================================
+   START HARVIXPANEL
+======================================================== */
+
+app.listen(
+    PORT,
+    HOST,
+    () => {
+
+        console.log("");
+        console.log(
+            "========================================"
+        );
+
+        console.log(
+            "          HARVIXPANEL"
+        );
+
+        console.log(
+            "========================================"
+        );
+
+        console.log(
+            `Server running on port ${PORT}`
+        );
+
+        console.log(
+            `Host: ${HOST}`
+        );
+
+        console.log(
+            `Public directory: ${PUBLIC_DIR}`
+        );
+
+        console.log(
+            `Database: ${DATABASE_FILE}`
+        );
+
+        console.log(
+            "========================================"
+        );
 
     }
 );
