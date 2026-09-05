@@ -16,11 +16,10 @@ const app = express();
 const PORT = Number(process.env.PORT) || 6969;
 const HOST = process.env.HOST || "0.0.0.0";
 
-const JWT_SECRET =
-    String(
-        process.env.JWT_SECRET ||
-        "CHANGE_THIS_HARVIXPANEL_SECRET"
-    ).trim();
+const JWT_SECRET = String(
+    process.env.JWT_SECRET ||
+    "CHANGE_THIS_HARVIXPANEL_SECRET"
+).trim();
 
 /* =========================================================
    PATHS
@@ -28,20 +27,28 @@ const JWT_SECRET =
 
 const ROOT_DIR = __dirname;
 
-const PUBLIC_DIR =
-    path.join(ROOT_DIR, "public");
+const PUBLIC_DIR = path.join(
+    ROOT_DIR,
+    "public"
+);
 
-const DATA_DIR =
-    path.join(ROOT_DIR, "data");
+const DATA_DIR = path.join(
+    ROOT_DIR,
+    "data"
+);
 
-const DATABASE_FILE =
-    path.join(DATA_DIR, "harvix.json");
+const DATABASE_FILE = path.join(
+    DATA_DIR,
+    "harvix.json"
+);
 
-const SERVERS_DIR =
-    path.join(ROOT_DIR, "servers");
+const SERVERS_DIR = path.join(
+    ROOT_DIR,
+    "servers"
+);
 
 /* =========================================================
-   DIRECTORIES
+   CREATE DIRECTORIES
 ========================================================= */
 
 function createDirectories() {
@@ -82,22 +89,19 @@ const DEFAULT_DATABASE = {
 function readDatabase() {
     try {
         if (!fs.existsSync(DATABASE_FILE)) {
-            saveDatabase(
-                JSON.parse(
-                    JSON.stringify(DEFAULT_DATABASE)
-                )
-            );
-
-            return JSON.parse(
+            const database = JSON.parse(
                 JSON.stringify(DEFAULT_DATABASE)
             );
+
+            saveDatabase(database);
+
+            return database;
         }
 
-        const raw =
-            fs.readFileSync(
-                DATABASE_FILE,
-                "utf8"
-            );
+        const raw = fs.readFileSync(
+            DATABASE_FILE,
+            "utf8"
+        );
 
         if (!raw.trim()) {
             return JSON.parse(
@@ -105,8 +109,7 @@ function readDatabase() {
             );
         }
 
-        const database =
-            JSON.parse(raw);
+        const database = JSON.parse(raw);
 
         if (!Array.isArray(database.users)) {
             database.users = [];
@@ -195,84 +198,6 @@ app.use((req, res, next) => {
 });
 
 /* =========================================================
-   PASSWORD HELPERS
-========================================================= */
-
-async function verifyPassword(
-    password,
-    user
-) {
-    if (!user) {
-        return false;
-    }
-
-    /*
-     * New database format
-     */
-    if (
-        typeof user.passwordHash === "string" &&
-        user.passwordHash.length > 0
-    ) {
-        try {
-            return await bcrypt.compare(
-                password,
-                user.passwordHash
-            );
-        } catch (error) {
-            console.error(
-                "bcrypt verification error:",
-                error.message
-            );
-
-            return false;
-        }
-    }
-
-    /*
-     * Other possible format
-     */
-    if (
-        typeof user.password_hash === "string" &&
-        user.password_hash.length > 0
-    ) {
-        try {
-            return await bcrypt.compare(
-                password,
-                user.password_hash
-            );
-        } catch (error) {
-            return false;
-        }
-    }
-
-    /*
-     * Old plaintext database
-     *
-     * If the old database contains password,
-     * verify it and automatically migrate it.
-     */
-    if (
-        typeof user.password === "string"
-    ) {
-        if (
-            user.password === password
-        ) {
-            user.passwordHash =
-                await bcrypt.hash(
-                    password,
-                    12
-                );
-
-            delete user.password;
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
-/* =========================================================
    JWT
 ========================================================= */
 
@@ -294,11 +219,7 @@ function createToken(user) {
    AUTHENTICATION
 ========================================================= */
 
-function authenticate(
-    req,
-    res,
-    next
-) {
+function authenticate(req, res, next) {
     try {
         const header =
             req.headers.authorization;
@@ -316,8 +237,7 @@ function authenticate(
 
         if (
             parts.length !== 2 ||
-            parts[0].toLowerCase() !==
-                "bearer"
+            parts[0].toLowerCase() !== "bearer"
         ) {
             return res.status(401).json({
                 success: false,
@@ -328,11 +248,10 @@ function authenticate(
 
         const token = parts[1];
 
-        const decoded =
-            jwt.verify(
-                token,
-                JWT_SECRET
-            );
+        const decoded = jwt.verify(
+            token,
+            JWT_SECRET
+        );
 
         req.user = decoded;
 
@@ -356,11 +275,7 @@ function authenticate(
    ADMIN AUTH
 ========================================================= */
 
-function requireAdmin(
-    req,
-    res,
-    next
-) {
+function requireAdmin(req, res, next) {
     if (
         !req.user ||
         req.user.role !== "admin"
@@ -386,8 +301,7 @@ app.get(
             success: true,
             panel: "HarvixPanel",
             status: "online",
-            time:
-                new Date().toISOString()
+            time: new Date().toISOString()
         });
     }
 );
@@ -403,32 +317,27 @@ app.post(
             const database =
                 readDatabase();
 
-            const firstName =
-                String(
-                    req.body.firstName || ""
-                ).trim();
+            const firstName = String(
+                req.body.firstName || ""
+            ).trim();
 
-            const lastName =
-                String(
-                    req.body.lastName || ""
-                ).trim();
+            const lastName = String(
+                req.body.lastName || ""
+            ).trim();
 
-            const username =
-                String(
-                    req.body.username || ""
-                ).trim();
+            const username = String(
+                req.body.username || ""
+            ).trim();
 
-            const email =
-                String(
-                    req.body.email || ""
-                )
+            const email = String(
+                req.body.email || ""
+            )
                 .trim()
                 .toLowerCase();
 
-            const password =
-                String(
-                    req.body.password || ""
-                );
+            const password = String(
+                req.body.password || ""
+            );
 
             if (
                 !username ||
@@ -442,9 +351,7 @@ app.post(
                 });
             }
 
-            if (
-                password.length < 6
-            ) {
+            if (password.length < 6) {
                 return res.status(400).json({
                     success: false,
                     message:
@@ -458,7 +365,8 @@ app.post(
                         String(
                             user.username || ""
                         )
-                        .toLowerCase() ===
+                            .trim()
+                            .toLowerCase() ===
                         username.toLowerCase()
                 );
 
@@ -476,7 +384,8 @@ app.post(
                         String(
                             user.email || ""
                         )
-                        .toLowerCase() ===
+                            .trim()
+                            .toLowerCase() ===
                         email
                 );
 
@@ -544,7 +453,8 @@ app.post(
 );
 
 /* =========================================================
-   LOGIN - FIXED
+   LOGIN
+   Original password checking preserved
 ========================================================= */
 
 app.post(
@@ -554,26 +464,17 @@ app.post(
             const database =
                 readDatabase();
 
-            /*
-             * Accept all common frontend names:
-             *
-             * identifier
-             * username
-             * email
-             */
-            const identifier =
-                String(
-                    req.body.identifier ??
-                    req.body.username ??
-                    req.body.email ??
-                    ""
-                ).trim();
+            const identifier = String(
+                req.body.identifier ??
+                req.body.username ??
+                req.body.email ??
+                ""
+            ).trim();
 
-            const password =
-                String(
-                    req.body.password ??
-                    ""
-                );
+            const password = String(
+                req.body.password ??
+                ""
+            );
 
             if (
                 !identifier ||
@@ -589,9 +490,6 @@ app.post(
             const identifierLower =
                 identifier.toLowerCase();
 
-            /*
-             * Find user by username OR email
-             */
             const user =
                 database.users.find(
                     account => {
@@ -601,16 +499,16 @@ app.post(
                                 account.username ||
                                 ""
                             )
-                            .trim()
-                            .toLowerCase();
+                                .trim()
+                                .toLowerCase();
 
                         const email =
                             String(
                                 account.email ||
                                 ""
                             )
-                            .trim()
-                            .toLowerCase();
+                                .trim()
+                                .toLowerCase();
 
                         return (
                             username ===
@@ -629,11 +527,37 @@ app.post(
                 });
             }
 
-            const passwordCorrect =
-                await verifyPassword(
-                    password,
-                    user
-                );
+            /*
+             * ORIGINAL PASSWORD CHECK
+             */
+
+            let passwordCorrect = false;
+
+            if (user.passwordHash) {
+                passwordCorrect =
+                    await bcrypt.compare(
+                        password,
+                        user.passwordHash
+                    );
+
+            } else if (
+                typeof user.password === "string"
+            ) {
+                passwordCorrect =
+                    user.password === password;
+
+                if (passwordCorrect) {
+                    user.passwordHash =
+                        await bcrypt.hash(
+                            password,
+                            12
+                        );
+
+                    delete user.password;
+
+                    saveDatabase(database);
+                }
+            }
 
             if (!passwordCorrect) {
                 return res.status(401).json({
@@ -642,11 +566,6 @@ app.post(
                         "Invalid username/email or password."
                 });
             }
-
-            /*
-             * Save automatic password migration
-             */
-            saveDatabase(database);
 
             const token =
                 createToken(user);
@@ -661,16 +580,22 @@ app.post(
 
                 user: {
                     id: user.id,
+
                     firstName:
                         user.firstName || "",
+
                     lastName:
                         user.lastName || "",
+
                     username:
                         user.username,
+
                     email:
                         user.email,
+
                     role:
                         user.role || "user",
+
                     servers:
                         Array.isArray(
                             user.servers
@@ -695,235 +620,15 @@ app.post(
     }
 );
 
-
-            /*
-            ----------------------------------------
-            PASSWORD CHECK
-            ----------------------------------------
-            */
-
-            let passwordCorrect = false;
-
-
-            if (user.passwordHash) {
-
-                passwordCorrect =
-                    await bcrypt.compare(
-                        password,
-                        user.passwordHash
-                    );
-
-            }
-
-
-            /*
-            Compatibility with older HarvixPanel
-            database entries.
-            */
-
-            else if (
-                typeof user.password === "string"
-            ) {
-
-                passwordCorrect =
-                    user.password === password;
-
-
-                if (passwordCorrect) {
-
-                    user.passwordHash =
-                        await bcrypt.hash(
-                            password,
-                            12
-                        );
-
-                    delete user.password;
-
-                    saveDatabase(database);
-
-                }
-
-            }
-
-
-            if (!passwordCorrect) {
-
-                return res.status(401).json({
-
-                    success: false,
-
-                    message:
-                        "Invalid username/email or password."
-
-                });
-
-            }
-
-
-            /*
-            ----------------------------------------
-            TOKEN
-            ----------------------------------------
-            */
-
-            const token =
-                createToken(user);
-
-
-            return res.json({
-
-                success: true,
-
-                message:
-                    "Login successful.",
-
-                token,
-
-                user: {
-
-                    id:
-                        user.id,
-
-                    username:
-                        user.username,
-
-                    role:
-                        user.role
-
-                }
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Login error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Login failed."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ========================================================
+/* =========================================================
    AUTH ME
-======================================================== */
+========================================================= */
 
 app.get(
     "/api/auth/me",
     authenticate,
     (req, res) => {
-
         try {
-
-            const database =
-                readDatabase();
-
-            const user =
-                database.users.find(
-                    account =>
-                        String(account.id) ===
-                        String(req.user.id)
-                );
-
-            if (!user) {
-                return res.status(404).json({
-                    success: false,
-                    message: "User not found."
-                });
-            }
-
-            return res.json({
-                success: true,
-
-                user: {
-                    id: user.id,
-
-                    firstName:
-                        user.firstName || "",
-
-                    lastName:
-                        user.lastName || "",
-
-                    username:
-                        user.username,
-
-                    email:
-                        user.email,
-
-                    role:
-                        user.role || "user",
-
-                    servers:
-                        Array.isArray(user.servers)
-                            ? user.servers
-                            : [],
-
-                    createdAt:
-                        user.createdAt
-                }
-            });
-
-        } catch (error) {
-
-            console.error(
-                "Auth me error:",
-                error
-            );
-
-            return res.status(500).json({
-                success: false,
-                message:
-                    "Unable to load user."
-            });
-        }
-    }
-);
-
-
-/* ========================================================
-   LOGOUT
-======================================================== */
-
-app.post(
-    "/api/auth/logout",
-    authenticate,
-    (req, res) => {
-
-        return res.json({
-            success: true,
-            message:
-                "Logged out successfully."
-        });
-
-    }
-);
-
-
-/* ========================================================
-   CURRENT USER
-======================================================== */
-
-app.get(
-    "/api/user",
-    authenticate,
-    (req, res) => {
-
-        try {
-
             const database =
                 readDatabase();
 
@@ -964,7 +669,9 @@ app.get(
                         user.role || "user",
 
                     servers:
-                        Array.isArray(user.servers)
+                        Array.isArray(
+                            user.servers
+                        )
                             ? user.servers
                             : [],
 
@@ -974,7 +681,97 @@ app.get(
             });
 
         } catch (error) {
+            console.error(
+                "Auth me error:",
+                error
+            );
 
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to load user."
+            });
+        }
+    }
+);
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+app.post(
+    "/api/auth/logout",
+    authenticate,
+    (req, res) => {
+        return res.json({
+            success: true,
+            message:
+                "Logged out successfully."
+        });
+    }
+);
+
+/* =========================================================
+   CURRENT USER
+========================================================= */
+
+app.get(
+    "/api/user",
+    authenticate,
+    (req, res) => {
+        try {
+            const database =
+                readDatabase();
+
+            const user =
+                database.users.find(
+                    account =>
+                        String(account.id) ===
+                        String(req.user.id)
+                );
+
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "User not found."
+                });
+            }
+
+            return res.json({
+                success: true,
+
+                user: {
+                    id: user.id,
+
+                    firstName:
+                        user.firstName || "",
+
+                    lastName:
+                        user.lastName || "",
+
+                    username:
+                        user.username,
+
+                    email:
+                        user.email,
+
+                    role:
+                        user.role || "user",
+
+                    servers:
+                        Array.isArray(
+                            user.servers
+                        )
+                            ? user.servers
+                            : [],
+
+                    createdAt:
+                        user.createdAt
+                }
+            });
+
+        } catch (error) {
             console.error(
                 "Get user error:",
                 error
@@ -989,24 +786,20 @@ app.get(
     }
 );
 
-
-/* ========================================================
+/* =========================================================
    ADMIN INFORMATION
-======================================================== */
+========================================================= */
 
 app.get(
     "/api/admin",
     authenticate,
     requireAdmin,
     (req, res) => {
-
         try {
-
             const database =
                 readDatabase();
 
             return res.json({
-
                 success: true,
 
                 admin: {
@@ -1027,11 +820,9 @@ app.get(
 
                 nodes:
                     database.nodes.length
-
             });
 
         } catch (error) {
-
             console.error(
                 "Admin info error:",
                 error
@@ -1046,26 +837,22 @@ app.get(
     }
 );
 
-
-/* ========================================================
+/* =========================================================
    ADMIN - ALL USERS
-======================================================== */
+========================================================= */
 
 app.get(
     "/api/admin/users",
     authenticate,
     requireAdmin,
     (req, res) => {
-
         try {
-
             const database =
                 readDatabase();
 
             const users =
                 database.users.map(
                     user => ({
-
                         id: user.id,
 
                         firstName:
@@ -1092,7 +879,6 @@ app.get(
 
                         createdAt:
                             user.createdAt
-
                     })
                 );
 
@@ -1102,7 +888,6 @@ app.get(
             });
 
         } catch (error) {
-
             console.error(
                 "Get admin users error:",
                 error
@@ -1117,18 +902,15 @@ app.get(
     }
 );
 
-
-/* ========================================================
+/* =========================================================
    GET SERVERS
-======================================================== */
+========================================================= */
 
 app.get(
     "/api/servers",
     authenticate,
     (req, res) => {
-
         try {
-
             const database =
                 readDatabase();
 
@@ -1148,10 +930,8 @@ app.get(
             if (
                 req.user.role === "admin"
             ) {
-
                 servers =
                     allServers;
-
             }
 
             /*
@@ -1159,7 +939,6 @@ app.get(
              */
 
             else {
-
                 const userServers =
                     Array.isArray(
                         req.user.servers
@@ -1199,10 +978,8 @@ app.get(
                                         server.id
                                     )
                             );
-
                         }
                     );
-
             }
 
             return res.json({
@@ -1211,7 +988,6 @@ app.get(
             });
 
         } catch (error) {
-
             console.error(
                 "Get servers error:",
                 error
@@ -1226,10 +1002,9 @@ app.get(
     }
 );
 
-
-/* ========================================================
+/* =========================================================
    STATIC FRONTEND
-======================================================== */
+========================================================= */
 
 app.use(
     express.static(
@@ -1237,15 +1012,13 @@ app.use(
     )
 );
 
-
-/* ========================================================
+/* =========================================================
    ROOT PAGE
-======================================================== */
+========================================================= */
 
 app.get(
     "/",
     (req, res) => {
-
         const indexFile =
             path.join(
                 PUBLIC_DIR,
@@ -1255,11 +1028,9 @@ app.get(
         if (
             !fs.existsSync(indexFile)
         ) {
-
             return res.status(404).send(
                 "HarvixPanel frontend not found. Make sure public/index.html exists."
             );
-
         }
 
         return res.sendFile(
@@ -1268,33 +1039,28 @@ app.get(
     }
 );
 
-
-/* ========================================================
+/* =========================================================
    404 API HANDLER
-======================================================== */
+========================================================= */
 
 app.use(
     "/api",
     (req, res) => {
-
         return res.status(404).json({
             success: false,
             message:
                 "API endpoint not found.",
             path: req.path
         });
-
     }
 );
 
-
-/* ========================================================
+/* =========================================================
    GLOBAL ERROR HANDLER
-======================================================== */
+========================================================= */
 
 app.use(
     (error, req, res, next) => {
-
         console.error(
             "Unhandled server error:",
             error
@@ -1312,405 +1078,22 @@ app.use(
     }
 );
 
-
-/* ========================================================
+/* =========================================================
    START HARVIXPANEL
-======================================================== */
+========================================================= */
 
 app.listen(
     PORT,
     HOST,
     () => {
-
         console.log("");
+
         console.log(
             "========================================"
         );
 
         console.log(
             "          HARVIXPANEL"
-        );
-
-        console.log(
-            "========================================"
-        );
-
-        console.log(
-            `Server running on port ${PORT}`
-        );
-
-        console.log(
-            `Host: ${HOST}`
-        );
-
-        console.log(
-            `Public directory: ${PUBLIC_DIR}`
-        );
-
-        console.log(
-            `Database: ${DATABASE_FILE}`
-        );
-
-        console.log(
-            "========================================"
-        );
-
-    }
-);
-
-
-/*
-========================================================
-LOGOUT
-========================================================
-*/
-
-app.post(
-    "/api/auth/logout",
-    authenticate,
-    (req, res) => {
-
-        /*
-        JWT logout is handled client-side
-        by removing the token.
-        */
-
-        return res.json({
-
-            success: true,
-
-            message:
-                "Logged out successfully."
-
-        });
-
-    }
-);
-
-
-/*
-========================================================
-GET CURRENT USER
-========================================================
-*/
-
-app.get(
-    "/api/user",
-    authenticate,
-    (req, res) => {
-
-        const database =
-            readDatabase();
-
-
-        const user =
-            database.users.find(
-                account =>
-                    account.id ===
-                    req.user.id
-            );
-
-
-        if (!user) {
-
-            return res.status(404).json({
-
-                success: false,
-
-                message:
-                    "User not found."
-
-            });
-
-        }
-
-
-        return res.json({
-
-            success: true,
-
-            user: {
-
-                id:
-                    user.id,
-
-                firstName:
-                    user.firstName || "",
-
-                lastName:
-                    user.lastName || "",
-
-                username:
-                    user.username,
-
-                email:
-                    user.email,
-
-                role:
-                    user.role,
-
-                servers:
-                    user.servers || [],
-
-                createdAt:
-                    user.createdAt
-
-            }
-
-        });
-
-    }
-);
-
-
-/*
-========================================================
-ADMIN INFORMATION
-========================================================
-*/
-
-app.get(
-    "/api/admin",
-    authenticate,
-    requireAdmin,
-    (req, res) => {
-
-        const database =
-            readDatabase();
-
-
-        return res.json({
-
-            success: true,
-
-            admin: {
-
-                id:
-                    req.user.id,
-
-                username:
-                    req.user.username,
-
-                role:
-                    req.user.role
-
-            },
-
-            users:
-                database.users.length,
-
-            servers:
-                database.servers.length,
-
-            nodes:
-                database.nodes.length
-
-        });
-
-    }
-);
-
-
-/*
-========================================================
-GET ALL USERS - ADMIN
-========================================================
-*/
-
-app.get(
-    "/api/admin/users",
-    authenticate,
-    requireAdmin,
-    (req, res) => {
-
-        const database =
-            readDatabase();
-
-
-        const users =
-            database.users.map(
-                user => ({
-
-                    id:
-                        user.id,
-
-                    username:
-                        user.username,
-
-                    email:
-                        user.email,
-
-                    role:
-                        user.role,
-
-                    servers:
-                        user.servers || [],
-
-                    createdAt:
-                        user.createdAt
-
-                })
-            );
-
-
-        return res.json({
-
-            success: true,
-
-            users
-
-        });
-
-    }
-);
-
-
-/*
-========================================================
-GET SERVERS
-========================================================
-*/
-
-app.get(
-    "/api/servers",
-    authenticate,
-    (req, res) => {
-
-        try {
-
-            const database =
-                readDatabase();
-
-            const allServers =
-                Array.isArray(database.servers)
-                    ? database.servers
-                    : [];
-
-            let servers = [];
-
-            /*
-            ADMIN
-            */
-
-            if (
-                req.user.role === "admin"
-            ) {
-
-                servers =
-                    allServers;
-
-            }
-
-            /*
-            NORMAL USER
-            */
-
-            else {
-
-                const userServers =
-                    Array.isArray(
-                        req.user.servers
-                    )
-                        ? req.user.servers
-                        : [];
-
-                servers =
-                    allServers.filter(
-                        server => {
-
-                            /*
-                            Owner ID
-                            */
-
-                            if (
-                                String(
-                                    server.ownerId
-                                ) ===
-                                String(
-                                    req.user.id
-                                )
-                            ) {
-
-                                return true;
-
-                            }
-
-                            /*
-                            User server list
-                            */
-
-                            return userServers.some(
-                                serverId =>
-                                    String(
-                                        serverId
-                                    ) ===
-                                    String(
-                                        server.id
-                                    )
-                            );
-
-                        }
-                    );
-
-            }
-
-
-            return res.json({
-
-                success: true,
-
-                servers
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Get servers error:",
-                error
-            );
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Unable to load servers."
-
-            });
-
-        }
-
-    }
-);
-
-
-/*
-========================================================
-START SERVER
-========================================================
-*/
-app.use(express.static(PUBLIC_DIR));
-
-app.get("/", (req, res) => {
-    res.sendFile(
-        path.join(PUBLIC_DIR, "index.html")
-    );
-});
-
-app.listen(
-    PORT,
-    HOST,
-    () => {
-
-        console.log("");
-        console.log(
-            "========================================"
-        );
-
-        console.log(
-            "       HARVIXPANEL"
         );
 
         console.log(
@@ -1726,8 +1109,15 @@ app.listen(
         );
 
         console.log(
-            "========================================"
+            `Public directory: ${PUBLIC_DIR}`
         );
 
+        console.log(
+            `Database: ${DATABASE_FILE}`
+        );
+
+        console.log(
+            "========================================"
+        );
     }
 );
